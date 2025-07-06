@@ -1,0 +1,16 @@
+version: "3.8"
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    ports:
+      - "5678:5678"
+    env_file:
+      - ./env.list
+    volumes:
+      - /Users/kunkel/n8n-data:/home/node/.n8n
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    extra_hosts:
+      - "db5018019634.hosting-data.io:0.0.0.0"
+ 
