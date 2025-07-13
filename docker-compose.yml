@@ -1,16 +1,154 @@
-version: "3.8"
+version: '3.8'
+
 services:
+  # PostgreSQL 15 mit Verschlüsselung
+  postgres:
+    image: postgres:15-alpine
+    container_name: threema_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-threema_db}
+      POSTGRES_USER: ${POSTGRES_USER:-n8n_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./backups:/backups
+    ports:
+      - "127.0.0.1:5432:5432"
+    networks:
+      - threema_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-n8n_user} -d ${POSTGRES_DB:-threema_db}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis für Session-Management mit Verschlüsselung
+  redis:
+    image: redis:7-alpine
+    container_name: threema_redis
+    restart: unless-stopped
+    command: redis-server --requirepass ${REDIS_PASSWORD} --appendonly yes --appendfsync everysec
+    volumes:
+      - redis_data:/data
+    ports:
+      - "127.0.0.1:6379:6379"
+    networks:
+      - threema_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # n8n Workflow Engine mit DSGVO-Compliance
   n8n:
     image: n8nio/n8n:latest
-    ports:
-      - "5678:5678"
-    env_file:
-      - ./env.list
+    container_name: threema_n8n
+    restart: unless-stopped
+    environment:
+      # Database-Konfiguration
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: postgres
+      DB_POSTGRESDB_PORT: 5432
+      DB_POSTGRESDB_DATABASE: ${POSTGRES_DB:-threema_db}
+      DB_POSTGRESDB_USER: ${POSTGRES_USER:-n8n_user}
+      DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_POSTGRESDB_SCHEMA: n8n
+      
+      # Redis-Konfiguration
+      QUEUE_BULL_REDIS_HOST: redis
+      QUEUE_BULL_REDIS_PORT: 6379
+      QUEUE_BULL_REDIS_PASSWORD: ${REDIS_PASSWORD}
+      
+      # n8n-Konfiguration
+      N8N_HOST: ${N8N_HOST:-localhost}
+      N8N_PORT: 5678
+      N8N_PROTOCOL: http
+      WEBHOOK_URL: ${WEBHOOK_URL}
+      
+      # Sicherheit
+      N8N_BASIC_AUTH_ACTIVE: true
+      N8N_BASIC_AUTH_USER: ${N8N_AUTH_USER}
+      N8N_BASIC_AUTH_PASSWORD: ${N8N_AUTH_PASSWORD}
+      
+      # Threema Gateway
+      THREEMA_GATEWAY_ID: ${THREEMA_GATEWAY_ID}
+      THREEMA_GATEWAY_SECRET: ${THREEMA_GATEWAY_SECRET}
+      
+      # Azure OpenAI
+      AZURE_OPENAI_API_KEY: ${AZURE_OPENAI_API_KEY}
+      AZURE_OPENAI_ENDPOINT: ${AZURE_OPENAI_ENDPOINT}
+      AZURE_OPENAI_DEPLOYMENT_NAME: ${AZURE_OPENAI_DEPLOYMENT_NAME}
+      AZURE_OPENAI_API_VERSION: ${AZURE_OPENAI_API_VERSION}
+      
+      # DSGVO-Compliance
+      N8N_LOG_LEVEL: ${LOG_LEVEL:-info}
+      N8N_LOG_OUTPUT: console,file
+      N8N_LOG_FILE_LOCATION: /home/node/.n8n/logs/
+      EXECUTIONS_DATA_PRUNE: true
+      EXECUTIONS_DATA_MAX_AGE: ${DATA_RETENTION_DAYS:-30}
+      ENABLE_AUDIT_LOGGING: ${ENABLE_AUDIT_LOGGING:-true}
+      AUDIT_LOG_RETENTION_DAYS: ${AUDIT_LOG_RETENTION_DAYS:-2555}
+      ENABLE_DATA_ENCRYPTION: ${ENABLE_DATA_ENCRYPTION:-true}
+      
+      # Entwicklung
+      NODE_ENV: ${NODE_ENV:-development}
+      DEBUG_MODE: ${DEBUG_MODE:-false}
+      
     volumes:
-      - /Users/kunkel/n8n-data:/home/node/.n8n
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
-    extra_hosts:
-      - "db5018019634.hosting-data.io:0.0.0.0"
- 
+      - n8n_data:/home/node/.n8n
+      - ./custom_nodes:/home/node/.n8n/custom
+      - ./logs:/home/node/.n8n/logs
+    ports:
+      - "127.0.0.1:5678:5678"
+    networks:
+      - threema_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:5678/healthz || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # pgAdmin für PostgreSQL-Management (optional)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: threema_pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@local.dev}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'True'
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    ports:
+      - "127.0.0.1:5050:80"
+    networks:
+      - threema_network
+    depends_on:
+      - postgres
+    profiles:
+      - tools
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  n8n_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+
+networks:
+  threema_network:
+    driver: bridge
+    internal: false 
