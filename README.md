@@ -3,7 +3,8 @@
 ## Aktuelle Konfiguration
 - Basis: SQLite (vereinfachte Version)
 - Workspace: `/Users/kunkel/n8n-workflows`
-- Docker Image: n8nio/n8n:latest
+- **Stabile Version:** n8nio/n8n:1.115.2 (Port 5678)
+- **Beta Version:** n8nio/n8n:1.119.1 (Port 5679)
 
 ## Verzeichnisstruktur
 ```
@@ -43,6 +44,8 @@ volumes:
 ```
 
 ## Wichtige Befehle
+
+### Stabile Version (1.115.2) auf Port 5678
 ```bash
 # Start
 docker-compose up -d
@@ -58,6 +61,31 @@ docker-compose exec n8n n8n export:workflow --all --output=workflows/backup/
 
 # Workflow importieren
 docker-compose exec n8n n8n import:workflow --input=workflows/mein-workflow.json
+```
+
+### Beta Version (1.119.1) auf Port 5679
+```bash
+# Start
+docker-compose -f docker-compose.beta.yml up -d
+
+# Stop
+docker-compose -f docker-compose.beta.yml down
+
+# Logs anzeigen
+docker-compose -f docker-compose.beta.yml logs -f
+
+# Zugriff im Browser
+http://localhost:5679
+```
+
+### Beide Versionen parallel laufen lassen
+```bash
+# Starte beide Versionen
+docker-compose up -d
+docker-compose -f docker-compose.beta.yml up -d
+
+# Stabile Version: http://localhost:5678
+# Beta Version: http://localhost:5679
 ```
 
 ## GitHub Repository

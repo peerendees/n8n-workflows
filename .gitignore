@@ -2,6 +2,7 @@
 
 # Lokale n8n-Daten und Datenbank
 data/
+data-beta/
 *.sqlite
 
 # Umgebungsvariablen mit Credentials

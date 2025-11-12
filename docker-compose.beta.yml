@@ -1,9 +1,9 @@
 services:
   n8n:
-    image: n8nio/n8n:1.115.2
+    image: n8nio/n8n:1.119.1
     restart: unless-stopped
     ports:
-      - "5678:5678"
+      - "5679:5678"  # Anderer Port um parallel zur stabilen Version laufen zu können
     environment:
       - N8N_HOST=oriented-sincere-robin.ngrok-free.app
       - N8N_PORT=5678
@@ -23,8 +23,10 @@ services:
       - N8N_LOG_LEVEL=debug
       - DEBUG=*
     volumes:
-      - ./data:/home/node/.n8n
+      - ./data-beta:/home/node/.n8n
       - type: bind
         source: ./workflows
         target: /home/node/.n8n/workflows
-    user: "1000:1000" 
+    user: "1000:1000"
+    container_name: n8n-beta
+
