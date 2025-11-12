@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Threema Gateway Key Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tweetnacl/1.0.3/nacl.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tweetnacl-util/0.15.1/nacl-util.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2e7d32;
+        }
+        button {
+            background: #2e7d32;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 20px 0;
+        }
+        button:hover {
+            background: #1b5e20;
+        }
+        .key-box {
+            background: #f9f9f9;
+            border: 2px solid #2e7d32;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-family: monospace;
+            word-break: break-all;
+        }
+        .label {
+            font-weight: bold;
+            color: #2e7d32;
+            margin-bottom: 5px;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .info {
+            background: #e3f2fd;
+            border: 2px solid #2196f3;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Threema Gateway E2E Schlüssel Generator</h1>
+        
+        <div class="info">
+            <strong>ℹ️ Information:</strong><br>
+            Dieses Tool generiert ein Schlüsselpaar für Threema Gateway im End-to-End Modus.<br>
+            Die Schlüssel werden nur in Deinem Browser erzeugt und nirgendwo gespeichert oder übertragen!
+        </div>
+
+        <button onclick="generateKeys()">🔑 Schlüsselpaar generieren</button>
+
+        <div id="results" class="hidden">
+            <h2>✅ Deine Schlüssel:</h2>
+
+            <div class="warning">
+                <strong>⚠️ WICHTIG:</strong><br>
+                Speichere den <strong>Private Key</strong> SICHER! Du brauchst ihn für n8n.<br>
+                Den Public Key lädst Du bei der Gateway-Registrierung hoch.
+            </div>
+
+            <div class="label">Public Key (Hex):</div>
+            <div class="key-box" id="publicKey"></div>
+
+            <div class="label">Private Key (Hex) - SICHER AUFBEWAHREN!</div>
+            <div class="key-box" id="privateKey"></div>
+
+            <h3>📋 Nächste Schritte:</h3>
+            <ol>
+                <li>Gehe zu <a href="https://gateway.threema.ch" target="_blank">https://gateway.threema.ch</a></li>
+                <li>Erstelle eine neue Gateway-ID</li>
+                <li>Wähle <strong>"End-to-End Modus"</strong></li>
+                <li>Kopiere den <strong>Public Key</strong> oben und füge ihn ein</li>
+                <li>Wähle eine ID (z.B. *BERENT2)</li>
+                <li>Löse einen Voucher-Code ein</li>
+                <li>Speichere den <strong>Private Key</strong> für n8n!</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        function generateKeys() {
+            // Generiere ein NaCl-Schlüsselpaar (Curve25519)
+            const keyPair = nacl.box.keyPair();
+            
+            // Konvertiere zu Hex
+            const publicKeyHex = Array.from(keyPair.publicKey)
+                .map(b => b.toString(16).padStart(2, '0'))
+                .join('');
+            
+            const privateKeyHex = Array.from(keyPair.secretKey)
+                .map(b => b.toString(16).padStart(2, '0'))
+                .join('');
+            
+            // Zeige die Schlüssel an
+            document.getElementById('publicKey').textContent = publicKeyHex;
+            document.getElementById('privateKey').textContent = privateKeyHex;
+            document.getElementById('results').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
+

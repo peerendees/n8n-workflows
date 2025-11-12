@@ -1,1 +1,21 @@
 *.log
+
+# Lokale n8n-Daten und Datenbank
+data/
+*.sqlite
+
+# Umgebungsvariablen mit Credentials
+.env
+env.list.new
+
+# Docker Volumes
+postgres_data/
+redis_data/
+n8n_data/
+
+# macOS
+.DS_Store
+
+# Backups
+backups/
+*.backup

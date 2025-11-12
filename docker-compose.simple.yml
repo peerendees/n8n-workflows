@@ -1,26 +1,30 @@
-översion: '3.8'
-
 services:
   n8n:
-    container_name: n8n-main
-    image: n8nio/n8n:latest
+    image: n8nio/n8n:1.115.2
     restart: unless-stopped
     ports:
       - "5678:5678"
     environment:
-      - N8N_HOST=${N8N_HOST:-localhost}
+      - N8N_HOST=oriented-sincere-robin.ngrok-free.app
       - N8N_PORT=5678
-      - N8N_PROTOCOL=http
+      - N8N_PROTOCOL=https
+      - NODE_ENV=production
       - DB_TYPE=sqlite
-      - DB_SQLITE_PATH=/home/node/.n8n/database.sqlite
-      # Optional: Basic Auth aktivieren
-      # - N8N_BASIC_AUTH_ACTIVE=true
-      # - N8N_BASIC_AUTH_USER=admin
-      # - N8N_BASIC_AUTH_PASSWORD=changeme
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin@local.host
+      - N8N_BASIC_AUTH_PASSWORD=Testtest1
+      - N8N_DEFAULT_OWNER_EMAIL=admin@local.host
+      - N8N_DEFAULT_OWNER_PASSWORD=Testtest1
+      - N8N_ONBOARDING_FLOW_DISABLED=true
+      - GENERIC_TIMEZONE=Europe/Berlin
+      - TZ=Europe/Berlin
+      - N8N_WEBHOOK_URL=https://oriented-sincere-robin.ngrok-free.app
+      - N8N_WEBHOOK_TEST_URL=https://oriented-sincere-robin.ngrok-free.app
+      - N8N_LOG_LEVEL=debug
+      - DEBUG=*
     volumes:
-      - n8n_data:/home/node/.n8n
-      - ./workflows:/home/node/.n8n/workflows
-
-volumes:
-  n8n_data:
-    name: n8n_data 
+      - ./data:/home/node/.n8n
+      - type: bind
+        source: ./workflows
+        target: /home/node/.n8n/workflows
+    user: "1000:1000" 

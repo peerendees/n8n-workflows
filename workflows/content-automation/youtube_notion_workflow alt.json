@@ -1,0 +1,317 @@
+{
+  "meta": {
+    "instanceId": "your-instance-id"
+  },
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "start-trigger",
+      "name": "Manueller Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [60, 300]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "channelId",
+              "value": "UCxxx_CHANNEL_ID_HIER_EINTRAGEN"
+            },
+            {
+              "name": "authorName", 
+              "value": "Liam Ottley"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "channel-config",
+      "name": "Kanal Konfiguration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "search",
+        "operation": "list",
+        "part": "snippet",
+        "channelId": "={{ $json.channelId }}",
+        "order": "date",
+        "maxResults": 10,
+        "additionalFields": {
+          "publishedAfter": "={{ DateTime.now().minus({ days: 30 }).toISO() }}"
+        }
+      },
+      "id": "youtube-videos",
+      "name": "YouTube Videos abrufen",
+      "type": "n8n-nodes-base.youtube",
+      "typeVersion": 1,
+      "position": [420, 300]
+    },
+    {
+      "parameters": {
+        "url": "=https://www.googleapis.com/youtube/v3/videos?part=snippet&id={{ $json.id.videoId }}&key={{ $credentials.googleApi.oauthTokenData.access_token }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
+        "options": {}
+      },
+      "id": "video-details",
+      "name": "Video Details",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [600, 160]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.youtubetranscript.com/?video_id={{ $json.id.videoId }}",
+        "options": {}
+      },
+      "id": "get-transcript",
+      "name": "Transkript extrahieren",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [600, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "transcript-exists",
+              "leftValue": "={{ $json.transcript }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-transcript",
+      "name": "Transkript vorhanden?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [780, 300]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Transkript bereinigen und formatieren\nconst transcript = $input.item(0).json.transcript || '';\n\n// Text bereinigen\nconst cleanTranscript = transcript\n  .replace(/\\[.*?\\]/g, '') // [Musik], [Applaus] etc. entfernen\n  .replace(/\\s+/g, ' ')     // Mehrfache Leerzeichen\n  .trim();\n\nreturn {\n  ...input.all()[0].json,\n  cleanTranscript: cleanTranscript,\n  characterCount: cleanTranscript.length\n};"
+      },
+      "id": "format-transcript",
+      "name": "Transkript formatieren",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [960, 200]
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.cleanTranscript }}",
+        "translateTo": "DE",
+        "options": {}
+      },
+      "id": "deepl-translate",
+      "name": "DeepL Übersetzen",
+      "type": "n8n-nodes-base.deepL",
+      "typeVersion": 1,
+      "position": [1140, 200],
+      "credentials": {
+        "deepLApi": {
+          "id": "your-deepl-api-key",
+          "name": "DeepL API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "create",
+        "databaseId": "22f31cc6-fd56-80f8-9a68-da6f99f3dade",
+        "properties": {
+          "Name": {
+            "type": "title",
+            "title": [
+              {
+                "text": {
+                  "content": "={{ $('video-details').item(0).json.items[0].snippet.title }}"
+                }
+              }
+            ]
+          },
+          "Autor": {
+            "type": "select",
+            "select": {
+              "name": "={{ $('channel-config').item(0).json.authorName }}"
+            }
+          },
+          "Video URL": {
+            "type": "url",
+            "url": "=https://youtube.com/watch?v={{ $('youtube-videos').item(0).json.id.videoId }}"
+          },
+          "Kanal": {
+            "type": "rich_text",
+            "rich_text": [
+              {
+                "text": {
+                  "content": "={{ $('video-details').item(0).json.items[0].snippet.channelTitle }}"
+                }
+              }
+            ]
+          },
+          "Veröffentlicht": {
+            "type": "date",
+            "date": {
+              "start": "={{ $('video-details').item(0).json.items[0].snippet.publishedAt.split('T')[0] }}"
+            }
+          },
+          "Deutsche Übersetzung": {
+            "type": "rich_text",
+            "rich_text": [
+              {
+                "text": {
+                  "content": "={{ $json.text }}"
+                }
+              }
+            ]
+          },
+          "Tags": {
+            "type": "multi_select",
+            "multi_select": [
+              {
+                "name": "AI"
+              }
+            ]
+          },
+          "Status": {
+            "type": "select",
+            "select": {
+              "name": "Neu"
+            }
+          },
+          "Bewertung": {
+            "type": "select",
+            "select": {
+              "name": "Unbewertet"
+            }
+          }
+        }
+      },
+      "id": "notion-create",
+      "name": "Notion Eintrag erstellen",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2,
+      "position": [1320, 200],
+      "credentials": {
+        "notionApi": {
+          "id": "your-notion-api-key",
+          "name": "Notion API"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "start-trigger": {
+      "main": [
+        [
+          {
+            "node": "channel-config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "channel-config": {
+      "main": [
+        [
+          {
+            "node": "youtube-videos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "youtube-videos": {
+      "main": [
+        [
+          {
+            "node": "get-transcript",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "video-details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get-transcript": {
+      "main": [
+        [
+          {
+            "node": "check-transcript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "check-transcript": {
+      "main": [
+        [
+          {
+            "node": "format-transcript",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "format-transcript": {
+      "main": [
+        [
+          {
+            "node": "deepl-translate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "deepl-translate": {
+      "main": [
+        [
+          {
+            "node": "notion-create",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-07-13T10:00:00.000Z",
+  "versionId": "1"
+}
