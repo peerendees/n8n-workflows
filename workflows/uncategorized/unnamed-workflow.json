@@ -266,7 +266,7 @@
       "tags": []
     },
     {
-      "updatedAt": "2025-12-21T19:04:34.593Z",
+      "updatedAt": "2025-12-21T19:17:31.586Z",
       "createdAt": "2025-12-15T21:35:40.591Z",
       "id": "C3QqvJAGjf0KhCZH",
       "name": "n8n to GitHub Auto-Backup (inkrementell)",
@@ -349,7 +349,7 @@
           "credentials": {
             "httpHeaderAuth": {
               "id": "4gc7MePUZVuCyowB",
-              "name": "Header Auth account"
+              "name": "n8n API"
             }
           }
         },
@@ -463,24 +463,24 @@
             "url": "https://msgapi.threema.ch/send_simple",
             "authentication": "genericCredentialType",
             "genericAuthType": "httpHeaderAuth",
-            "sendQuery": true,
-            "queryParameters": {
+            "sendBody": true,
+            "contentType": "multipart-form-data",
+            "bodyParameters": {
               "parameters": [
                 {
                   "name": "from",
-                  "value": "*DEINE_THREEMA_ID"
+                  "value": "*BERENT2"
                 },
                 {
                   "name": "to",
-                  "value": "*EMPFÄNGER_THREEMA_ID"
+                  "value": "BUMFMZ39"
                 },
                 {
-                  "name": "secret",
-                  "value": "*DEIN_THREEMA_SECRET"
+                  "name": "secret"
                 },
                 {
                   "name": "text",
-                  "value": "=🔄 n8n Backup erfolgreich\\n\\n{{ $json.summary }}\\n\\nGeänderte Workflows:\\n{{ $json.changedWorkflows.join('\\n') }}\\n\\n🔗 https://github.com/peerendees/n8n-workflows"
+                  "value": "=🔄 n8n Backup erfolgreich  {{ $json.summary }}  Details: {{ $json.changedList }}  🔗 https://github.com/peerendees/n8n-workflows"
                 }
               ]
             },
@@ -493,7 +493,13 @@
           "position": [
             1296,
             -400
-          ]
+          ],
+          "credentials": {
+            "httpHeaderAuth": {
+              "id": "nSNvIRCSAnKXrLyH",
+              "name": "Threema Work"
+            }
+          }
         },
         {
           "parameters": {
@@ -507,8 +513,8 @@
           "type": "n8n-nodes-base.stickyNote",
           "typeVersion": 1,
           "position": [
-            -944,
-            -848
+            -1072,
+            -800
           ]
         },
         {
@@ -577,42 +583,6 @@
           ],
           "id": "f03cf7be-e43f-4b2d-945d-2662dd6a2baa",
           "name": "Determine Action"
-        },
-        {
-          "parameters": {
-            "resource": "file",
-            "operation": "edit",
-            "owner": {
-              "__rl": true,
-              "value": "peerendees",
-              "mode": "name"
-            },
-            "repository": {
-              "__rl": true,
-              "value": "n8n-workflows",
-              "mode": "list",
-              "cachedResultName": "n8n-workflows",
-              "cachedResultUrl": "https://github.com/peerendees/n8n-workflows"
-            },
-            "filePath": "={{ $('Process Workflows').item.json.filepath }}",
-            "fileContent": "={{ $('Process Workflows').item.json.content }}",
-            "commitMessage": "=🤖 Auto-Backup: {{ $node[\"Process Workflows\"].json.name }} ({{ $node[\"Determine Action\"].json.action }})"
-          },
-          "type": "n8n-nodes-base.github",
-          "typeVersion": 1.1,
-          "position": [
-            -720,
-            -720
-          ],
-          "id": "57e663a8-80f8-4270-9bb5-0a8aaf4b9cee",
-          "name": "Commit to GitHub1",
-          "webhookId": "bc53628b-0532-403d-95a8-34635212af18",
-          "credentials": {
-            "githubApi": {
-              "id": "uE78TkEY6lWLV4oP",
-              "name": "GitHub account"
-            }
-          }
         },
         {
           "parameters": {
@@ -775,7 +745,7 @@
         "templateCredsSetupCompleted": true
       },
       "pinData": {},
-      "versionId": "79da9ca0-cd1e-4f4b-aa73-d30d605f0c28",
+      "versionId": "881a63b2-9721-4cb5-bf9f-328f259deab9",
       "activeVersionId": null,
       "triggerCount": 0,
       "shared": [
