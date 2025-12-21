@@ -266,7 +266,7 @@
       "tags": []
     },
     {
-      "updatedAt": "2025-12-21T18:45:50.359Z",
+      "updatedAt": "2025-12-21T18:48:03.280Z",
       "createdAt": "2025-12-15T21:35:40.591Z",
       "id": "C3QqvJAGjf0KhCZH",
       "name": "n8n to GitHub Auto-Backup (inkrementell)",
@@ -413,7 +413,7 @@
         },
         {
           "parameters": {
-            "jsCode": "const items = $input.all();\n\n// Wir zählen, was passiert ist\nconst stats = {\n  total: items.length,\n  created: items.filter(i => i.json.action === 'create').length,\n  updated: items.filter(i => i.json.action === 'update').length,\n  skipped: items.filter(i => i.json.action === 'skip').length,\n};\n\n// Wir erstellen eine Liste der Namen, die sich geändert haben\nconst changedWorkflows = items\n  .filter(i => i.json.action !== 'skip')\n  .map(i => `• ${i.json.name} (${i.json.action})`);\n\nreturn [{\n  json: {\n    hasChanges: (stats.created + stats.updated) > 0,\n    summary: `✅ Backup: ${stats.created} neu, ${stats.updated} aktualisiert, ${stats.skipped} unverändert.`,\n    changedList: changedWorkflows.join('\\n'),\n    stats: stats\n  }\n}];"
+            "jsCode": "// Wir blicken zurück auf den Node \"Detect Changes\", \n// da dieser die vollständige Liste ALLER Workflows und Entscheidungen enthält.\nconst allWorkflows = $(\"Detect Changes\").all();\n\nconst stats = {\n  total: allWorkflows.length,\n  created: allWorkflows.filter(i => i.json.action === 'create').length,\n  updated: allWorkflows.filter(i => i.json.action === 'update').length,\n  skipped: allWorkflows.filter(i => i.json.action === 'skip').length,\n};\n\n// Liste der Namen erstellen, die NICHT übersprungen wurden\nconst changedWorkflows = allWorkflows\n  .filter(i => i.json.action !== 'skip')\n  .map(i => `• ${i.json.name} (${i.json.action})`);\n\nreturn [{\n  json: {\n    hasChanges: (stats.created + stats.updated) > 0,\n    summary: `✅ Backup: ${stats.created} neu, ${stats.updated} aktualisiert, ${stats.skipped} unverändert.`,\n    changedList: changedWorkflows.length > 0 ? changedWorkflows.join('\\n') : \"Keine Änderungen\",\n    stats: stats\n  }\n}];"
           },
           "id": "da117cd8-c031-4d5f-8313-701cdfe54c64",
           "name": "Collect Backup Stats",
@@ -775,7 +775,7 @@
         "templateCredsSetupCompleted": true
       },
       "pinData": {},
-      "versionId": "44d0ca12-2db9-47ac-ac0b-1e5ee476caaa",
+      "versionId": "42a6cee2-1e6e-4461-9e42-39547563c5d0",
       "activeVersionId": null,
       "triggerCount": 0,
       "shared": [
