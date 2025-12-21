@@ -266,7 +266,7 @@
       "tags": []
     },
     {
-      "updatedAt": "2025-12-21T19:51:11.714Z",
+      "updatedAt": "2025-12-21T19:53:42.479Z",
       "createdAt": "2025-12-15T21:35:40.591Z",
       "id": "C3QqvJAGjf0KhCZH",
       "name": "n8n to GitHub Auto-Backup (inkrementell)",
@@ -402,7 +402,7 @@
           "typeVersion": 4.2,
           "position": [
             848,
-            -648
+            -656
           ],
           "credentials": {
             "httpHeaderAuth": {
@@ -461,13 +461,15 @@
           "parameters": {
             "method": "POST",
             "url": "https://msgapi.threema.ch/send_simple",
+            "authentication": "genericCredentialType",
+            "genericAuthType": "httpHeaderAuth",
             "sendBody": true,
             "contentType": "form-urlencoded",
             "bodyParameters": {
               "parameters": [
                 {
                   "name": "from",
-                  "value": "*BERENT2"
+                  "value": "*BERENT1"
                 },
                 {
                   "name": "to",
@@ -492,7 +494,13 @@
           "position": [
             1520,
             -576
-          ]
+          ],
+          "credentials": {
+            "httpHeaderAuth": {
+              "id": "nSNvIRCSAnKXrLyH",
+              "name": "Threema Work API"
+            }
+          }
         },
         {
           "parameters": {
@@ -522,8 +530,8 @@
           "type": "n8n-nodes-base.stickyNote",
           "typeVersion": 1,
           "position": [
-            -326,
-            -728
+            -320,
+            -736
           ]
         },
         {
@@ -777,7 +785,7 @@
         "templateCredsSetupCompleted": true
       },
       "pinData": {},
-      "versionId": "23a7e758-3707-41ed-b61b-d1860d5e36ba",
+      "versionId": "ae1127c1-660e-48d7-974b-b4ffa9925608",
       "activeVersionId": null,
       "triggerCount": 0,
       "shared": [
