@@ -266,7 +266,7 @@
       "tags": []
     },
     {
-      "updatedAt": "2025-12-21T19:24:42.710Z",
+      "updatedAt": "2025-12-21T19:39:50.599Z",
       "createdAt": "2025-12-15T21:35:40.591Z",
       "id": "C3QqvJAGjf0KhCZH",
       "name": "n8n to GitHub Auto-Backup (inkrementell)",
@@ -475,7 +475,7 @@
                 },
                 {
                   "name": "secret",
-                  "value": "={{ $credentials.secret }}"
+                  "value": "={{ $credentials.value }}"
                 },
                 {
                   "name": "text",
@@ -609,6 +609,29 @@
           ],
           "id": "c5e4a411-fe36-42d3-9fe5-cf284bc5d850",
           "name": "Has Changes?"
+        },
+        {
+          "parameters": {
+            "assignments": {
+              "assignments": [
+                {
+                  "id": "161e6775-602d-4527-befd-e58008924f10",
+                  "name": "secret",
+                  "value": "bd9264814eb3cf8657533d57dd8e0d8629eb9bf348f317ecbe5672e4032ed534",
+                  "type": "string"
+                }
+              ]
+            },
+            "options": {}
+          },
+          "type": "n8n-nodes-base.set",
+          "typeVersion": 3.4,
+          "position": [
+            -720,
+            -672
+          ],
+          "id": "a5028991-8793-4104-96e7-4e5de99cdd37",
+          "name": "Config"
         }
       ],
       "connections": {
@@ -728,6 +751,11 @@
               }
             ]
           ]
+        },
+        "Send Threema Notification": {
+          "main": [
+            []
+          ]
         }
       },
       "settings": {
@@ -738,7 +766,7 @@
         "templateCredsSetupCompleted": true
       },
       "pinData": {},
-      "versionId": "b1e19023-85ba-41ac-bfd0-249e332cef9e",
+      "versionId": "d8b24d0f-628d-4e8e-89df-8633adfa4081",
       "activeVersionId": null,
       "triggerCount": 0,
       "shared": [
