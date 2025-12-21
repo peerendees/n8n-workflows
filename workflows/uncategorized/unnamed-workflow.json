@@ -266,7 +266,7 @@
       "tags": []
     },
     {
-      "updatedAt": "2025-12-21T18:48:03.280Z",
+      "updatedAt": "2025-12-21T18:49:58.094Z",
       "createdAt": "2025-12-15T21:35:40.591Z",
       "id": "C3QqvJAGjf0KhCZH",
       "name": "n8n to GitHub Auto-Backup (inkrementell)",
@@ -413,7 +413,7 @@
         },
         {
           "parameters": {
-            "jsCode": "// Wir blicken zurück auf den Node \"Detect Changes\", \n// da dieser die vollständige Liste ALLER Workflows und Entscheidungen enthält.\nconst allWorkflows = $(\"Detect Changes\").all();\n\nconst stats = {\n  total: allWorkflows.length,\n  created: allWorkflows.filter(i => i.json.action === 'create').length,\n  updated: allWorkflows.filter(i => i.json.action === 'update').length,\n  skipped: allWorkflows.filter(i => i.json.action === 'skip').length,\n};\n\n// Liste der Namen erstellen, die NICHT übersprungen wurden\nconst changedWorkflows = allWorkflows\n  .filter(i => i.json.action !== 'skip')\n  .map(i => `• ${i.json.name} (${i.json.action})`);\n\nreturn [{\n  json: {\n    hasChanges: (stats.created + stats.updated) > 0,\n    summary: `✅ Backup: ${stats.created} neu, ${stats.updated} aktualisiert, ${stats.skipped} unverändert.`,\n    changedList: changedWorkflows.length > 0 ? changedWorkflows.join('\\n') : \"Keine Änderungen\",\n    stats: stats\n  }\n}];"
+            "jsCode": "// Wir nehmen alle Items, die direkt in diesen Node fließen.\nconst items = $input.all();\n\nconst stats = {\n  total: items.length,\n  created: 0,\n  updated: 0,\n  skipped: 0\n};\n\nconst changedWorkflows = [];\n\nfor (const item of items) {\n  const data = item.json;\n  \n  // Wir prüfen die 'action', die wir im Node 'Detect Changes' gesetzt haben.\n  // n8n schleift diese Information durch den GitHub-Node durch.\n  if (data.action === 'create') {\n    stats.created++;\n    changedWorkflows.push(`• ${data.name || 'Unbekannt'} (Neu)`);\n  } else if (data.action === 'update') {\n    stats.updated++;\n    changedWorkflows.push(`• ${data.name || 'Unbekannt'} (Aktualisiert)`);\n  } else if (data.action === 'skip') {\n    stats.skipped++;\n  }\n}\n\nreturn [{\n  json: {\n    hasChanges: (stats.created + stats.updated) > 0,\n    summary: `✅ Backup beendet: ${stats.created} neu, ${stats.updated} aktualisiert, ${stats.skipped} unverändert.`,\n    changedList: changedWorkflows.length > 0 ? changedWorkflows.join('\\n') : \"Keine Änderungen\",\n    stats: stats\n  }\n}];"
           },
           "id": "da117cd8-c031-4d5f-8313-701cdfe54c64",
           "name": "Collect Backup Stats",
@@ -775,7 +775,7 @@
         "templateCredsSetupCompleted": true
       },
       "pinData": {},
-      "versionId": "42a6cee2-1e6e-4461-9e42-39547563c5d0",
+      "versionId": "91ab0c40-55bc-4509-a519-a5bd0eb6541b",
       "activeVersionId": null,
       "triggerCount": 0,
       "shared": [
