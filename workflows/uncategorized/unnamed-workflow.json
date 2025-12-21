@@ -266,7 +266,7 @@
       "tags": []
     },
     {
-      "updatedAt": "2025-12-21T18:58:05.952Z",
+      "updatedAt": "2025-12-21T19:04:34.593Z",
       "createdAt": "2025-12-15T21:35:40.591Z",
       "id": "C3QqvJAGjf0KhCZH",
       "name": "n8n to GitHub Auto-Backup (inkrementell)",
@@ -413,7 +413,7 @@
         },
         {
           "parameters": {
-            "jsCode": "// Wir nehmen alle Items, die direkt in diesen Node fließen.\nconst items = $input.all();\n\nconst stats = {\n  total: items.length,\n  created: 0,\n  updated: 0,\n  skipped: 0\n};\n\nconst changedWorkflows = [];\n\nfor (const item of items) {\n  const data = item.json;\n  \n  // Wir prüfen die 'action', die wir im Node 'Detect Changes' gesetzt haben.\n  // n8n schleift diese Information durch den GitHub-Node durch.\n  if (data.action === 'create') {\n    stats.created++;\n    changedWorkflows.push(`• ${data.name || 'Unbekannt'} (Neu)`);\n  } else if (data.action === 'update') {\n    stats.updated++;\n    changedWorkflows.push(`• ${data.name || 'Unbekannt'} (Aktualisiert)`);\n  } else if (data.action === 'skip') {\n    stats.skipped++;\n  }\n}\n\nreturn [{\n  json: {\n    hasChanges: (stats.created + stats.updated) > 0,\n    summary: `✅ Backup beendet: ${stats.created} neu, ${stats.updated} aktualisiert, ${stats.skipped} unverändert.`,\n    changedList: changedWorkflows.length > 0 ? changedWorkflows.join('\\n') : \"Keine Änderungen\",\n    stats: stats\n  }\n}];"
+            "jsCode": "// Wir holen die Daten von dem Node, der die Entscheidung getroffen hat.\n// WICHTIG: Der Name in den Klammern muss EXAKT wie der Node aus Schritt 1 heißen.\nconst allDecisions = $(\"Determine Action\").all();\n\nconst stats = {\n  total: allDecisions.length,\n  created: allDecisions.filter(i => i.json.action === 'create').length,\n  updated: allDecisions.filter(i => i.json.action === 'update').length,\n  skipped: allDecisions.filter(i => i.json.action === 'skip').length,\n};\n\nconst changedWorkflows = allDecisions\n  .filter(i => i.json.action !== 'skip')\n  .map(i => `• ${i.json.name} (${i.json.action})`);\n\nreturn [{\n  json: {\n    hasChanges: (stats.created + stats.updated) > 0,\n    summary: `✅ Backup beendet: ${stats.created} neu, ${stats.updated} aktualisiert, ${stats.skipped} unverändert.`,\n    changedList: changedWorkflows.length > 0 ? changedWorkflows.join('\\n') : \"Keine Änderungen\",\n    stats: stats\n  }\n}];"
           },
           "id": "da117cd8-c031-4d5f-8313-701cdfe54c64",
           "name": "Collect Backup Stats",
@@ -567,7 +567,7 @@
         {
           "parameters": {
             "mode": "runOnceForEachItem",
-            "jsCode": "const local = $(\"Process Workflows\").item.json;\nconst remote = $input.item.json;\n\nlet action = 'skip';\nlet sha = null;\nlet reason = 'No changes';\n\n// 1. Wenn GitHub einen Fehler meldet (Datei nicht da) -> NEU\nif (remote.error || !remote.sha) {\n  action = 'create';\n  reason = 'New workflow';\n} \nelse {\n  // 2. Wir vergleichen den Inhalt\n  const remoteContentClean = (remote.content || '').replace(/\\s/g, '');\n  const localContentClean = (local.contentBase64 || '').replace(/\\s/g, '');\n\n  if (remoteContentClean !== localContentClean) {\n    action = 'update';\n    sha = remote.sha;\n    reason = 'Content changed';\n  }\n}\n\nreturn {\n  ...local,\n  action,\n  sha,\n  reason\n};"
+            "jsCode": "const local = $(\"Process Workflows\").item.json;\nconst remote = $input.item.json;\n\nlet action = 'skip';\nlet sha = null;\nlet reason = 'No changes';\n\n// 1. Wenn GitHub einen Fehler meldet (Datei nicht da) -> NEU\nif (remote.error || !remote.sha) {\n  action = 'create';\n  reason = 'New workflow';\n} \nelse {\n  // 2. Inhalt vergleichen (Leerzeichen entfernen für sauberen Vergleich)\n  const remoteContentClean = (remote.content || '').replace(/\\s/g, '');\n  const localContentClean = (local.contentBase64 || '').replace(/\\s/g, '');\n\n  if (remoteContentClean !== localContentClean) {\n    action = 'update';\n    sha = remote.sha;\n    reason = 'Content changed';\n  }\n}\n\nreturn {\n  ...local, // Hier bleiben Name, ID etc. erhalten\n  action,   // Hier kommt der Stempel 'create', 'update' oder 'skip'\n  sha,      // Der SHA für GitHub\n  reason\n};"
           },
           "type": "n8n-nodes-base.code",
           "typeVersion": 2,
@@ -625,13 +625,12 @@
               },
               "conditions": [
                 {
-                  "id": "8842bb3c-3f3b-4b97-a118-01cb0866a8bb",
-                  "leftValue": "={{ $json.action !== 'skip' }}",
-                  "rightValue": "",
+                  "id": "a21035d4-b914-483c-aca3-c493a3546872",
+                  "leftValue": "={{ $json.action }}",
+                  "rightValue": "skip",
                   "operator": {
-                    "type": "boolean",
-                    "operation": "true",
-                    "singleValue": true
+                    "type": "string",
+                    "operation": "notEquals"
                   }
                 }
               ],
@@ -776,7 +775,7 @@
         "templateCredsSetupCompleted": true
       },
       "pinData": {},
-      "versionId": "966de61b-96b5-4419-95b8-116dfaf2df90",
+      "versionId": "79da9ca0-cd1e-4f4b-aa73-d30d605f0c28",
       "activeVersionId": null,
       "triggerCount": 0,
       "shared": [
