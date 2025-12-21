@@ -266,7 +266,7 @@
       "tags": []
     },
     {
-      "updatedAt": "2025-12-21T18:49:58.094Z",
+      "updatedAt": "2025-12-21T18:58:05.952Z",
       "createdAt": "2025-12-15T21:35:40.591Z",
       "id": "C3QqvJAGjf0KhCZH",
       "name": "n8n to GitHub Auto-Backup (inkrementell)",
@@ -402,7 +402,7 @@
           "typeVersion": 4.2,
           "position": [
             624,
-            -472
+            -480
           ],
           "credentials": {
             "httpHeaderAuth": {
@@ -430,7 +430,8 @@
               "options": {
                 "caseSensitive": true,
                 "leftValue": "",
-                "typeValidation": "strict"
+                "typeValidation": "strict",
+                "version": 1
               },
               "conditions": [
                 {
@@ -507,7 +508,7 @@
           "typeVersion": 1,
           "position": [
             -944,
-            -852
+            -848
           ]
         },
         {
@@ -522,8 +523,8 @@
           "type": "n8n-nodes-base.stickyNote",
           "typeVersion": 1,
           "position": [
-            -550,
-            -552
+            -544,
+            -560
           ]
         },
         {
@@ -566,7 +567,7 @@
         {
           "parameters": {
             "mode": "runOnceForEachItem",
-            "jsCode": "// Daten vom Code-Node davor abgreifen (unser lokaler Workflow)\nconst local = $(\"Process Workflows\").item.json;\n// Daten von GitHub abgreifen\nconst remote = $input.item.json;\n\nlet action = 'skip';\nlet sha = null;\nlet reason = '';\n\n// Fall 1: Datei existiert noch nicht auf GitHub\nif (remote.error || !remote.sha) {\n  action = 'create';\n  reason = 'New workflow';\n} \nelse {\n  // Fall 2: Datei existiert. Wir vergleichen den Inhalt.\n  // GitHub schickt den Inhalt in Base64, aber oft mit Zeilenumbrüchen (\\n).\n  const remoteContentClean = remote.content.replace(/\\n/g, '');\n  const localContent = local.contentBase64;\n\n  if (remoteContentClean !== localContent) {\n    action = 'update';\n    sha = remote.sha; // Wir brauchen den SHA für das Update!\n    reason = 'Changes detected';\n  } else {\n    action = 'skip';\n    reason = 'No changes';\n  }\n}\n\n// Alles zusammenführen\nreturn {\n  ...local,\n  action,\n  sha,\n  reason\n};"
+            "jsCode": "const local = $(\"Process Workflows\").item.json;\nconst remote = $input.item.json;\n\nlet action = 'skip';\nlet sha = null;\nlet reason = 'No changes';\n\n// 1. Wenn GitHub einen Fehler meldet (Datei nicht da) -> NEU\nif (remote.error || !remote.sha) {\n  action = 'create';\n  reason = 'New workflow';\n} \nelse {\n  // 2. Wir vergleichen den Inhalt\n  const remoteContentClean = (remote.content || '').replace(/\\s/g, '');\n  const localContentClean = (local.contentBase64 || '').replace(/\\s/g, '');\n\n  if (remoteContentClean !== localContentClean) {\n    action = 'update';\n    sha = remote.sha;\n    reason = 'Content changed';\n  }\n}\n\nreturn {\n  ...local,\n  action,\n  sha,\n  reason\n};"
           },
           "type": "n8n-nodes-base.code",
           "typeVersion": 2,
@@ -645,7 +646,7 @@
             -400
           ],
           "id": "c5e4a411-fe36-42d3-9fe5-cf284bc5d850",
-          "name": "Has Changes?1"
+          "name": "Has Changes?"
         }
       ],
       "connections": {
@@ -741,14 +742,14 @@
           "main": [
             [
               {
-                "node": "Has Changes?1",
+                "node": "Has Changes?",
                 "type": "main",
                 "index": 0
               }
             ]
           ]
         },
-        "Has Changes?1": {
+        "Has Changes?": {
           "main": [
             [
               {
@@ -775,7 +776,7 @@
         "templateCredsSetupCompleted": true
       },
       "pinData": {},
-      "versionId": "91ab0c40-55bc-4509-a519-a5bd0eb6541b",
+      "versionId": "966de61b-96b5-4419-95b8-116dfaf2df90",
       "activeVersionId": null,
       "triggerCount": 0,
       "shared": [
