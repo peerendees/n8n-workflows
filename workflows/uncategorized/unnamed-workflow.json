@@ -266,7 +266,7 @@
       "tags": []
     },
     {
-      "updatedAt": "2025-12-21T18:23:19.850Z",
+      "updatedAt": "2025-12-21T18:40:20.348Z",
       "createdAt": "2025-12-15T21:35:40.591Z",
       "id": "C3QqvJAGjf0KhCZH",
       "name": "n8n to GitHub Auto-Backup (inkrementell)",
@@ -385,7 +385,7 @@
           "type": "n8n-nodes-base.httpRequest",
           "typeVersion": 4.2,
           "position": [
-            576,
+            784,
             -208
           ],
           "credentials": {
@@ -404,7 +404,7 @@
           "type": "n8n-nodes-base.code",
           "typeVersion": 2,
           "position": [
-            800,
+            1008,
             -208
           ]
         },
@@ -437,7 +437,7 @@
           "type": "n8n-nodes-base.if",
           "typeVersion": 2,
           "position": [
-            1024,
+            1232,
             -208
           ]
         },
@@ -461,6 +461,10 @@
                 {
                   "name": "branch",
                   "value": "main"
+                },
+                {
+                  "name": "sha",
+                  "value": "={{ $json.sha }}"
                 }
               ]
             },
@@ -471,8 +475,8 @@
           "type": "n8n-nodes-base.httpRequest",
           "typeVersion": 4.2,
           "position": [
-            1248,
-            -288
+            672,
+            -336
           ],
           "credentials": {
             "httpHeaderAuth": {
@@ -490,7 +494,7 @@
           "type": "n8n-nodes-base.code",
           "typeVersion": 2,
           "position": [
-            1472,
+            1680,
             -208
           ]
         },
@@ -522,7 +526,7 @@
           "type": "n8n-nodes-base.if",
           "typeVersion": 2,
           "position": [
-            1696,
+            1904,
             -208
           ]
         },
@@ -560,7 +564,7 @@
           "type": "n8n-nodes-base.httpRequest",
           "typeVersion": 4.2,
           "position": [
-            1920,
+            2128,
             -208
           ]
         },
@@ -680,6 +684,42 @@
           ],
           "id": "c5e4a411-fe36-42d3-9fe5-cf284bc5d850",
           "name": "If"
+        },
+        {
+          "parameters": {
+            "resource": "file",
+            "operation": "edit",
+            "owner": {
+              "__rl": true,
+              "value": "peerendees",
+              "mode": "name"
+            },
+            "repository": {
+              "__rl": true,
+              "value": "n8n-workflows",
+              "mode": "list",
+              "cachedResultName": "n8n-workflows",
+              "cachedResultUrl": "https://github.com/peerendees/n8n-workflows"
+            },
+            "filePath": "={{ $('Process Workflows').item.json.filepath }}",
+            "fileContent": "={{ $('Process Workflows').item.json.content }}",
+            "commitMessage": "=🤖 Auto-Backup: {{ $node[\"Process Workflows\"].json.name }} ({{ $node[\"Determine Action\"].json.action }})"
+          },
+          "type": "n8n-nodes-base.github",
+          "typeVersion": 1.1,
+          "position": [
+            560,
+            -720
+          ],
+          "id": "57e663a8-80f8-4270-9bb5-0a8aaf4b9cee",
+          "name": "Commit to GitHub1",
+          "webhookId": "bc53628b-0532-403d-95a8-34635212af18",
+          "credentials": {
+            "githubApi": {
+              "id": "uE78TkEY6lWLV4oP",
+              "name": "GitHub account"
+            }
+          }
         }
       ],
       "connections": {
@@ -751,13 +791,7 @@
         },
         "Has Changes?": {
           "main": [
-            [
-              {
-                "node": "Commit to GitHub",
-                "type": "main",
-                "index": 0
-              }
-            ],
+            [],
             [
               {
                 "node": "Collect Backup Stats",
@@ -769,13 +803,7 @@
         },
         "Commit to GitHub": {
           "main": [
-            [
-              {
-                "node": "Collect Backup Stats",
-                "type": "main",
-                "index": 0
-              }
-            ]
+            []
           ]
         },
         "Collect Backup Stats": {
@@ -826,11 +854,16 @@
           "main": [
             [
               {
-                "node": "Check if File Changed",
+                "node": "Commit to GitHub",
                 "type": "main",
                 "index": 0
               }
             ]
+          ]
+        },
+        "Commit to GitHub1": {
+          "main": [
+            []
           ]
         }
       },
@@ -842,7 +875,7 @@
         "templateCredsSetupCompleted": true
       },
       "pinData": {},
-      "versionId": "64c493ad-4821-43b8-8ff1-417fb7495fdd",
+      "versionId": "7c00e602-9fc4-4299-ae6b-b23a0f3f2fc6",
       "activeVersionId": null,
       "triggerCount": 0,
       "shared": [
