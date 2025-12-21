@@ -266,7 +266,7 @@
       "tags": []
     },
     {
-      "updatedAt": "2025-12-21T19:53:42.479Z",
+      "updatedAt": "2025-12-21T19:59:46.916Z",
       "createdAt": "2025-12-15T21:35:40.591Z",
       "id": "C3QqvJAGjf0KhCZH",
       "name": "n8n to GitHub Auto-Backup (inkrementell)",
@@ -625,7 +625,7 @@
                 {
                   "id": "161e6775-602d-4527-befd-e58008924f10",
                   "name": "secret",
-                  "value": "bd9264814eb3cf8657533d57dd8e0d8629eb9bf348f317ecbe5672e4032ed534",
+                  "value": "18DOvPKBV7ize3Nh",
                   "type": "string"
                 }
               ]
@@ -785,7 +785,7 @@
         "templateCredsSetupCompleted": true
       },
       "pinData": {},
-      "versionId": "ae1127c1-660e-48d7-974b-b4ffa9925608",
+      "versionId": "f237f62c-0bf3-4d62-abc4-ecdad0a54c1e",
       "activeVersionId": null,
       "triggerCount": 0,
       "shared": [
