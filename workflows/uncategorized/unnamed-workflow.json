@@ -266,7 +266,7 @@
       "tags": []
     },
     {
-      "updatedAt": "2025-12-21T19:39:50.599Z",
+      "updatedAt": "2025-12-21T19:42:02.344Z",
       "createdAt": "2025-12-15T21:35:40.591Z",
       "id": "C3QqvJAGjf0KhCZH",
       "name": "n8n to GitHub Auto-Backup (inkrementell)",
@@ -296,7 +296,7 @@
           "typeVersion": 1.2,
           "position": [
             -720,
-            -496
+            -672
           ]
         },
         {
@@ -307,7 +307,7 @@
           "typeVersion": 1,
           "position": [
             -720,
-            -304
+            -480
           ]
         },
         {
@@ -343,8 +343,8 @@
           "type": "n8n-nodes-base.httpRequest",
           "typeVersion": 4.2,
           "position": [
-            -496,
-            -400
+            -272,
+            -576
           ],
           "credentials": {
             "httpHeaderAuth": {
@@ -363,8 +363,8 @@
           "type": "n8n-nodes-base.code",
           "typeVersion": 2,
           "position": [
-            -272,
-            -400
+            -48,
+            -576
           ]
         },
         {
@@ -401,8 +401,8 @@
           "type": "n8n-nodes-base.httpRequest",
           "typeVersion": 4.2,
           "position": [
-            624,
-            -480
+            848,
+            -648
           ],
           "credentials": {
             "httpHeaderAuth": {
@@ -420,8 +420,8 @@
           "type": "n8n-nodes-base.code",
           "typeVersion": 2,
           "position": [
-            848,
-            -400
+            1072,
+            -576
           ]
         },
         {
@@ -453,8 +453,8 @@
           "type": "n8n-nodes-base.if",
           "typeVersion": 2,
           "position": [
-            1072,
-            -400
+            1296,
+            -576
           ]
         },
         {
@@ -475,7 +475,7 @@
                 },
                 {
                   "name": "secret",
-                  "value": "={{ $credentials.value }}"
+                  "value": "={{ $('Config').item.json.secret }}"
                 },
                 {
                   "name": "text",
@@ -490,8 +490,8 @@
           "type": "n8n-nodes-base.httpRequest",
           "typeVersion": 4.2,
           "position": [
-            1296,
-            -400
+            1520,
+            -576
           ]
         },
         {
@@ -506,8 +506,8 @@
           "type": "n8n-nodes-base.stickyNote",
           "typeVersion": 1,
           "position": [
-            -1072,
-            -800
+            -1088,
+            -944
           ]
         },
         {
@@ -522,8 +522,8 @@
           "type": "n8n-nodes-base.stickyNote",
           "typeVersion": 1,
           "position": [
-            -544,
-            -560
+            -326,
+            -728
           ]
         },
         {
@@ -549,8 +549,8 @@
           "type": "n8n-nodes-base.github",
           "typeVersion": 1.1,
           "position": [
-            -48,
-            -400
+            176,
+            -576
           ],
           "id": "ca6d1fd3-4d01-49ba-86f8-98929e969590",
           "name": "Check GitHub for File",
@@ -571,8 +571,8 @@
           "type": "n8n-nodes-base.code",
           "typeVersion": 2,
           "position": [
-            176,
-            -400
+            400,
+            -576
           ],
           "id": "f03cf7be-e43f-4b2d-945d-2662dd6a2baa",
           "name": "Determine Action"
@@ -604,8 +604,8 @@
           "type": "n8n-nodes-base.if",
           "typeVersion": 2.3,
           "position": [
-            400,
-            -400
+            624,
+            -576
           ],
           "id": "c5e4a411-fe36-42d3-9fe5-cf284bc5d850",
           "name": "Has Changes?"
@@ -627,8 +627,8 @@
           "type": "n8n-nodes-base.set",
           "typeVersion": 3.4,
           "position": [
-            -720,
-            -672
+            -496,
+            -576
           ],
           "id": "a5028991-8793-4104-96e7-4e5de99cdd37",
           "name": "Config"
@@ -639,7 +639,7 @@
           "main": [
             [
               {
-                "node": "Get All Workflows",
+                "node": "Config",
                 "type": "main",
                 "index": 0
               }
@@ -650,7 +650,7 @@
           "main": [
             [
               {
-                "node": "Get All Workflows",
+                "node": "Config",
                 "type": "main",
                 "index": 0
               }
@@ -756,6 +756,17 @@
           "main": [
             []
           ]
+        },
+        "Config": {
+          "main": [
+            [
+              {
+                "node": "Get All Workflows",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
         }
       },
       "settings": {
@@ -766,7 +777,7 @@
         "templateCredsSetupCompleted": true
       },
       "pinData": {},
-      "versionId": "d8b24d0f-628d-4e8e-89df-8633adfa4081",
+      "versionId": "0d8e1ed7-63b7-4804-9982-e1d28b13c748",
       "activeVersionId": null,
       "triggerCount": 0,
       "shared": [
