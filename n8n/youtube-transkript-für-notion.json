@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-23T22:46:10.324Z",
+  "updatedAt": "2025-12-23T22:54:29.713Z",
   "createdAt": "2025-11-11T23:08:14.064Z",
   "id": "qV8SHVJFOeoAv0FC",
   "name": "YouTube-Transkript für Notion",
@@ -164,7 +164,13 @@
       "position": [
         480,
         176
-      ]
+      ],
+      "credentials": {
+        "deepLApi": {
+          "id": "UYMLSZlCK38G0uST",
+          "name": "DeepL account"
+        }
+      }
     },
     {
       "parameters": {
@@ -362,9 +368,11 @@
     "executionOrder": "v1"
   },
   "staticData": null,
-  "meta": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
   "pinData": {},
-  "versionId": "30c91d99-1585-43a3-af5f-925bf735db32",
+  "versionId": "44bd531c-006c-4187-b09f-4c6117ac0ac4",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
