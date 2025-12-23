@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-23T21:59:41.849Z",
+  "updatedAt": "2025-12-23T22:44:59.681Z",
   "createdAt": "2025-11-24T19:30:01.014Z",
   "id": "p4WBXmtWQqToEtLw",
   "name": "Hedy to Webhook to Notion 0.9",
@@ -9,6 +9,7 @@
     {
       "parameters": {
         "path": "Hedy-Todos",
+        "authentication": "headerAuth",
         "options": {}
       },
       "type": "n8n-nodes-base.webhook",
@@ -19,7 +20,13 @@
       ],
       "id": "6ee2556f-14fa-491a-a23f-fc8232698e60",
       "name": "Hedy API",
-      "webhookId": "b9081b42-f39a-4933-9964-4dcfa7aa227e"
+      "webhookId": "b9081b42-f39a-4933-9964-4dcfa7aa227e",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "aZMd0okvVFkvyGnj",
+          "name": "GitHub Token"
+        }
+      }
     },
     {
       "parameters": {
@@ -83,7 +90,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "85e94efb-f2e0-40eb-bf52-18608ff78a8a",
+  "versionId": "d5c50f6c-dfe2-464b-ba03-10eb68e1e42d",
   "activeVersionId": "64b68a4b-7ee9-430f-8ab1-bdf343f828ee",
   "triggerCount": 1,
   "shared": [
