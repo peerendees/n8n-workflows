@@ -1,0 +1,89 @@
+{
+  "updatedAt": "2025-12-23T15:41:18.000Z",
+  "createdAt": "2025-11-22T15:05:15.611Z",
+  "id": "7BdKngA6qCAySGXs",
+  "name": "Prototype Gemini 3",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        0
+      ],
+      "id": "bdb8a018-e32d-415d-a3a1-dd729779f8cb",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "authentication": "predefinedCredentialType",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -192,
+        0
+      ],
+      "id": "eb6878db-9641-4096-b79b-61399547b911",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        16,
+        0
+      ],
+      "id": "d3a34b06-e8db-4f60-89f5-37cf9a76482a",
+      "name": "When chat message received",
+      "webhookId": "ee094aa7-72ca-46b4-ad64-3c42c7cf0225"
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "4b0dac47-99ee-4002-abe4-29fc978701f2",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-11-22T15:05:15.618Z",
+      "createdAt": "2025-11-22T15:05:15.618Z",
+      "role": "workflow:owner",
+      "workflowId": "7BdKngA6qCAySGXs",
+      "projectId": "yr4Hj71ou1NOsi2p"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
