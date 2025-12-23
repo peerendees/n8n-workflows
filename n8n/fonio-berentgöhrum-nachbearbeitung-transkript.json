@@ -1,0 +1,531 @@
+{
+  "updatedAt": "2025-12-23T09:46:01.769Z",
+  "createdAt": "2025-12-23T09:35:02.747Z",
+  "id": "9zrdcroz4Dxqp3Cl",
+  "name": "fonio BERENT/Göhrum Nachbearbeitung Transkript",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "berent_goehrum_nachbearbeitung",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -352,
+        -256
+      ],
+      "id": "93864959-7fbb-4c9b-8c39-f36aea885817",
+      "name": "Webhook",
+      "webhookId": "91027d69-8d90-4cc6-893e-9165d86c96d0"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "011ef203-63fd-49f7-ae0d-4ed7318ad11f",
+              "name": "headers.host",
+              "value": "={{ $json.headers.host }}",
+              "type": "string"
+            },
+            {
+              "id": "04f27e3e-ebed-4ae5-a22f-23d0f7c61904",
+              "name": "body[0].body.formattedTranscript",
+              "value": "={{ $json.body[0].body.formattedTranscript }}",
+              "type": "string"
+            },
+            {
+              "id": "017777fc-53d7-473d-b3c8-09a32e601385",
+              "name": "body[0].body.fromNumber",
+              "value": "={{ $json.body[0].body.fromNumber }}",
+              "type": "string"
+            },
+            {
+              "id": "882e8a05-a492-4445-bb4a-1856bfb586a1",
+              "name": "body[0].body.context.anrufer_name",
+              "value": "={{ $json.body[0].body.context.anrufer_name }}",
+              "type": "string"
+            },
+            {
+              "id": "a6508b49-d751-49d7-b40c-c91be52f5839",
+              "name": "body[0].body.context.einrichtung_typ",
+              "value": "={{ $json.body[0].body.context.einrichtung_typ }}",
+              "type": "string"
+            },
+            {
+              "id": "08190377-3019-449b-9374-494e642c5125",
+              "name": "body[0].body.context.einrichtung_name",
+              "value": "={{ $json.body[0].body.context.einrichtung_name }}",
+              "type": "string"
+            },
+            {
+              "id": "58740a6d-b29d-48ca-b2a3-fc14e3dedaeb",
+              "name": "body[0].body.context.technisch",
+              "value": "={{ $json.body[0].body.context.technisch }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -128,
+        -352
+      ],
+      "id": "23917905-1e91-4849-95e6-6d233a6cb41f",
+      "name": "Daten extrahieren"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Führe die Klassifikation durch.",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=DU BIST EIN HOCHSPEZIALISIERTER KLASSIFIKATIONS-AGENT FÜR IT-HOTLINE-TRANSKRIPTE.\n\n###DEINE HAUPTAUFGABE###\nAnalysiere Telefon-Transkripte und ordne sie präzise in eine Dringlichkeitskategorie (A, B, C oder D) ein, basierend auf den Kriterien aus der bereitgestellten Wissensdatenbank. Deine Klassifikation ermöglicht Technikern eine zielgerichtete, priorisierte Bearbeitung.\n\n---\n\n###VERFÜGBARE DATEN###\n\n**DRINGLICHKEITSKRITERIEN (aus Google Sheet):**\n{{ $('Dringlichkeitskriterien laden').all().slice(1).map(item =>\n`Kategorie ${item.json.Dringlichkeit}: ${item.json.Kategorie}\nSchlüsselworte: ${item.json.Schlagworte}\nBeispiele: ${item.json.Beispiele}`\n).join('\\n\\n') }}\n\n**ZU ANALYSIERENDES TRANSKRIPT:**\n{{ $json.anonymizedText }}\n\n---\n\n###ANALYSE-METHODIK (CHAIN OF THOUGHTS)###\n\n1. **UNDERSTAND**\n   - Lies das Transkript gründlich und identifiziere das konkrete technische Problem\n   - Erkenne die Auswirkungen: Produktivitätsausfall, Datenverlust, Eskalation, Geschäftskritikalität\n\n2. **IDENTIFY KEY SIGNALS**\n   - Schlüsselbegriffe für hohe Dringlichkeit: \"nicht arbeitsfähig\", \"Produktion steht\", \"Kunde wartet\", \"dringend\", \"sofort\"\n   - Schlüsselbegriffe für niedrige Dringlichkeit: \"nicht eilig\", \"wenn Zeit ist\", \"Informationsfrage\", \"optional\"\n\n3. **ASSESS IMPACT**\n   - Ist ein geschäftskritischer Prozess blockiert?\n   - Sind mehrere Nutzer betroffen?\n   - Gibt es Fristen oder SLA-relevante Zeitpunkte?\n   - Handelt es sich um einen Standardvorgang oder eine Informationsanfrage?\n\n4. **MATCH WITH CRITERIA**\n   - Vergleiche die erkannten Merkmale mit den Referenzbeispielen aus dem Google Sheet\n   - Wähle die Kategorie, die der Fallbeschreibung AM NÄCHSTEN kommt\n\n5. **HANDLE EDGE CASES**\n   - Bei unklaren oder widersprüchlichen Transkripten: Wähle die konservativere (höhere) Kategorie\n   - Weise explizit auf Unsicherheiten hin\n\n---\n\n###AUSGABEFORMAT###\n\n***WICHTIGER HINWEIS ZUR DATENSCHUTZ-KONFORMITÄT***\nDer Text enthält anonymisierte Platzhalter wie [PERSON_1], [PERSON_2].\nWenn du Namen extrahierst (z.B. für \"AnsprechpartnerName\" oder in der \"Beschreibung\"),\nNUTZE AUSSCHLIESSLICH DIESE PLATZHALTER.\nWandle sie NICHT um und erfinde keine Namen.\nBeispiel korrekt: \"AnsprechpartnerName\": \"[PERSON_2]\"\n\nGib deine Analyse im folgenden JSON-Format zurück:\n```json\n{\n  \"Dringlichkeit\": \"B\",\n  \"Kategorie\": \"Dringend\",\n  \"Problemtyp\": \"Technisch\",\n  \"Themenstichwort\": \"Server-Ausfall\",\n  \"Beschreibung\": [\n    \"Mehrere Mitarbeiter betroffen (Buchhaltung)\",\n    \"Datenbankverbindung unterbrochen seit 8 Uhr\",\n    \"Fehlende Rechnungen der letzten 2 Wochen\",\n    \"Zeitkritisch: Jahresabschluss-Termin in 2 Stunden\"\n  ],\n  \"AnsprechpartnerBleibt\": true = Anrufer bleibt Ansprechpartner, false = anderer Ansprechpartner wurde genannt\n  \"AnsprechpartnerName\": \"Frau Weber\",\n  \"RueckrufnummerAnders\": true = andere Rückrufnummer gewünscht, false = unter anrufender Nummer zurückrufen\n  \"Rueckrufnummer\": Die vom Anrufer genannte Rückrufnummer (mit Durchwahl falls vorhanden)\n  \"Begründung\": \"Der Kunde ist grundsätzlich arbeitsfähig, jedoch blockiert ein IT-Fehler einen zeitkritischen Geschäftsprozess. Entspricht den Beispielen für Kategorie B im Sheet.\"\n}\n```\n\n**WICHTIG: Feldbeschreibungen** \n- Die Dringlichkeit MUSS ein einzelner Buchstabe sein: A, B, C oder D, entsprechend der Möglichkeiten im Google Sheet\n- Die Kategorie MUSS sich auf die entsprechende Spalte im Google Sheet beziehen\n- Problemtyp: Klassifiziere in GENAU EINE dieser Kategorien:\n  • \"Technisch\" = Hardware-Probleme, Netzwerkausfälle, Gerätedefekte, Server-Ausfälle\n  • \"Software\" = Programmfehler, Anmeldeprobleme, Softwarestörungen, Datenbankprobleme\n  • \"Anliegen\" = Informationsanfragen, Beratung, allgemeine Fragen ohne akutes technisches Problem\n- Themenstichwort: Kurze, prägnante Beschreibung des Hauptproblems (2-4 Wörter, z. B. \"SAP-Login\", \"E-Mail-Sync\", \"Drucker-WLAN\")\n- Beschreibung: Array mit 3-6 Stichpunkten, die wichtigsten Informationen zuerst:\n  • Betroffene Personen/Systeme\n  • Zeitpunkt des Auftretens\n  • Konkrete Symptome/Fehler\n  • Geschäftliche Auswirkungen\n  • Fristen/Zeitdruck\n  • Bereits versuchte Lösungen\n- AnsprechpartnerBleibt: true = Anrufer bleibt Ansprechpartner, false = anderer Ansprechpartner wurde genannt\n- AnsprechpartnerName: Name des Ansprechpartners (falls abweichend vom Anrufer, sonst leer lassen)\n- AnsprechpartnerTelefon: Telefonnummer des Ansprechpartners (falls abweichend, sonst leer lassen)\n- RueckrufnummerAnders: true = andere Rückrufnummer als anrufende Nummer, false = unter anrufender Nummer zurückrufen\n- Rueckrufnummer: Die Rückrufnummer (kann identisch mit AnsprechpartnerTelefon sein)\n- Die Begründung MUSS sich auf die Kriterien im Google Sheet beziehen\n- Halte dich strikt an das JSON-Format\n\n---\n\n###WAS NICHT ZU TUN IST###\n\nNIEMALS Kategorien ohne Bezug zum Google Sheet festlegen\nVERMEIDE vage Begründungen wie \"klingt dringend\" oder \"scheint wichtig\"\nNICHT nur nach einzelnen Schlüsselworten klassifizieren – analysiere die Gesamtsituation\nNIEMALS Aussagen erfinden, die nicht im Transkript stehen\nNICHT überkategorisieren: Unzufriedenheit allein rechtfertigt keine Kategorie A\nIGNORIERE NIEMALS Hinweise auf Systemrelevanz, Produktionsstopp oder geschäftskritische Prozesse\n\n---\n\n###FEW-SHOT BEISPIELE###\n\n**Beispiel 1 - Kategorie A:**\nTranskript: \"Ich kann mich nicht mehr in SAP anmelden, wir müssen heute unbedingt die Monatsabrechnung machen.\"\nAusgabe:\n```json\n{\n  \"Dringlichkeit\": \"A\",\n  \"Kategorie\": \"Notfall\",\n  \"Problemtyp\": \"Software\",\n  \"Themenstichwort\": \"Kurze, prägnante Beschreibung des Hauptproblems (2-4 Wörter, z.B. 'SAP-Login', 'E-Mail-Sync', 'Drucker-WLAN')\",\n  \"Begründung\": \"Geschäftskritischer Prozess (Monatsabrechnung) ist komplett blockiert. Entspricht den Referenzfällen für Kategorie A im Sheet.\"\n}\n```\n\n**Beispiel 2 - Kategorie D:**\nTranskript: \"Ich wollte nur fragen, ob man den Drucker auch über WLAN verbinden kann – ist aber nicht eilig.\"\nAusgabe:\n```json\n{\n  \"Dringlichkeit\": \"D\",\n  \"Kategorie\": \"Informativ\",\n  \"Problemtyp\": \"Technisch\",\n  \"Themenstichwort\": \"Kurze, prägnante Beschreibung des Hauptproblems (2-4 Wörter, z.B. 'SAP-Login', 'E-Mail-Sync', 'Drucker-WLAN')\",\n  \"Begründung\": \"Informationsanfrage ohne Zeitdruck, kein akuter Vorfall. Entspricht klar Kategorie D im Sheet.\"\n}\n```\n\n**Beispiel 3 - Kategorie B:**\nTranskript: \"Mein Outlook synchronisiert nicht mehr. Ich kann arbeiten, aber wichtige E-Mails von Kunden kommen nicht an.\"\nAusgabe:\n```json\n{\n  \"Dringlichkeit\": \"B\",\n  \"Kategorie\": \"Dringend\",\n  \"Problemtyp\": \"Technisch\",\n  \"Themenstichwort\": \"Kurze, prägnante Beschreibung des Hauptproblems (2-4 Wörter, z.B. 'SAP-Login', 'E-Mail-Sync', 'Drucker-WLAN')\",\n  \"Begründung\": \"Eingeschränkte Arbeitsfähigkeit bei einem wichtigen Kommunikationskanal. Keine komplette Blockade, aber geschäftsrelevant. Entspricht Kategorie B.\"\n}\n```"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        1216,
+        -256
+      ],
+      "id": "8cf7091d-42df-4c77-ad1c-eaa6c9f0543f",
+      "name": "AI Agent",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-3-5-haiku-20241022",
+          "mode": "list",
+          "cachedResultName": "Claude Haiku 3.5"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        1296,
+        -32
+      ],
+      "id": "459423e2-c5da-4413-9da7-677c5508266d",
+      "name": "Anthropic Chat Model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "z2co8mXBEBKkyhYu",
+          "name": "API Anthropic"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "1Drzkc9BcFsDuCkajyxpDGRpSLOwK4S882TR0m6xo5sw",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Dringlichkeiten",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Drzkc9BcFsDuCkajyxpDGRpSLOwK4S882TR0m6xo5sw/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -128,
+        -160
+      ],
+      "id": "29f5b923-f1cf-40fa-bcb2-57e80ec6c53c",
+      "name": "Dringlichkeitskriterien laden",
+      "credentials": {
+        "googleApi": {
+          "id": "vRVq7GTwn9kTIi8N",
+          "name": "n8n Sheets Service"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        96,
+        -256
+      ],
+      "id": "25fc7223-88fd-422f-a068-c834cb4ce914",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "operation": "sanitize",
+        "text": "={{ $('Merge').item.json.body[0].body.formattedTranscript }}",
+        "guardrails": {
+          "pii": {
+            "value": {
+              "type": "selected",
+              "entities": [
+                "EMAIL_ADDRESS",
+                "PHONE_NUMBER",
+                "IP_ADDRESS",
+                "LOCATION"
+              ]
+            }
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.guardrails",
+      "typeVersion": 1,
+      "position": [
+        320,
+        -256
+      ],
+      "id": "c6b7d983-e3eb-49ac-a78b-a51a0dae7820",
+      "name": "Daten anonymisieren"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Zugriff auf die Antwort des AI Agents\nlet agentOutput = $input.item.json.output || $input.item.json.text || \"\";\n\n// Wir machen sicherheitshalber einen String daraus\nif (typeof agentOutput === 'object') {\n  agentOutput = JSON.stringify(agentOutput);\n}\n\n// 2. Das Mapping holen (exakter Name der Node davor ist wichtig!)\nconst mappingData = $('Azure Response Verarbeitung').first();\nconst nameMapping = mappingData.json.nameMapping || [];\n\n// 3. Re-Personalisierung durchführen (Suchen & Ersetzen im Rohtext)\n// Wir machen das VOR dem JSON-Parsing, damit auch Namen in Strings ersetzt werden.\nlet processedText = agentOutput;\n\nfor (const item of nameMapping) {\n  // Ersetze [PERSON_X] durch den echten Namen (global)\n  // Wir escapen die Klammern für den Regex\n  const placeholderRegex = new RegExp(item.placeholder.replace(/\\[/g, '\\\\[').replace(/\\]/g, '\\\\]'), 'g');\n  processedText = processedText.replace(placeholderRegex, item.original);\n}\n\n// 4. JSON Extrahieren (Der \"Gesprächigkeit\"-Filter)\n// Wir suchen den Bereich zwischen der ersten '{' und der letzten '}'\nconst firstBracket = processedText.indexOf('{');\nconst lastBracket = processedText.lastIndexOf('}');\n\nif (firstBracket !== -1 && lastBracket !== -1) {\n  // Schneide alles vor der ersten Klammer und nach der letzten Klammer weg\n  const jsonString = processedText.substring(firstBracket, lastBracket + 1);\n  \n  try {\n    const finalObject = JSON.parse(jsonString);\n    return finalObject; // Gib das saubere Objekt zurück\n  } catch (e) {\n    return { error: \"JSON war trotz Filterung ungültig\", raw: processedText };\n  }\n} else {\n  // Fallback, falls gar keine Klammern gefunden wurden\n  return { error: \"Kein JSON im Antworttext gefunden\", raw: processedText };\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1568,
+        -256
+      ],
+      "id": "dc903612-dc03-4d32-9a3a-888ce846202e",
+      "name": "Re-Personalisierung"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://berent-ki.services.ai.azure.com/models/chat/completions?api-version=2024-05-01-preview",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "=json",
+        "specifyBody": "json",
+        "bodyParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "jsonBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        768,
+        -256
+      ],
+      "id": "14b1d91c-ef2b-4658-822b-198e191a4ff7",
+      "name": "Namen-Anonymisierung (Azure)",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "maxTries": 5,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "x5y4aJ1X9shkkOZh",
+          "name": "API Threema Work Secret"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Wir greifen auf die Antwort der Azure-Node zu\nconst response = $input.item.json;\n\n// Sicherstellen, dass wir eine Antwort haben\nif (response.choices && response.choices[0] && response.choices[0].message) {\n  \n  // Den Textinhalt holen\n  let content = response.choices[0].message.content;\n  \n  // Oft sendet die KI den Text in Markdown-Blöcken (```json ... ```).\n  // Diese entfernen wir hier, damit das JSON sauber ist.\n  content = content.replace(/^```json\\s*/, \"\").replace(/\\s*```$/, \"\");\n  \n  try {\n    // Den Textstring in ein echtes JSON-Objekt umwandeln\n    const parsedData = JSON.parse(content);\n    \n    // Das saubere Ergebnis zurückgeben\n    return parsedData;\n    \n  } catch (error) {\n    // Falls die KI kein gültiges JSON geschickt hat, geben wir den Rohtext zurück\n    return {\n      error: \"Konnte JSON nicht parsen\",\n      rawContent: content\n    };\n  }\n} else {\n  return { error: \"Keine gültige Antwort von Azure erhalten\" };\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        992,
+        -256
+      ],
+      "id": "cc46e049-8203-49f2-8feb-2b833caa4035",
+      "name": "Azure Response Verarbeitung"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Daten aus der vorherigen Node holen\n// Fallback auf leeren String, falls keine Daten da sind\nconst transcript = $input.item.json.guardrailsInput || $input.item.json.output || \"\";\n\nconst systemPrompt = `Du bist ein Spezialist für die Anonymisierung von Personennamen in deutschen Telefon-Transkripten.\n\n###DEINE AUFGABE###\nErkenne alle Personennamen (Vornamen und Nachnamen) im gegebenen Text und ersetze sie durch nummerierte Platzhalter im Format [PERSON_1], [PERSON_2], [PERSON_3] etc.\n\n###REGELN###\n1. Erkenne nur echte Personennamen (z.B. Thomas, Anna, Müller, Schmidt)\n2. Ignoriere Titel wie 'Herr', 'Frau', 'Dr.' - diese bleiben unverändert\n3. Ersetze jeden gefundenen Namen durch einen eindeutigen Platzhalter [PERSON_N]\n4. Gleiche Namen im Text erhalten den gleichen Platzhalter (z.B. 'Thomas' wird immer zu [PERSON_1])\n5. Verschiedene Namen erhalten verschiedene Platzhalter (z.B. 'Thomas' → [PERSON_1], 'Anna' → [PERSON_2])\n6. Behalte die ursprüngliche Formatierung bei (Zeilenumbrüche, Interpunktion)\n\n###AUSGABEFORMAT###\nGib dein Ergebnis im folgenden JSON-Format zurück:\n\\`\\`\\`json\n{\n  \"anonymizedText\": \"Der anonymisierte Text mit [PERSON_1], [PERSON_2] etc.\",\n  \"nameMapping\": [\n    {\"original\": \"Thomas\", \"placeholder\": \"[PERSON_1]\"},\n    {\"original\": \"Anna\", \"placeholder\": \"[PERSON_2]\"}\n  ]\n}\n\\`\\`\\``;\n\n// Das fertige Payload-Objekt zurückgeben\nreturn {\n  model: \"mistral-namen-anonymisierung\",\n  messages: [\n    {\n      role: \"system\",\n      content: systemPrompt\n    },\n    {\n      role: \"user\",\n      content: transcript\n    }\n  ],\n  temperature: 0.1,\n  max_tokens: 1000\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        544,
+        -256
+      ],
+      "id": "e79ea409-47a0-4a3a-916d-f14b107c9ff2",
+      "name": "Azure Request Vorbereitung"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://msgapi.threema.ch/send_simple",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "from",
+              "value": "*BERENT1"
+            },
+            {
+              "name": "to",
+              "value": "BUMFMZ39"
+            },
+            {
+              "name": "secret",
+              "value": "={{ $('Config').item.json.secret }}"
+            },
+            {
+              "name": "text",
+              "value": "=🔄 n8n Backup erfolgreich  {{ $json.summary }}  Details: {{ $json.changedList }}  🔗 https://github.com/peerendees/n8n-workflows"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "346eacc7-2fe2-4646-9d8a-34127f127d62",
+      "name": "Send Threema Notification",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2016,
+        -256
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "nSNvIRCSAnKXrLyH",
+          "name": "API Threema Work BERENT1"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9cac8552-e981-44e5-bfc7-854012461c3f",
+              "name": "subject",
+              "value": "={{ $json.Kategorie }} | {{ $('Daten extrahieren').first().json.body[0].body.context.einrichtung_name }}, {{ $('Daten extrahieren').first().json.body[0].body.context.anrufer_name }} | {{ $json.Themenstichwort }}",
+              "type": "string"
+            },
+            {
+              "id": "988dd2a7-83ea-48b9-9e7e-bcc66745c72c",
+              "name": "htmlBody",
+              "value": "=<h3>Problemtyp: {{ $json.Problemtyp }}</h3>\n\n<h4>KI-Einschätzung</h4>\n<p>\n  <b>Einrichtung:</b> {{ $('Daten extrahieren').first().json.body[0].body.context.einrichtung_typ }}<br>\n  <b>Anrufer:</b> {{ $('Daten extrahieren').first().json.body[0].body.context.anrufer_name }} ({{ $('Daten extrahieren').first().json.body[0].body.fromNumber }})<br>\n  <b>Ansprechpartner:</b> {{ $json.AnsprechpartnerName ? $json.AnsprechpartnerName : \"Wie Anrufer\" }}<br>\n  <b>Rückrufnummer:</b> {{ $json.Rueckrufnummer ? $json.Rueckrufnummer : $('Daten extrahieren').first().json.body[0].body.fromNumber }}<br>\n  <b>Thema:</b> {{ $json.Themenstichwort }}\n</p>\n\n<b>Beschreibung:</b>\n<ul>\n{{ $json.Beschreibung.map(item => `<li>${item}</li>`).join('') }}\n</ul>",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1792,
+        -256
+      ],
+      "id": "78bd0002-231d-4cb3-8368-fded30482f57",
+      "name": "Nachricht an Threema Work vorbereiten"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Daten extrahieren",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Dringlichkeitskriterien laden",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daten extrahieren": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dringlichkeitskriterien laden": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Daten anonymisieren",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Re-Personalisierung",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daten anonymisieren": {
+      "main": [
+        [
+          {
+            "node": "Azure Request Vorbereitung",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Re-Personalisierung": {
+      "main": [
+        [
+          {
+            "node": "Nachricht an Threema Work vorbereiten",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Namen-Anonymisierung (Azure)": {
+      "main": [
+        [
+          {
+            "node": "Azure Response Verarbeitung",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Azure Response Verarbeitung": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Azure Request Vorbereitung": {
+      "main": [
+        [
+          {
+            "node": "Namen-Anonymisierung (Azure)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nachricht an Threema Work vorbereiten": {
+      "main": [
+        [
+          {
+            "node": "Send Threema Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "86b68440-b6f0-4c59-b120-62f627473f90",
+  "activeVersionId": null,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2025-12-23T09:35:02.756Z",
+      "createdAt": "2025-12-23T09:35:02.756Z",
+      "role": "workflow:owner",
+      "workflowId": "9zrdcroz4Dxqp3Cl",
+      "projectId": "yr4Hj71ou1NOsi2p"
+    }
+  ],
+  "activeVersion": null,
+  "tags": [
+    {
+      "updatedAt": "2025-12-23T09:34:57.682Z",
+      "createdAt": "2025-12-23T09:34:57.682Z",
+      "id": "1G25hJ4CstTCgKO9",
+      "name": "Göhrum"
+    },
+    {
+      "updatedAt": "2025-11-23T13:54:55.934Z",
+      "createdAt": "2025-11-23T13:54:55.934Z",
+      "id": "UbtH830CoddJZ3Zk",
+      "name": "generator"
+    },
+    {
+      "updatedAt": "2025-12-23T09:34:51.833Z",
+      "createdAt": "2025-12-23T09:34:51.833Z",
+      "id": "jj3XLdaKjqa8OQ2V",
+      "name": "BERENT"
+    }
+  ]
+}
