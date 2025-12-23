@@ -1,71 +1,93 @@
 {
-  "updatedAt": "2025-11-11T22:29:55.000Z",
-  "createdAt": "2025-11-11T22:01:32.621Z",
-  "id": "CKF3dFWeZX0gTU1U",
+  "updatedAt": "2025-11-11T23:07:15.000Z",
+  "createdAt": "2025-11-11T22:30:16.638Z",
+  "id": "DKEKrzFx9oYFubkV",
   "name": "YouTube-Transkript für Notion",
   "active": false,
   "isArchived": false,
   "nodes": [
     {
-      "parameters": {},
-      "id": "0529cc23-465a-4869-905d-7ffdf002f3f5",
-      "name": "Manueller Start",
-      "type": "n8n-nodes-base.manualTrigger",
-      "typeVersion": 1,
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "youtube-transcript",
+        "responseMode": "responseNode",
+        "options": {
+          "rawBody": true
+        }
+      },
+      "id": "8578df34-bc02-4bd1-9715-42f75f19702a",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
       "position": [
-        -544,
-        128
-      ]
+        -240,
+        112
+      ],
+      "webhookId": "youtube-transcript-webhook"
     },
     {
       "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "youtube-url",
+              "name": "youtubeUrl",
+              "value": "={{ $json.body.url || $json.query.url || $json.url }}",
+              "type": "string"
+            },
+            {
+              "id": "video-id",
+              "name": "videoId",
+              "value": "={{ $json.body.url ? $json.body.url.match(/(?:youtube\\.com\\/watch\\?v=|youtu\\.be\\/)([^&]+)/)?.[1] : '' }}",
+              "type": "string"
+            },
+            {
+              "id": "author-name",
+              "name": "authorName",
+              "value": "={{ $json.body.author || 'Unbekannt' }}",
+              "type": "string"
+            }
+          ]
+        },
         "options": {}
       },
-      "id": "08656112-da08-41bd-8afe-0f30a17bb215",
-      "name": "Kanal Konfiguration",
+      "id": "bc66bf3f-464a-4a6c-a242-22b99c3fdf87",
+      "name": "Webhook Daten extrahieren",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3,
+      "typeVersion": 3.3,
       "position": [
-        -368,
-        128
-      ]
-    },
-    {
-      "parameters": {},
-      "id": "2911386d-5ba0-4f0a-8f54-72534aed4e3a",
-      "name": "YouTube Videos abrufen",
-      "type": "n8n-nodes-youtube.youtube",
-      "typeVersion": 1,
-      "position": [
-        -192,
-        128
-      ]
-    },
-    {
-      "parameters": {},
-      "id": "c37e66e7-bd0c-47bb-ad6e-977633822372",
-      "name": "Video Details",
-      "type": "n8n-nodes-youtube.youtube",
-      "typeVersion": 1,
-      "position": [
-        0,
-        0
+        -16,
+        112
       ]
     },
     {
       "parameters": {
-        "url": "=https://api.youtubetranscript.com/?video_id={{ $json.id.videoId }}",
+        "operation": "get",
+        "part": "snippet,contentDetails,statistics"
+      },
+      "id": "f38ef7ea-6f13-4373-8c7d-ac4cac265458",
+      "name": "YouTube Video Details",
+      "type": "n8n-nodes-base.youTube",
+      "typeVersion": 1,
+      "position": [
+        208,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.youtubetranscript.com/?video_id={{ $json.videoId }}",
         "options": {
           "timeout": 30000
         }
       },
-      "id": "6008e63c-6c09-4572-ab87-e5340024d883",
+      "id": "dd98d656-4525-4c0d-9927-df71725dfe4b",
       "name": "Transkript extrahieren",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.1,
+      "typeVersion": 4.2,
       "position": [
-        0,
-        144
+        432,
+        112
       ]
     },
     {
@@ -100,27 +122,27 @@
         },
         "options": {}
       },
-      "id": "7319f50a-bdf6-4a97-9e8e-90e64d0b3eb4",
+      "id": "44540dcd-3aa0-4f12-a9b9-1545880563b9",
       "name": "Transkript validieren",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
       "position": [
-        176,
-        144
+        656,
+        112
       ]
     },
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "// Alle Daten aus vorherigen Nodes sammeln\nconst searchData = $('youtube-search').item(0).json;\nconst videoDetails = $('video-details').item(0).json;\nconst transcriptData = $('get-transcript').item(0).json;\nconst config = $('config').item(0).json;\n\n// Transkript extrahieren und bereinigen\nlet rawTranscript = transcriptData.transcript || transcriptData.text || '';\nif (Array.isArray(transcriptData)) {\n  rawTranscript = transcriptData.map(item => item.text || item.content || '').join(' ');\n}\n\n// Text bereinigen und formatieren\nconst cleanTranscript = rawTranscript\n  .replace(/\\[.*?\\]/g, '')           // [Musik], [Applaus] etc.\n  .replace(/\\(.*?\\)/g, '')           // (inaudible) etc.\n  .replace(/\\s+/g, ' ')              // Mehrfache Leerzeichen\n  .replace(/\\n+/g, '\\n\\n')           // Absätze formatieren\n  .trim();\n\n// Video-Dauer aus ISO 8601 Format parsen (PT4M13S -> 4:13)\nfunction parseDuration(duration) {\n  if (!duration) return 'Unknown';\n  const match = duration.match(/PT(?:(\\d+)H)?(?:(\\d+)M)?(?:(\\d+)S)?/);\n  if (!match) return duration;\n  \n  const hours = parseInt(match[1] || 0);\n  const minutes = parseInt(match[2] || 0);\n  const seconds = parseInt(match[3] || 0);\n  \n  if (hours > 0) {\n    return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;\n  } else {\n    return `${minutes}:${seconds.toString().padStart(2, '0')}`;\n  }\n}\n\n// Tags aus Video-Titel und Beschreibung extrahieren\nfunction extractTags(title, description) {\n  const tags = [];\n  const text = (title + ' ' + description).toLowerCase();\n  \n  // AI/KI-bezogene Keywords\n  if (text.match(/(ai|artificial intelligence|chatgpt|gpt|claude|llm|machine learning|automation)/)) {\n    tags.push('AI');\n  }\n  \n  // Marketing Keywords\n  if (text.match(/(marketing|sales|business|growth|strategy|revenue)/)) {\n    tags.push('Marketing');\n  }\n  \n  // Tutorial Keywords\n  if (text.match(/(tutorial|how to|guide|step by step|walkthrough|setup)/)) {\n    tags.push('Tutorial');\n  }\n  \n  // Tool Keywords\n  if (text.match(/(tool|software|app|platform|api|integration)/)) {\n    tags.push('Tools');\n  }\n  \n  return tags.length > 0 ? tags : ['AI']; // Default fallback\n}\n\nreturn {\n  // Video Grunddaten\n  videoId: searchData.id.videoId,\n  title: videoDetails.snippet.title,\n  channelTitle: videoDetails.snippet.channelTitle,\n  authorName: config.authorName,\n  publishedAt: videoDetails.snippet.publishedAt,\n  description: videoDetails.snippet.description,\n  \n  // Statistiken\n  viewCount: parseInt(videoDetails.statistics?.viewCount || 0),\n  likeCount: parseInt(videoDetails.statistics?.likeCount || 0),\n  duration: parseDuration(videoDetails.contentDetails?.duration),\n  \n  // URLs\n  videoUrl: `https://youtube.com/watch?v=${searchData.id.videoId}`,\n  thumbnailUrl: videoDetails.snippet?.thumbnails?.high?.url || '',\n  \n  // Transkript\n  cleanTranscript: cleanTranscript,\n  transcriptLength: cleanTranscript.length,\n  wordCount: cleanTranscript.split(' ').length,\n  estimatedReadingTime: Math.ceil(cleanTranscript.split(' ').length / 200),\n  \n  // Auto-Tags\n  autoTags: extractTags(videoDetails.snippet.title, videoDetails.snippet.description)\n};"
+        "jsCode": "// Alle Daten aus vorherigen Nodes sammeln\nconst config = $('Webhook Daten extrahieren').item.json;\nconst videoDetails = $('YouTube Video Details').item.json;\nconst transcriptData = $('Transkript extrahieren').item.json;\n\n// Transkript extrahieren und bereinigen\nlet rawTranscript = transcriptData.transcript || transcriptData.text || '';\nif (Array.isArray(transcriptData)) {\n  rawTranscript = transcriptData.map(item => item.text || item.content || '').join(' ');\n}\n\n// Text bereinigen und formatieren\nconst cleanTranscript = rawTranscript\n  .replace(/\\[.*?\\]/g, '')           // [Musik], [Applaus] etc.\n  .replace(/\\(.*?\\)/g, '')           // (inaudible) etc.\n  .replace(/\\s+/g, ' ')              // Mehrfache Leerzeichen\n  .replace(/\\n+/g, '\\n\\n')           // Absätze formatieren\n  .trim();\n\n// Video-Dauer aus ISO 8601 Format parsen (PT4M13S -> 4:13)\nfunction parseDuration(duration) {\n  if (!duration) return 'Unknown';\n  const match = duration.match(/PT(?:(\\d+)H)?(?:(\\d+)M)?(?:(\\d+)S)?/);\n  if (!match) return duration;\n  \n  const hours = parseInt(match[1] || 0);\n  const minutes = parseInt(match[2] || 0);\n  const seconds = parseInt(match[3] || 0);\n  \n  if (hours > 0) {\n    return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;\n  } else {\n    return `${minutes}:${seconds.toString().padStart(2, '0')}`;\n  }\n}\n\n// Tags aus Video-Titel und Beschreibung extrahieren\nfunction extractTags(title, description) {\n  const tags = [];\n  const text = (title + ' ' + description).toLowerCase();\n  \n  // AI/KI-bezogene Keywords\n  if (text.match(/(ai|artificial intelligence|chatgpt|gpt|claude|llm|machine learning|automation)/)) {\n    tags.push('AI');\n  }\n  \n  // Marketing Keywords\n  if (text.match(/(marketing|sales|business|growth|strategy|revenue)/)) {\n    tags.push('Marketing');\n  }\n  \n  // Tutorial Keywords\n  if (text.match(/(tutorial|how to|guide|step by step|walkthrough|setup)/)) {\n    tags.push('Tutorial');\n  }\n  \n  // Tool Keywords\n  if (text.match(/(tool|software|app|platform|api|integration)/)) {\n    tags.push('Tools');\n  }\n  \n  return tags.length > 0 ? tags : ['AI']; // Default fallback\n}\n\nreturn {\n  // Video Grunddaten\n  videoId: config.videoId,\n  title: videoDetails.snippet?.title || 'Unbekannt',\n  channelTitle: videoDetails.snippet?.channelTitle || 'Unbekannt',\n  authorName: config.authorName || 'Unbekannt',\n  publishedAt: videoDetails.snippet?.publishedAt || new Date().toISOString(),\n  description: videoDetails.snippet?.description || '',\n  \n  // Statistiken\n  viewCount: parseInt(videoDetails.statistics?.viewCount || 0),\n  likeCount: parseInt(videoDetails.statistics?.likeCount || 0),\n  duration: parseDuration(videoDetails.contentDetails?.duration),\n  \n  // URLs\n  videoUrl: `https://youtube.com/watch?v=${config.videoId}`,\n  thumbnailUrl: videoDetails.snippet?.thumbnails?.high?.url || '',\n  \n  // Transkript\n  cleanTranscript: cleanTranscript,\n  transcriptLength: cleanTranscript.length,\n  wordCount: cleanTranscript.split(' ').length,\n  estimatedReadingTime: Math.ceil(cleanTranscript.split(' ').length / 200),\n  \n  // Auto-Tags\n  autoTags: extractTags(videoDetails.snippet?.title || '', videoDetails.snippet?.description || '')\n};"
       },
-      "id": "dcfdaf32-c774-400d-8290-bdd6e2f6d4e9",
+      "id": "8da16805-22c9-4587-9123-d9adeeef36ff",
       "name": "Daten zusammenführen",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        368,
-        48
+        880,
+        112
       ]
     },
     {
@@ -129,58 +151,202 @@
         "translateTo": "DE",
         "additionalFields": {}
       },
-      "id": "fdb1c480-70bf-4817-93bc-8648c73e5b7b",
+      "id": "b1940f22-06d0-4976-ae4e-4b1d42ebb692",
       "name": "DeepL Übersetzen",
       "type": "n8n-nodes-base.deepL",
       "typeVersion": 1,
       "position": [
-        544,
-        48
+        1104,
+        112
       ]
     },
     {
       "parameters": {
         "resource": "databasePage",
-        "databaseId": "22f31cc6-fd56-80f8-9a68-da6f99f3dade",
+        "databaseId": {
+          "__rl": true,
+          "mode": "url",
+          "value": "=22f31cc6fd5680f89a68da6f99f3dade",
+          "__regex": "(?:https|http)://www\\.notion\\.so/(?:[a-z0-9-]{2,}/)?([0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12})"
+        },
+        "title": "YouTube Transkripte",
+        "simple": false,
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Autor"
+            }
+          ]
+        },
         "options": {}
       },
-      "id": "575440c2-7ac3-4366-9f15-2bd1fbb4a40c",
+      "id": "0c40d5b2-9606-4b6f-9e8f-634b726738d4",
       "name": "Notion Eintrag erstellen",
       "type": "n8n-nodes-base.notion",
       "typeVersion": 2,
       "position": [
-        720,
-        48
-      ]
+        1328,
+        112
+      ],
+      "notesInFlow": true,
+      "credentials": {
+        "notionApi": {
+          "id": "KpKj51GJ0big0oYv",
+          "name": "Notion account"
+        }
+      },
+      "notes": "Datenbank-ID als ENV-Variable: NOTION_DATABASE_ID"
     },
     {
-      "parameters": {},
-      "id": "1f1a0e3c-192b-4300-bf97-9bee858e0220",
-      "name": "Threema Benachrichtigung",
-      "type": "n8n-nodes-base.threema",
+      "parameters": {
+        "authentication": "generic",
+        "options": {}
+      },
+      "id": "b35e4ad7-9a42-4754-b9fd-b5da476968d9",
+      "name": "Threema Work Benachrichtigung",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1552,
+        112
+      ],
+      "notesInFlow": true,
+      "notes": "Threema Work API - Empfänger-ID noch anzupassen"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {\n  \"success\": true,\n  \"message\": \"Video erfolgreich verarbeitet\",\n  \"videoId\": $('Webhook Daten extrahieren').item.json.videoId,\n  \"title\": $('Daten zusammenführen').item.json.title,\n  \"notionUrl\": $('Notion Eintrag erstellen').item.json.url || 'Erstellt'\n} }}",
+        "options": {}
+      },
+      "id": "bb891e48-698a-4b94-8eac-61cbc94e57fc",
+      "name": "Webhook Response",
+      "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
       "position": [
-        896,
-        48
+        1776,
+        112
       ]
     }
   ],
-  "connections": {},
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Webhook Daten extrahieren",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Daten extrahieren": {
+      "main": [
+        [
+          {
+            "node": "YouTube Video Details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "YouTube Video Details": {
+      "main": [
+        [
+          {
+            "node": "Transkript extrahieren",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transkript extrahieren": {
+      "main": [
+        [
+          {
+            "node": "Transkript validieren",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transkript validieren": {
+      "main": [
+        [
+          {
+            "node": "Daten zusammenführen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daten zusammenführen": {
+      "main": [
+        [
+          {
+            "node": "DeepL Übersetzen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepL Übersetzen": {
+      "main": [
+        [
+          {
+            "node": "Notion Eintrag erstellen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notion Eintrag erstellen": {
+      "main": [
+        [
+          {
+            "node": "Threema Work Benachrichtigung",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Threema Work Benachrichtigung": {
+      "main": [
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
   "settings": {
     "executionOrder": "v1"
   },
   "staticData": null,
-  "meta": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
   "pinData": {},
-  "versionId": "56bf5671-3ae3-43b6-9d15-7293f763a9a2",
+  "versionId": "d75fc063-4a08-4b66-8e53-d17f55ae58aa",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
     {
-      "updatedAt": "2025-11-11T22:01:32.624Z",
-      "createdAt": "2025-11-11T22:01:32.624Z",
+      "updatedAt": "2025-11-11T22:30:16.641Z",
+      "createdAt": "2025-11-11T22:30:16.641Z",
       "role": "workflow:owner",
-      "workflowId": "CKF3dFWeZX0gTU1U",
+      "workflowId": "DKEKrzFx9oYFubkV",
       "projectId": "yr4Hj71ou1NOsi2p"
     }
   ],
