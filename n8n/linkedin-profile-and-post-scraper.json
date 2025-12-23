@@ -1,0 +1,30 @@
+{
+  "updatedAt": "2025-11-11T19:11:17.811Z",
+  "createdAt": "2025-11-11T19:11:17.811Z",
+  "id": "b9iyuWBFH35Nzzp0",
+  "name": "LinkedIn Profile and Post Scraper",
+  "active": false,
+  "isArchived": false,
+  "nodes": [],
+  "connections": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "0317aa28-d2a1-4060-9108-384689e9d401",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-11-11T19:11:17.814Z",
+      "createdAt": "2025-11-11T19:11:17.814Z",
+      "role": "workflow:owner",
+      "workflowId": "b9iyuWBFH35Nzzp0",
+      "projectId": "yr4Hj71ou1NOsi2p"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
