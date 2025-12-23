@@ -1,0 +1,342 @@
+{
+  "updatedAt": "2025-12-03T14:11:05.000Z",
+  "createdAt": "2025-11-17T21:03:36.257Z",
+  "id": "CCJmgqzH9XCESXGz",
+  "name": "My Sub-workflow",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.code",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        336
+      ],
+      "id": "7529b4b9-a2c9-4732-8dc8-8c7b4e924aa9",
+      "name": "LangChain Code"
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "414d8426-53cf-4db3-ae65-58b9ab576d9a",
+      "typeVersion": 1.1,
+      "name": "Start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        -848,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "1kyIdVpLg4Ate6b0o2yyB4wzu3e7stQjcILLVrWX6RD8",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Anrufer",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1kyIdVpLg4Ate6b0o2yyB4wzu3e7stQjcILLVrWX6RD8/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -320,
+        224
+      ],
+      "id": "86ba2908-e79b-4cea-b516-72436f22c05c",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleApi": {
+          "id": "vRVq7GTwn9kTIi8N",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        128
+      ],
+      "id": "d6d88f12-945d-485a-ad0e-19afa6233241",
+      "name": "When clicking ‘Execute workflow’",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst now = new Date();\n\nconsole.log(\"Aktuelle Zeit:\", now.toISOString());\n\nconst itemsToCall = items.filter(item => {\n  const anrufzeitpunkt = item.json.Anrufzeitpunkt;\n  console.log(\"Anrufzeitpunkt aus Sheet:\", anrufzeitpunkt);\n  \n  const callTime = new Date(anrufzeitpunkt);\n  console.log(\"Geparste callTime:\", callTime.toISOString());\n  \n  const timeDiff = now.getTime() - callTime.getTime();\n  console.log(\"TimeDiff in ms:\", timeDiff);\n  console.log(\"Bedingung erfüllt?\", timeDiff >= 0 && timeDiff <= 60000);\n  \n  return timeDiff >= 0 && timeDiff <= 60000;\n});\n\nreturn itemsToCall;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -112,
+        224
+      ],
+      "id": "fa54ed68-a3f2-4ce1-9b59-597e25d9d736",
+      "name": "Check Time"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "fcd2afab-561c-46c7-85fb-cf7f44ae08d4",
+              "leftValue": "",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        96,
+        224
+      ],
+      "id": "3ff081fa-082a-4377-afa3-93cdd34f1b3f",
+      "name": "If"
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Check Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Time": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "99d3901b-455e-4629-804b-823baef4fa18",
+  "activeVersionId": "99d3901b-455e-4629-804b-823baef4fa18",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-11-17T21:03:36.264Z",
+      "createdAt": "2025-11-17T21:03:36.264Z",
+      "role": "workflow:owner",
+      "workflowId": "CCJmgqzH9XCESXGz",
+      "projectId": "yr4Hj71ou1NOsi2p"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2025-12-18T10:08:31.967Z",
+    "createdAt": "2025-12-18T10:08:31.967Z",
+    "versionId": "99d3901b-455e-4629-804b-823baef4fa18",
+    "workflowId": "CCJmgqzH9XCESXGz",
+    "nodes": [
+      {
+        "parameters": {},
+        "type": "@n8n/n8n-nodes-langchain.code",
+        "typeVersion": 1,
+        "position": [
+          -640,
+          336
+        ],
+        "id": "7529b4b9-a2c9-4732-8dc8-8c7b4e924aa9",
+        "name": "LangChain Code"
+      },
+      {
+        "parameters": {
+          "inputSource": "passthrough"
+        },
+        "id": "414d8426-53cf-4db3-ae65-58b9ab576d9a",
+        "typeVersion": 1.1,
+        "name": "Start",
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "position": [
+          -848,
+          336
+        ]
+      },
+      {
+        "parameters": {
+          "authentication": "serviceAccount",
+          "documentId": {
+            "__rl": true,
+            "value": "1kyIdVpLg4Ate6b0o2yyB4wzu3e7stQjcILLVrWX6RD8",
+            "mode": "id"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "gid=0",
+            "mode": "list",
+            "cachedResultName": "Anrufer",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1kyIdVpLg4Ate6b0o2yyB4wzu3e7stQjcILLVrWX6RD8/edit#gid=0"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.7,
+        "position": [
+          -320,
+          224
+        ],
+        "id": "86ba2908-e79b-4cea-b516-72436f22c05c",
+        "name": "Get row(s) in sheet",
+        "credentials": {
+          "googleApi": {
+            "id": "vRVq7GTwn9kTIi8N",
+            "name": "Google Sheets account 2"
+          }
+        }
+      },
+      {
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          -640,
+          128
+        ],
+        "id": "d6d88f12-945d-485a-ad0e-19afa6233241",
+        "name": "When clicking ‘Execute workflow’",
+        "disabled": true
+      },
+      {
+        "parameters": {
+          "jsCode": "const items = $input.all();\nconst now = new Date();\n\nconsole.log(\"Aktuelle Zeit:\", now.toISOString());\n\nconst itemsToCall = items.filter(item => {\n  const anrufzeitpunkt = item.json.Anrufzeitpunkt;\n  console.log(\"Anrufzeitpunkt aus Sheet:\", anrufzeitpunkt);\n  \n  const callTime = new Date(anrufzeitpunkt);\n  console.log(\"Geparste callTime:\", callTime.toISOString());\n  \n  const timeDiff = now.getTime() - callTime.getTime();\n  console.log(\"TimeDiff in ms:\", timeDiff);\n  console.log(\"Bedingung erfüllt?\", timeDiff >= 0 && timeDiff <= 60000);\n  \n  return timeDiff >= 0 && timeDiff <= 60000;\n});\n\nreturn itemsToCall;"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -112,
+          224
+        ],
+        "id": "fa54ed68-a3f2-4ce1-9b59-597e25d9d736",
+        "name": "Check Time"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "fcd2afab-561c-46c7-85fb-cf7f44ae08d4",
+                "leftValue": "",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals",
+                  "name": "filter.operator.equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          96,
+          224
+        ],
+        "id": "3ff081fa-082a-4377-afa3-93cdd34f1b3f",
+        "name": "If"
+      }
+    ],
+    "connections": {
+      "When clicking ‘Execute workflow’": {
+        "main": [
+          [
+            {
+              "node": "Get row(s) in sheet",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get row(s) in sheet": {
+        "main": [
+          [
+            {
+              "node": "Check Time",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Check Time": {
+        "main": [
+          [
+            {
+              "node": "If",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "system migration",
+    "name": null,
+    "description": null
+  },
+  "tags": []
+}
