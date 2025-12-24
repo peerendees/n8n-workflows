@@ -282,6 +282,19 @@
         }
       },
       "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Stelle sicher, dass workflowData das name-Feld hat\nconst data = $node[\"Parse Workflow\"].json;\n\n// Falls data.error existiert, weiterleiten\nif (data.error) {\n  return data;\n}\n\n// Stelle sicher, dass workflowData das name-Feld hat\nconst workflowData = {\n  ...data.workflowData,\n  name: data.workflowName || data.workflowData.name || 'Unnamed Workflow'\n};\n\nreturn {\n  ...data,\n  workflowData: workflowData\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1072,
+        -720
+      ],
+      "id": "vorbereite-workflow-daten",
+      "name": "Vorbereite Workflow-Daten"
     }
   ],
   "connections": {
@@ -363,7 +376,7 @@
         ],
         [
           {
-            "node": "Erstelle Workflow",
+            "node": "Vorbereite Workflow-Daten",
             "type": "main",
             "index": 0
           }
