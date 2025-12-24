@@ -17,7 +17,8 @@ Dieses Repository enthält n8n-Workflows für die Synchronisation zwischen GitHu
 
 1. **Workflow importieren:**
    - `github-to-n8n-sync-workflow.json` in n8n importieren
-   - **WICHTIG:** n8n URL anpassen für Hostinger:
+   - **WICHTIG:** n8n URI anpassen für Hostinger:
+     - Es gibt in meinem Paket keine Umgebungsvariablen.
      - In n8n: Workflow öffnen → Environment Variables
      - Variable `N8N_URL` erstellen mit deiner Hostinger n8n URL (z.B. `https://deine-domain.hostinger.com`)
      - Oder direkt in den HTTP Request Nodes die URL ändern
