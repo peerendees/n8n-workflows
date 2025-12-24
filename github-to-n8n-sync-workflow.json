@@ -475,10 +475,32 @@
     },
     "Update Workflow": {
       "main": [
-        []
+        [
+          {
+            "node": "Debug: Update Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Erstelle Workflow": {
+      "main": [
+        [
+          {
+            "node": "Debug: Erstelle Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Debug: Erstelle Workflow": {
+      "main": [
+        []
+      ]
+    },
+    "Debug: Update Workflow": {
       "main": [
         []
       ]
