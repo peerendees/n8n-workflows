@@ -1,0 +1,903 @@
+{
+  "updatedAt": "2025-12-24T08:44:50.939Z",
+  "createdAt": "2025-12-24T08:44:50.939Z",
+  "id": "ovQVCmXRHzylDIOF",
+  "name": "Neuerung",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "9705f3db-c7b6-4503-b6fd-c50a2aa40522",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -2864,
+        -160
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "161e6775-602d-4527-befd-e58008924f10",
+              "name": "secret",
+              "value": "18DOvPKBV7ize3Nh",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2640,
+        -240
+      ],
+      "id": "fef91bf0-7ceb-423f-a6a5-b086e6357f34",
+      "name": "Config"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const r = $json; // Das ist der Rucksack\nconst wf = r.workflows[r.index];\n\n// Selbst-Backup Sperre\nconst isSelf = wf.id === 'C3QqvJAGjf0KhCZH';\n\nconst name = wf.name || \"unnamed\";\nconst clean = String(name).replace(/[^a-zA-Z0-9-_äöüÄÖÜß ]/g, '').replace(/\\s+/g, '-').toLowerCase();\n\nr.aktueller_name = name;\nr.aktueller_pfad = `n8n/${clean}.json`;\nr.aktueller_inhalt = Buffer.from(JSON.stringify(wf, null, 2)).toString('base64');\nr.ist_self = isSelf;\n\nreturn r;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1744,
+        -432
+      ],
+      "id": "e8cf43e1-12ec-4d8e-af3f-e06096d4f0c4",
+      "name": "Extrahieren und Verarbeiten"
+    },
+    {
+      "parameters": {
+        "jsCode": "const r = $json;\nconst wort = r.anzahl === 1 ? 'Workflow' : 'Workflows';\n\nreturn {\n  hasChanges: (r.neu + r.updates) > 0,\n  text: `✅ Backup beendet: ${r.anzahl} ${wort} geprüft.\\n` +\n        `Ergebnis: ${r.neu} neu, ${r.updates} aktualisiert, ${r.skip} unverändert.\\n\\n` +\n        `${r.tabelle.join('\\n') || 'Keine Änderungen'}`\n};"
+      },
+      "id": "ab1c65c9-9afc-4c0b-b93a-d7811b427542",
+      "name": "Backup-Statistik einsammeln",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1744,
+        -240
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const remote = $json; // GitHub Ergebnis\nconst r = $node[\"Extrahieren und Verarbeiten\"].json; // Unser Rucksack\n\nlet action = 'skip';\nlet sha = remote.sha || null;\n\nif (!r.ist_self) {\n    if (remote.error || !remote.sha) {\n        action = 'create';\n    } else {\n        const remoteContent = (remote.content || '').replace(/\\s/g, '');\n        const localContent = (r.aktueller_inhalt || '').replace(/\\s/g, '');\n        if (remoteContent !== localContent) {\n            action = 'update';\n        }\n    }\n}\n\n// WICHTIG: Wir geben den Rucksack (r) plus die neue Entscheidung zurück\nreturn { ...r, action, sha };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1296,
+        -432
+      ],
+      "id": "5ec8b2e2-dc37-465d-aa16-dfcf01dba364",
+      "name": "Bestimme Handlung"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "stats-has-changes",
+              "leftValue": "={{ $json.hasChanges }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "456e093d-1ba2-4239-98ac-c8df0a518dd3",
+      "name": "Benachrichtigung senden?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -1520,
+        -240
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a21035d4-b914-483c-aca3-c493a3546872",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "skip",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1072,
+        -432
+      ],
+      "id": "ea6eb7b1-db33-4129-a9e1-fc88204cc302",
+      "name": "Geänderter Workflow?"
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:5678/api/v1/workflows",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          },
+          "pagination": {
+            "pagination": {
+              "parameters": {
+                "parameters": [
+                  {
+                    "name": "cursor",
+                    "value": "={{ $response.body.nextCursor }}"
+                  }
+                ]
+              },
+              "paginationCompleteWhen": "other",
+              "completeExpression": "={{ !$response.body.nextCursor }}",
+              "limitPagesFetched": true
+            }
+          }
+        }
+      },
+      "id": "987a6c57-c23e-4d88-9333-9a964915fddf",
+      "name": "Hole alle Workflows",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -2416,
+        -240
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "4gc7MePUZVuCyowB",
+          "name": "API n8n"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://msgapi.threema.ch/send_simple",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "from",
+              "value": "*BERENT1"
+            },
+            {
+              "name": "to",
+              "value": "BUMFMZ39"
+            },
+            {
+              "name": "secret",
+              "value": "={{ $('Config').first().json.secret }}"
+            },
+            {
+              "name": "text",
+              "value": "={{ $json.text }}\n\n🔗 https://github.com/peerendees/n8n-workflows/n8n"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "365fbb33-26af-4a04-8287-46e25d8adb23",
+      "name": "Threema Benachrichtigung",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1296,
+        -240
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "nSNvIRCSAnKXrLyH",
+          "name": "API Threema Work BERENT1"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://api.github.com/repos/peerendees/n8n-workflows/contents/{{ $json.aktueller_pfad }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "message",
+              "value": "=🤖 Auto-Backup: {{ $json.aktueller_name }} ({{ $json.action }})"
+            },
+            {
+              "name": "content",
+              "value": "={{ $json.aktueller_inhalt }}"
+            },
+            {
+              "name": "branch",
+              "value": "main"
+            },
+            {
+              "name": "sha",
+              "value": "={{ $json.sha ? $json.sha : undefined }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c3c2809c-7cf3-4e44-a546-d85f725b5a28",
+      "name": "An GitHub übergeben",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -848,
+        -496
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "aZMd0okvVFkvyGnj",
+          "name": "GitHub Token"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "*/15 7-20 * * *"
+            }
+          ]
+        }
+      },
+      "id": "720230f9-72f1-4be2-a0a4-6a967d431d80",
+      "name": "Zeitplan: 7-20 Uhr (alle 15min)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -2864,
+        -352
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const workflows = $node[\"Hole alle Workflows\"].json.data || [];\nreturn {\n  workflows: workflows,\n  index: 0,\n  anzahl: workflows.length,\n  neu: 0,\n  updates: 0,\n  skip: 0,\n  tabelle: [] // Hier kommen die Namen rein\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2192,
+        -240
+      ],
+      "id": "68296f60-8fe0-4834-b587-98880f47a8fc",
+      "name": "Initialisierung"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// WICHTIG: Wir ignorieren das direkte Input-JSON (GitHub Antwort)\n// und holen uns den Rucksack direkt von \"Bestimme Handlung\" zurück.\nconst r = $(\"Bestimme Handlung\").item.json;\n\nif (!r.ist_self) {\n    if (r.action === 'create') {\n        r.neu++;\n        r.tabelle.push(`• ${r.aktueller_name} (Neu)`);\n    } else if (r.action === 'update') {\n        r.updates++;\n        r.tabelle.push(`• ${r.aktueller_name} (Update)`);\n    } else {\n        r.skip++;\n    }\n} else {\n    r.skip++;\n}\n\n// Zähler erhöhen\nr.index++;\n\n// Jetzt ist der Rucksack wieder das Haupt-Objekt für die nächste Runde\nreturn r;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -624,
+        -304
+      ],
+      "id": "27d55f4d-4299-45db-969a-b7d24e94d451",
+      "name": "Tabelle pflegen"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "get",
+        "owner": {
+          "__rl": true,
+          "value": "peerendees",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "n8n-workflows",
+          "mode": "list",
+          "cachedResultName": "n8n-workflows",
+          "cachedResultUrl": "https://github.com/peerendees/n8n-workflows"
+        },
+        "filePath": "={{ $json.aktueller_pfad }}",
+        "asBinaryProperty": false,
+        "additionalParameters": {
+          "reference": "main"
+        }
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        -1520,
+        -432
+      ],
+      "id": "320bc400-3956-4d2c-809d-c4fa1607b847",
+      "name": "Prüfe GitHub zur Datei",
+      "webhookId": "694567e2-c3e8-4bfc-91af-aae5697aca36",
+      "credentials": {
+        "githubApi": {
+          "id": "uE78TkEY6lWLV4oP",
+          "name": "API GitHub"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "54a2217a-25f1-452b-a80a-b7b77c94f9f7",
+              "leftValue": "={{ $json.index }}",
+              "rightValue": "={{ $json.anzahl }}",
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1968,
+        -240
+      ],
+      "id": "bb37ab0f-fcd7-49e8-bc62-aebd32b0431d",
+      "name": "Schleife prüfen"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "final-commit-check",
+              "leftValue": "={{ $json.hasChanges }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1072,
+        -160
+      ],
+      "id": "e4152644-9506-41d6-9045-badd2d4eb4f4",
+      "name": "Finaler Commit/Push"
+    },
+    {
+      "parameters": {
+        "url": "=http://localhost:5678/api/v1/workflows/C3QqvJAGjf0KhCZH",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "c50e5aa1-5212-4b79-b232-3968246c41df",
+      "name": "Hole aktuellen Workflow",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -2640,
+        16
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "4gc7MePUZVuCyowB",
+          "name": "API n8n"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const workflow = $json.data || $json;\nconst workflowJson = JSON.stringify(workflow, null, 2);\nconst content = Buffer.from(workflowJson).toString('base64');\n\nreturn {\n  workflow_name: workflow.name || 'n8n-Backup-Workflow',\n  workflow_content: content,\n  workflow_json: workflowJson\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2416,
+        16
+      ],
+      "id": "6be53368-4a5f-4d25-8a09-2e4fd87b2b4d",
+      "name": "Workflow vorbereiten"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "get",
+        "owner": {
+          "__rl": true,
+          "value": "peerendees",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "n8n-workflows",
+          "mode": "list",
+          "cachedResultName": "n8n-workflows",
+          "cachedResultUrl": "https://github.com/peerendees/n8n-workflows"
+        },
+        "filePath": "n8n-Backup-Workflow.json",
+        "asBinaryProperty": false,
+        "additionalParameters": {
+          "reference": "main"
+        }
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        -2192,
+        16
+      ],
+      "id": "0a7c9a07-f43b-4c98-aa73-e8066c2e25ea",
+      "name": "Prüfe Workflow auf GitHub",
+      "webhookId": "694567e2-c3e8-4bfc-91af-aae5697aca36",
+      "credentials": {
+        "githubApi": {
+          "id": "uE78TkEY6lWLV4oP",
+          "name": "API GitHub"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const remote = $json;\nconst local = $node[\"Workflow vorbereiten\"].json;\n\nlet sha = null;\nlet action = 'create';\n\nif (!remote.error && remote.sha) {\n  sha = remote.sha;\n  const remoteContent = (remote.content || '').replace(/\\s/g, '');\n  const localContent = (local.workflow_content || '').replace(/\\s/g, '');\n  if (remoteContent !== localContent) {\n    action = 'update';\n  } else {\n    action = 'skip';\n  }\n}\n\nreturn {\n  ...local,\n  sha: sha,\n  action: action\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1968,
+        16
+      ],
+      "id": "27857a54-4835-4a5e-a352-f1d05ce5c852",
+      "name": "Bestimme Workflow-Aktion"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "workflow-action-check",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "skip",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1744,
+        16
+      ],
+      "id": "97ed8525-af0f-46d0-b731-2951a301aef1",
+      "name": "Workflow geändert?"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "https://api.github.com/repos/peerendees/n8n-workflows/contents/n8n-Backup-Workflow.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "message",
+              "value": "=🤖 Workflow-Backup: {{ $json.workflow_name }} ({{ $json.action }})"
+            },
+            {
+              "name": "content",
+              "value": "={{ $json.workflow_content }}"
+            },
+            {
+              "name": "branch",
+              "value": "main"
+            },
+            {
+              "name": "sha",
+              "value": "={{ $json.sha ? $json.sha : undefined }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5865efc4-c421-4f1d-ae18-44015e03410f",
+      "name": "Workflow auf GitHub speichern",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1520,
+        16
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "aZMd0okvVFkvyGnj",
+          "name": "GitHub Token"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://api.github.com/repos/peerendees/n8n-workflows/commits/main",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "86229354-bc42-473a-ac1f-da2e22a0e545",
+      "name": "GitHub Commit bestätigen",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -848,
+        -160
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "aZMd0okvVFkvyGnj",
+          "name": "GitHub Token"
+        }
+      },
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Hole alle Workflows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extrahieren und Verarbeiten": {
+      "main": [
+        [
+          {
+            "node": "Prüfe GitHub zur Datei",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Backup-Statistik einsammeln": {
+      "main": [
+        [
+          {
+            "node": "Benachrichtigung senden?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bestimme Handlung": {
+      "main": [
+        [
+          {
+            "node": "Geänderter Workflow?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Benachrichtigung senden?": {
+      "main": [
+        [
+          {
+            "node": "Threema Benachrichtigung",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Geänderter Workflow?": {
+      "main": [
+        [
+          {
+            "node": "An GitHub übergeben",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Tabelle pflegen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hole alle Workflows": {
+      "main": [
+        [
+          {
+            "node": "Initialisierung",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Threema Benachrichtigung": {
+      "main": [
+        [
+          {
+            "node": "Finaler Commit/Push",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "An GitHub übergeben": {
+      "main": [
+        [
+          {
+            "node": "Tabelle pflegen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Zeitplan: 7-20 Uhr (alle 15min)": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Initialisierung": {
+      "main": [
+        [
+          {
+            "node": "Schleife prüfen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tabelle pflegen": {
+      "main": [
+        [
+          {
+            "node": "Schleife prüfen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prüfe GitHub zur Datei": {
+      "main": [
+        [
+          {
+            "node": "Bestimme Handlung",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schleife prüfen": {
+      "main": [
+        [
+          {
+            "node": "Extrahieren und Verarbeiten",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Backup-Statistik einsammeln",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Finaler Commit/Push": {
+      "main": [
+        [
+          {
+            "node": "GitHub Commit bestätigen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hole aktuellen Workflow": {
+      "main": [
+        [
+          {
+            "node": "Workflow vorbereiten",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Workflow vorbereiten": {
+      "main": [
+        [
+          {
+            "node": "Prüfe Workflow auf GitHub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prüfe Workflow auf GitHub": {
+      "main": [
+        [
+          {
+            "node": "Bestimme Workflow-Aktion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bestimme Workflow-Aktion": {
+      "main": [
+        [
+          {
+            "node": "Workflow geändert?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Workflow geändert?": {
+      "main": [
+        [
+          {
+            "node": "Workflow auf GitHub speichern",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "5b1327fb-e7b0-4cb4-b575-b5d4bf3a422d",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-12-24T08:44:50.943Z",
+      "createdAt": "2025-12-24T08:44:50.943Z",
+      "role": "workflow:owner",
+      "workflowId": "ovQVCmXRHzylDIOF",
+      "projectId": "yr4Hj71ou1NOsi2p"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
