@@ -311,6 +311,39 @@
     },
     {
       "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "check-has-error",
+              "leftValue": "={{ $json.error || '' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        848,
+        -720
+      ],
+      "id": "pruefe-ob-fehler",
+      "name": "Prüfe ob Fehler"
+    },
+    {
+      "parameters": {
         "jsCode": "// Debug: Prüfe ob Erstellen erfolgreich war\nconst response = $json;\n\n// Prüfe auf Fehler\nif (response.error) {\n  return {\n    success: false,\n    error: response.error,\n    workflowName: $node[\"Parse Workflow\"].json.workflowName || 'Unbekannt',\n    workflowId: $node[\"Parse Workflow\"].json.workflowId || '',\n    filePath: $node[\"Parse Workflow\"].json.filePath || '',\n    response: response\n  };\n}\n\n// Prüfe auf Status-Code\nif (response.statusCode && response.statusCode >= 400) {\n  return {\n    success: false,\n    error: `HTTP ${response.statusCode}: ${JSON.stringify(response.body || response)}`,\n    workflowName: $node[\"Parse Workflow\"].json.workflowName || 'Unbekannt',\n    workflowId: $node[\"Parse Workflow\"].json.workflowId || '',\n    filePath: $node[\"Parse Workflow\"].json.filePath || '',\n    response: response\n  };\n}\n\n// Erfolg\nreturn {\n  success: true,\n  workflowName: response.name || $node[\"Parse Workflow\"].json.workflowName || 'Unbekannt',\n  workflowId: response.id || $node[\"Parse Workflow\"].json.workflowId || '',\n  filePath: $node[\"Parse Workflow\"].json.filePath || '',\n  response: response\n};"
       },
       "type": "n8n-nodes-base.code",
@@ -415,7 +448,25 @@
         ],
         [
           {
+            "node": "Prüfe ob Fehler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prüfe ob Fehler": {
+      "main": [
+        [
+          {
             "node": "Überspringe Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Vorbereite Workflow-Daten",
             "type": "main",
             "index": 0
           }
