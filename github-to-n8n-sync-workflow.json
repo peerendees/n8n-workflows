@@ -198,7 +198,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Analysiere die Antwort vom HTTP Request Node\nconst response = $json;\n\n// Prüfe ob ein Fehler vorhanden ist\nif (response.error) {\n  return {\n    exists: false,\n    error: response.error,\n    originalResponse: response\n  };\n}\n\n// Prüfe ob data vorhanden ist (kann direkt sein oder in einem Array)\n// n8n API gibt bei GET /workflows/{id} die Daten direkt zurück\n// oder in einem data-Array wenn es ein Array ist\nconst hasData = response.data && Array.isArray(response.data) && response.data.length > 0;\nconst hasDirectData = response.id && response.name; // Workflow-Daten direkt im Root\n\nif (hasData || hasDirectData) {\n  return {\n    exists: true,\n    workflowData: hasData ? response.data[0] : response,\n    originalResponse: response\n  };\n}\n\n// Wenn weder Fehler noch Daten vorhanden sind, existiert der Workflow nicht\nreturn {\n  exists: false,\n  originalResponse: response\n};"
+        "jsCode": "// Analysiere die Antwort vom HTTP Request Node\nconst response = $json;\n\n// Hole die Workflow-Daten vom Parse Workflow Node (werden für Erstellen benötigt)\nconst parseWorkflowData = $node[\"Parse Workflow\"].json;\n\n// Prüfe ob ein Fehler vorhanden ist\nif (response.error) {\n  return {\n    exists: false,\n    error: response.error,\n    originalResponse: response,\n    // Stelle sicher, dass workflowData vorhanden ist für Erstellen\n    workflowId: parseWorkflowData.workflowId || '',\n    workflowName: parseWorkflowData.workflowName || 'Unnamed Workflow',\n    workflowData: parseWorkflowData.workflowData || {},\n    filePath: parseWorkflowData.filePath || ''\n  };\n}\n\n// Prüfe ob data vorhanden ist (kann direkt sein oder in einem Array)\n// n8n API gibt bei GET /workflows/{id} die Daten direkt zurück\n// oder in einem data-Array wenn es ein Array ist\nconst hasData = response.data && Array.isArray(response.data) && response.data.length > 0;\nconst hasDirectData = response.id && response.name; // Workflow-Daten direkt im Root\n\nif (hasData || hasDirectData) {\n  return {\n    exists: true,\n    workflowData: hasData ? response.data[0] : response,\n    originalResponse: response,\n    // Stelle sicher, dass alle Parse Workflow Daten vorhanden sind\n    workflowId: parseWorkflowData.workflowId || '',\n    workflowName: parseWorkflowData.workflowName || 'Unnamed Workflow',\n    filePath: parseWorkflowData.filePath || ''\n  };\n}\n\n// Wenn weder Fehler noch Daten vorhanden sind, existiert der Workflow nicht\n// Stelle sicher, dass workflowData vorhanden ist für Erstellen\nreturn {\n  exists: false,\n  originalResponse: response,\n  workflowId: parseWorkflowData.workflowId || '',\n  workflowName: parseWorkflowData.workflowName || 'Unnamed Workflow',\n  workflowData: parseWorkflowData.workflowData || {},\n  filePath: parseWorkflowData.filePath || ''\n};"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -245,7 +245,7 @@
     {
       "parameters": {
         "method": "PUT",
-        "url": "=https://n8n.srv1098810.hstgr.cloud/api/v1/workflows/{{ $node[\"Parse Workflow\"].json.workflowId }}",
+        "url": "=https://n8n.srv1098810.hstgr.cloud/api/v1/workflows/{{ $json.workflowId || $node[\"Parse Workflow\"].json.workflowId }}",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
