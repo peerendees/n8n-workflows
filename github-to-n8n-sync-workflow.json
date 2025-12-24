@@ -1,0 +1,413 @@
+{
+  "name": "GitHub → n8n Synchronisation",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "github-webhook-trigger",
+      "name": "GitHub Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -720,
+        -656
+      ],
+      "webhookId": "github-sync-webhook"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "check-push-event",
+              "leftValue": "={{ $json.headers['x-github-event'] }}",
+              "rightValue": "push",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -496,
+        -656
+      ],
+      "id": "pruefe-push-event",
+      "name": "Prüfe Push Event"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extrahiere geänderte Dateien aus GitHub Webhook\nconst body = $json.body || {};\nconst commits = body.commits || [];\nconst changedFiles = [];\n\n// Sammle alle geänderten Dateien\nfor (const commit of commits) {\n  const added = commit.added || [];\n  const modified = commit.modified || [];\n  \n  for (const file of [...added, ...modified]) {\n    // Nur Workflow-Dateien im n8n/ Verzeichnis\n    if (file.startsWith('n8n/') && file.endsWith('.json')) {\n      changedFiles.push(file);\n    }\n  }\n}\n\nreturn changedFiles.map(file => ({ filePath: file }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -272,
+        -656
+      ],
+      "id": "extrahiere-dateien",
+      "name": "Extrahiere geänderte Dateien"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const filePath = $json.filePath;\nreturn { filePath };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -48,
+        -656
+      ],
+      "id": "vorbereiten-datei",
+      "name": "Vorbereiten Datei"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "get",
+        "owner": {
+          "__rl": true,
+          "value": "peerendees",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "n8n-workflows",
+          "mode": "list",
+          "cachedResultName": "n8n-workflows",
+          "cachedResultUrl": "https://github.com/peerendees/n8n-workflows"
+        },
+        "filePath": "={{ $json.filePath }}",
+        "asBinaryProperty": false,
+        "additionalParameters": {
+          "reference": "main"
+        }
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        176,
+        -656
+      ],
+      "id": "hole-datei-von-github",
+      "name": "Hole Datei von GitHub",
+      "webhookId": "694567e2-c3e8-4bfc-91af-aae5697aca36",
+      "credentials": {
+        "githubApi": {
+          "id": "uE78TkEY6lWLV4oP",
+          "name": "API GitHub"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extrahiere Workflow-Daten aus GitHub-Datei\nconst githubFile = $json;\n\nif (githubFile.error || !githubFile.content) {\n  return { error: 'Datei konnte nicht geladen werden' };\n}\n\ntry {\n  const content = Buffer.from(githubFile.content, 'base64').toString('utf-8');\n  const workflow = JSON.parse(content);\n  \n  return {\n    workflowId: workflow.id || null,\n    workflowName: workflow.name || 'unnamed',\n    workflowData: workflow,\n    filePath: githubFile.path || githubFile.name\n  };\n} catch (e) {\n  return { error: 'Fehler beim Parsen der Workflow-Datei: ' + e.message };\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        -656
+      ],
+      "id": "parse-workflow",
+      "name": "Parse Workflow"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "check-error",
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "check-workflow-id",
+              "leftValue": "={{ $json.workflowId }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        624,
+        -656
+      ],
+      "id": "pruefe-workflow",
+      "name": "Prüfe Workflow"
+    },
+    {
+      "parameters": {
+        "url": "=http://localhost:5678/api/v1/workflows/{{ $json.workflowId }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        848,
+        -656
+      ],
+      "id": "pruefe-workflow-existiert",
+      "name": "Prüfe ob Workflow existiert",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "4gc7MePUZVuCyowB",
+          "name": "API n8n"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "check-exists",
+              "leftValue": "={{ $json.statusCode }}",
+              "rightValue": 200,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1072,
+        -656
+      ],
+      "id": "workflow-existiert",
+      "name": "Workflow existiert?"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=http://localhost:5678/api/v1/workflows/{{ $node[\"Parse Workflow\"].json.workflowId }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={{ JSON.stringify($node[\"Parse Workflow\"].json.workflowData) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1296,
+        -592
+      ],
+      "id": "update-workflow",
+      "name": "Update Workflow",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "4gc7MePUZVuCyowB",
+          "name": "API n8n"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.N8N_URL || 'http://localhost:5678' }}/api/v1/workflows",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={{ JSON.stringify($node[\"Parse Workflow\"].json.workflowData) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1296,
+        -720
+      ],
+      "id": "create-workflow",
+      "name": "Erstelle Workflow",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "4gc7MePUZVuCyowB",
+          "name": "API n8n"
+        }
+      },
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "connections": {
+    "GitHub Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Prüfe Push Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prüfe Push Event": {
+      "main": [
+        [
+          {
+            "node": "Extrahiere geänderte Dateien",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Extrahiere geänderte Dateien": {
+      "main": [
+        [
+          {
+            "node": "Vorbereiten Datei",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vorbereiten Datei": {
+      "main": [
+        [
+          {
+            "node": "Hole Datei von GitHub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hole Datei von GitHub": {
+      "main": [
+        [
+          {
+            "node": "Parse Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Workflow": {
+      "main": [
+        [
+          {
+            "node": "Prüfe Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prüfe Workflow": {
+      "main": [
+        [
+          {
+            "node": "Prüfe ob Workflow existiert",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Prüfe ob Workflow existiert": {
+      "main": [
+        [
+          {
+            "node": "Workflow existiert?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Workflow existiert?": {
+      "main": [
+        [
+          {
+            "node": "Update Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Erstelle Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Workflow": {
+      "main": [
+        []
+      ]
+    },
+    "Erstelle Workflow": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "github-to-n8n-sync"
+  }
+}
+

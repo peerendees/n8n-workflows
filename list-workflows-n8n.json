@@ -1,0 +1,203 @@
+{
+  "name": "Liste alle Workflows",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "manual-trigger-list",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -720,
+        -656
+      ]
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:5678/api/v1/workflows",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          },
+          "pagination": {
+            "pagination": {
+              "parameters": {
+                "parameters": [
+                  {
+                    "name": "cursor",
+                    "value": "={{ $response.body.nextCursor }}"
+                  }
+                ]
+              },
+              "paginationCompleteWhen": "other",
+              "completeExpression": "={{ !$response.body.nextCursor }}",
+              "limitPagesFetched": true
+            }
+          }
+        }
+      },
+      "id": "hole-alle-workflows",
+      "name": "Hole alle Workflows",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -496,
+        -656
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "4gc7MePUZVuCyowB",
+          "name": "API n8n"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Formatiere Workflow-Liste für bessere Lesbarkeit\nconst workflows = $json.data || [];\n\n// Sortiere nach Name\nworkflows.sort((a, b) => {\n  const nameA = (a.name || '').toLowerCase();\n  const nameB = (b.name || '').toLowerCase();\n  return nameA.localeCompare(nameB);\n});\n\n// Erstelle formatierte Ausgabe\nconst formatted = workflows.map(wf => {\n  const created = wf.createdAt ? new Date(wf.createdAt).toLocaleDateString('de-DE') : 'N/A';\n  const updated = wf.updatedAt ? new Date(wf.updatedAt).toLocaleDateString('de-DE') : 'N/A';\n  const active = wf.active ? '✓' : '✗';\n  \n  return {\n    id: wf.id || 'N/A',\n    name: wf.name || 'Unbenannt',\n    created: created,\n    updated: updated,\n    active: active,\n    workflow: wf\n  };\n});\n\nreturn {\n  total: workflows.length,\n  workflows: formatted,\n  summary: `Gefunden: ${workflows.length} Workflow(s)\\n\\n` +\n    formatted.map(wf => \n      `ID: ${wf.id}\\n` +\n      `Name: ${wf.name}\\n` +\n      `Erstellt: ${wf.created}\\n` +\n      `Aktualisiert: ${wf.updated}\\n` +\n      `Aktiv: ${wf.active}\\n` +\n      `---`\n    ).join('\\n\\n')\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -272,
+        -656
+      ],
+      "id": "formatiere-liste",
+      "name": "Formatiere Liste"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "summary-assignment",
+              "name": "workflow_liste",
+              "value": "={{ $json.summary }}",
+              "type": "string"
+            },
+            {
+              "id": "total-assignment",
+              "name": "anzahl",
+              "value": "={{ $json.total }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -48,
+        -656
+      ],
+      "id": "speichere-zusammenfassung",
+      "name": "Speichere Zusammenfassung"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://msgapi.threema.ch/send_simple",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "from",
+              "value": "*BERENT1"
+            },
+            {
+              "name": "to",
+              "value": "BUMFMZ39"
+            },
+            {
+              "name": "secret",
+              "value": "18DOvPKBV7ize3Nh"
+            },
+            {
+              "name": "text",
+              "value": "=📋 n8n Workflow Liste\\n\\n{{ $json.workflow_liste }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "threema-benachrichtigung",
+      "name": "Threema Benachrichtigung",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        176,
+        -656
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "nSNvIRCSAnKXrLyH",
+          "name": "API Threema Work BERENT1"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Hole alle Workflows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hole alle Workflows": {
+      "main": [
+        [
+          {
+            "node": "Formatiere Liste",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatiere Liste": {
+      "main": [
+        [
+          {
+            "node": "Speichere Zusammenfassung",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Speichere Zusammenfassung": {
+      "main": [
+        [
+          {
+            "node": "Threema Benachrichtigung",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Threema Benachrichtigung": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "list-workflows-n8n"
+  }
+}
+
