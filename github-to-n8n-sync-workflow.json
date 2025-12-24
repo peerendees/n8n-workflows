@@ -137,7 +137,7 @@
           "conditions": [
             {
               "id": "check-error",
-              "leftValue": "={{ $json.error }}",
+              "leftValue": "={{ $json.error || '' }}",
               "rightValue": "",
               "operator": {
                 "type": "string",
