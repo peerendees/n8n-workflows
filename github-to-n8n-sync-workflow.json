@@ -48,7 +48,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Extrahiere geänderte Dateien aus GitHub Webhook\nconst body = $json.body || {};\nconst commits = body.commits || [];\nconst changedFiles = [];\n\n// Sammle alle geänderten Dateien\nfor (const commit of commits) {\n  const added = commit.added || [];\n  const modified = commit.modified || [];\n  \n  for (const file of [...added, ...modified]) {\n    // Nur Workflow-Dateien im n8n/ Verzeichnis\n    if (file.startsWith('n8n/') && file.endsWith('.json')) {\n      changedFiles.push(file);\n    }\n  }\n}\n\nreturn changedFiles.map(file => ({ filePath: file }));"
+        "jsCode": "// Extrahiere geänderte Dateien aus GitHub Webhook\nconst body = $json.body || {};\nconst commits = body.commits || [];\nconst changedFiles = [];\n\n// Sammle alle geänderten Dateien\nfor (const commit of commits) {\n  const added = commit.added || [];\n  const modified = commit.modified || [];\n  \n  for (const file of [...added, ...modified]) {\n    // Workflow-Dateien im n8n/ Verzeichnis ODER im Root (z.B. github-to-n8n-sync-workflow.json)\n    if (file.endsWith('.json') && (file.startsWith('n8n/') || file.includes('-workflow.json'))) {\n      changedFiles.push(file);\n    }\n  }\n}\n\nreturn changedFiles.map(file => ({ filePath: file }));"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
