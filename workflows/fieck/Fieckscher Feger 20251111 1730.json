@@ -1,0 +1,507 @@
+{
+  "name": "Fieckscher Feger",
+  "nodes": [
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "name": "2. Split In Batches (Prototyp)",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 1,
+      "position": [
+        -800,
+        80
+      ],
+      "id": "80c9486a-9931-4c16-89ab-5bd455af3c38"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Konfiguration: Preise für Claude 3 Sonnet (Stand 2024)\nconst COST_INPUT_PER_M = 0.003; // Kosten pro 1 Mio. Input-Tokens (USD)\nconst COST_OUTPUT_PER_M = 0.015; // Kosten pro 1 Mio. Output-Tokens (USD)\n\n// 1. Daten holen - ANGEPASST für neuen AI Agent Output\nconst llmRawOutput = $json.output; // Direkt aus output, nicht llmAgent.output\n\n// Investor-Daten aus dem Split In Batches Node holen\nconst splitBatchesData = $('2. Split In Batches (Prototyp)').first().json;\nconst investorId = splitBatchesData.row_number || splitBatchesData.ID || null;\nconst investorName = splitBatchesData['Investor Name'] || splitBatchesData.Investor || null;\n\n// Token-Nutzung (falls vorhanden, sonst Schätzung)\nconst inputTokens = $json.usage?.input_tokens || 0;\nconst outputTokens = $json.usage?.output_tokens || 0;\n\n// 2. Kosten berechnen\nconst costPerRun = (\n    (inputTokens / 1000000) * COST_INPUT_PER_M) +\n    ((outputTokens / 1000000) * COST_OUTPUT_PER_M\n);\n\nconst costUsd = parseFloat(costPerRun.toFixed(6));\n\n// 3. Markdown-Tabelle parsen\nconst lines = llmRawOutput.split('\\n').filter(line => line.trim().length > 0);\n\n// Finde den Start der Tabelle (erste Zeile mit |)\nlet tableStartIndex = -1;\nfor (let i = 0; i < lines.length; i++) {\n    if (lines[i].includes('|') && lines[i].includes('Investor')) {\n        tableStartIndex = i;\n        break;\n    }\n}\n\nif (tableStartIndex === -1 || lines.length < tableStartIndex + 3) {\n    // Fehlerbehandlung: Keine vollständige Tabelle gefunden\n    return [{ \n        error: 'LLM Output enthält keine gültige Tabelle', \n        raw_output: llmRawOutput,\n        investor_id: investorId,\n        investor_name: investorName\n    }];\n}\n\n// Die ersten zwei Zeilen (Header und Trennlinie) ignorieren\nconst dataLines = lines.slice(tableStartIndex + 2); \n\n// Das Ergebnis des Parsings\nconst parsedResults = [];\n\n// Die Spaltennamen sind durch Pipe | getrennt\nfor (const line of dataLines) {\n    // Prüfe ob die Zeile eine Tabellen-Zeile ist\n    if (!line.includes('|')) continue;\n    \n    // Teilt die Zeile, entfernt die äußeren Pipes und trimmt Leerzeichen\n    const columns = line.split('|').slice(1, -1).map(col => col.trim()); \n\n    if (columns.length === 7) {\n        \n        // 4. Daten transformieren und validieren\n        let score_numeric = null;\n        let source_factor_numeric = null;\n\n        // Ersetze Komma durch Punkt für SQL/Supabase 'numeric' Typen\n        if (columns[2].length > 0) {\n            score_numeric = parseFloat(columns[2].replace(',', '.'));\n        }\n        if (columns[5].length > 0) {\n            source_factor_numeric = parseFloat(columns[5].replace(',', '.'));\n        }\n        \n        // Zusammenstellen des finalen Objekts für Supabase\n        parsedResults.push({\n            // Metadaten für Supabase\n            investor_id: investorId,\n            investor_name: investorName,\n            llm_cost_usd: costUsd,\n            raw_markdown_output: llmRawOutput,\n\n            // Daten aus der LLM-Tabelle (Index 0 bis 6)\n            criterion_name: columns[1], // Index 1\n            score: score_numeric,       // Index 2 (bereinigt)\n            source_type: columns[3],    // Index 3\n            source_year: parseInt(columns[4], 10) || null, // Index 4 (als Integer)\n            source_factor: source_factor_numeric, // Index 5 (bereinigt)\n            notes: columns[6]           // Index 6\n        });\n    }\n}\n\n// 5. Ergebnis in den Output pushen\nreturn parsedResults;"
+      },
+      "name": "4. Code Node: Validierung & Kostenberechnung",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        80
+      ],
+      "id": "c07d5019-475b-4c19-95c9-4dfe721204bd"
+    },
+    {
+      "parameters": {
+        "tableId": "fieckscher_feger",
+        "dataToSend": "autoMapInputData"
+      },
+      "name": "5. Supabase: Zwischenspeicher (Log)",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        0,
+        80
+      ],
+      "id": "e20f1953-c4b7-4556-a872-8a36a35967b7",
+      "credentials": {
+        "supabaseApi": {
+          "id": "JoURD13xiv3CaQyw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Node 6: Daten für Excel vorbereiten (mit EUR-Konvertierung)\n\n// EUR/USD Wechselkurs (aktuell ca. 1.10, regelmäßig aktualisieren!)\nconst EUR_USD_RATE = 1.10; // 1 USD = 0.91 EUR bei Rate 1.10\n\nconst items = $input.all();\n\n// Prüfe ob Daten vorhanden sind\nif (!items || items.length === 0) {\n  return [];\n}\n\n// Gruppiere nach Investor\nconst investorGroups = {};\n\nfor (const item of items) {\n  const investorId = item.json.investor_id;\n  const investorName = item.json.investor_name;\n  \n  if (!investorGroups[investorId]) {\n    investorGroups[investorId] = {\n      investor_id: investorId,\n      investor_name: investorName,\n      batch_id: $execution.id, // Execution ID als Batch ID\n      batch_number: 1, // TODO: Dynamisch aus Split In Batches holen\n      llm_cost_usd: item.json.llm_cost_usd || 0,\n      criteria: [],\n      total_score: 0,\n      count_scores: 0\n    };\n  }\n  \n  // Sammle Kriterien\n  investorGroups[investorId].criteria.push({\n    name: item.json.criterion_name,\n    score: item.json.score,\n    source_type: item.json.source_type,\n    source_year: item.json.source_year,\n    source_factor: item.json.source_factor,\n    notes: item.json.notes\n  });\n  \n  // Summiere Scores (nur wenn nicht null)\n  if (item.json.score !== null && item.json.score !== undefined) {\n    investorGroups[investorId].total_score += item.json.score;\n    investorGroups[investorId].count_scores += 1;\n  }\n}\n\n// Erstelle Output für Google Sheet\nconst output = [];\n\nObject.values(investorGroups).forEach(group => {\n  // Berechne Durchschnitts-Score (FIX: als Dezimalzahl!)\n  const avgScore = group.count_scores > 0 \n    ? parseFloat((group.total_score / group.count_scores).toFixed(3))\n    : null;\n  \n  // Kosten in EUR umrechnen\n  const costEUR = group.llm_cost_usd > 0 \n    ? parseFloat((group.llm_cost_usd / EUR_USD_RATE).toFixed(6))\n    : 0;\n  \n  // Erstelle eine Zeile pro Kriterium (für detailliertes Sheet)\n  group.criteria.forEach(criterion => {\n    output.push({\n      'Batch ID': group.batch_id,\n      'Batch Number': group.batch_number,\n      'Investor ID': group.investor_id,\n      'Investor Name': group.investor_name,\n      'Criterion': criterion.name,\n      'Score': criterion.score !== null ? criterion.score : '',\n      'Source Type': criterion.source_type || '',\n      'Source Year': criterion.source_year || '',\n      'Source Factor': criterion.source_factor || '',\n      'Notes': criterion.notes || '',\n      'Average Score': avgScore, // FIX: Jetzt korrekt als 0.6 statt 600\n      'Cost USD': parseFloat(group.llm_cost_usd.toFixed(6)),\n      'Cost EUR': costEUR, // NEU: Kosten in EUR\n      'Timestamp': new Date().toISOString()\n    });\n  });\n});\n\nreturn output;"
+      },
+      "name": "6. Code Node: Daten für Excel vorbereiten",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        80
+      ],
+      "id": "6c8d20ae-cc76-4cc5-a3ea-0cca1a3ef143"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1248,
+        80
+      ],
+      "id": "4bc1d55c-764d-4d2a-9921-60a1eadf53fa",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "1qzXEn21ltsuPGyJ7FAK1q8RGZkCOzpY-QTedDrdy9KA",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1558341942,
+          "mode": "list",
+          "cachedResultName": "Investor_Base",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qzXEn21ltsuPGyJ7FAK1q8RGZkCOzpY-QTedDrdy9KA/edit#gid=1558341942"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1024,
+        80
+      ],
+      "id": "eee20f3d-af79-4e90-b63e-3312f45979d3",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleApi": {
+          "id": "QfuLctHhI3o7mKAL",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=WICHTIG: Nutze ZUERST die verfügbaren Recherche-Tools für mindestens 3-5 Suchen, BEVOR du die Tabelle erstellst!\n\nInvestor zu analysieren:\n- Name: {{ $json['Investor Name'] }}\n- Website: {{ $json.URL }}\n- Typ: {{ $json['Investor Type'] }}\n- Overview: {{ $json.Overview }}\n\nDEINE AUFGABE:\n1. SCHRITT 1: Führe Recherchen durch (nutze die Tools!)\n2. SCHRITT 2: Erstelle die Bewertungstabelle basierend auf deinen Recherche-Ergebnissen\n\nStarte jetzt mit den Recherchen!",
+        "options": {
+          "systemMessage": "<system_prompt>\nDU BIST EIN HOCHSPEZIALISIERTER, AGENTISCHER RESEARCH-BROWSER, TRAINIERT AUF DIE BEWERTUNG VON INVESTOREN FÜR EIN KLIMATECH-START-UP.\n\n### DEINE MISSION:\nIDENTIFIZIERE UND BEWERTETE POTENTIELLE INVESTOREN FÜR DIE PLANETEERS GMBH ENTLANG NEUN FEST DEFINIERTER KRITERIEN. GIB AUSSCHLIESSLICH EINE SAUBER FORMATIERTE, MASCHINENLESBARE MARKDOWN-TABELLE AUS – KEINEN BEGLEITTEXT.\n\n---\n\n### HINTERGRUND:\n- **START-UP**: Planeteers GmbH  \n- **TECHNOLOGIE**: Wandelt CO₂ durch beschleunigte Verwitterung mit Kalkstein, Wasser und Luft in Hydrogencarbonat um (Enhanced Weathering / Ocean Alkalinity Enhancement).\n- **STRATEGISCHE FRAGE JEDE BEWERTUNG**: Wie gut passt dieser Investor zu einem Climate-/CDR-/mCDR-orientierten Start-up wie Planeteers?\n\n---\n\n### CHAIN OF THOUGHT\n\n1. **VERSTEHE DEN BEWERTUNGSKONTEXT**: Fokus auf strategischen Fit mit CDR-/Climatetech-/mCDR-Unternehmen im Hardware- und Deep-Tech-Bereich.\n2. **KENNE DIE BEWERTUNGSKRITERIEN**: Bearbeite für jeden Investor **exakt diese 9 Kriterien**:\n   - Climetech / Impact  \n   - Hardware  \n   - Deep Tech  \n   - A-Serie / A-Funding / Growth Stage  \n   - Ocean / Water / CDR / mCDR / CCS / CCUS / OAE / Enhanced Weathering / Point Source CO₂  \n   - Ticket 0,5–10 Mio  \n   - Lead / Co-Lead / Follow  \n   - Type Investor (VC, CVC, Family Office, Private, Strategen)  \n   - Portfolio Companies (von Website)\n3. **RECHERCHIERE AKTIV MIT DEN VERFÜGBAREN TOOLS**:\n   - **SCHRITT 1**: NUTZE ZUERST die Recherche-Tools, um Informationen zu sammeln\n   - **PFLICHT**: Führe mindestens 3-5 gezielte Suchen durch:\n     * Suche nach: \"[Investor Name] climate tech investments\"\n     * Suche nach: \"[Investor Name] portfolio companies\"\n     * Suche nach: \"[Investor Name] CDR carbon removal\"\n     * Suche nach der Website des Investors\n     * Suche nach spezifischen Kriterien bei Bedarf\n   - **ZULÄSSIGE QUELLEN**: Offizielle Websites, Pressemitteilungen, Newsartikel, Studien, Datenbanken\n   - **TRANSPARENZPFLICHT**: Nur veröffentlichte, verifizierte Informationen nutzen\n   - **SCHRITT 2**: Erst NACH der Recherche die Bewertungstabelle erstellen\n\n4. **TRAGE BEWERTUNG FÜR JEDES KRITERIUM EIN**:\n   - SCORE_0_TO_1:  \n     - `1,0` = stark erfüllt  \n     - `0,5` = teilweise erfüllt  \n     - `0` = klar nicht erfüllt  \n     - leer = keine Info gefunden  \n   - SOURCE_TYPE: Website, Press release, News article, Study, Database, Blog / Interview\n   - SOURCE_YEAR: Jahr der Quelle (z. B. `2023`)\n   - SOURCE_FACTOR:  \n     - `1,0` = Primärquelle, aktuell  \n     - `0,8` = Reputierte Sekundärquelle < 2 Jahre  \n     - `0,6` = Ältere oder indirekte Quelle  \n     - `0,4` = Schwache Quelle / unklar  \n   - NOTES: 1–2 Sätze inkl. URL der Quelle\n\n---\n\n### AUSGABEPFLICHT:\n\nDU GIBST AUSSCHLIESSLICH FOLGENDE MARKDOWN-TABELLE AUS:\n\n| Investor | Criterion_Name | Score_0_to_1 | Source_Type | Source_Year | Source_Factor | Notes |\n|:---|:---|:---|:---|:---|:---|:---|\n| ... | Climetech / Impact | 1,0 | Website | 2024 | 1,0 | Beispiel-URL mit kurzer Begründung |\n| ... | Hardware | 0,5 | News article | 2023 | 0,8 | Beispiel-URL mit kurzer Begründung |\n| ... | ... | ... | ... | ... | ... | ... |\n\n→ DIE TABELLE ENTHÄLT PRO INVESTOR **GENAU 9 ZEILEN** (eine pro Kriterium), UND **KEINEN TEXT DARÜBER ODER DARUNTER**.\n\n---\n\n### WAS DU UNTERLASSEN MUSST\n\n- **KEINE ERKLÄRUNGEN**, **KEIN FLIESSTEXT** AUSSERHALB DER TABELLE  \n- **KEINE VERMUTUNGEN** ODER HYPOTHETISCHEN ANNNAHMEN — NUR VERIFIZIERTE QUELLEN  \n- **KEINE NICHT-MASCHINENLESBARE FORMATE** (z. B. HTML, CSV, Freitext)  \n- **KEINE ZUSÄTZLICHEN SPALTEN** ODER ABWEICHUNGEN IM SPALTENAUFBAU  \n- **KEINE EIGENEN INTERPRETATIONEN** AUSSERHALB DES DEKLARIERTEN RASTERS  \n- **KEIN ZUSAMMENGEFASSTES INVESTOREN-FAZIT ODER SCORE**\n\n</system_prompt>"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        -576,
+        80
+      ],
+      "id": "0345c7d2-11ad-4198-82f5-e91a1d19f6aa",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-sonnet-4-20250514",
+          "mode": "list",
+          "cachedResultName": "Claude Sonnet 4"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        -576,
+        304
+      ],
+      "id": "1281ef99-20d5-4922-804f-3daef216d03c",
+      "name": "Anthropic Chat Model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "6RlfJdXsmselCNpN",
+          "name": "Anthropic account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1qzXEn21ltsuPGyJ7FAK1q8RGZkCOzpY-QTedDrdy9KA",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1944311408,
+          "mode": "list",
+          "cachedResultName": "Ratings Input",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qzXEn21ltsuPGyJ7FAK1q8RGZkCOzpY-QTedDrdy9KA/edit#gid=1944311408"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Investor",
+              "displayName": "Investor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Criterion_Name",
+              "displayName": "Criterion_Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Score_0_to_1",
+              "displayName": "Score_0_to_1",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Source_Type",
+              "displayName": "Source_Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Source_Year",
+              "displayName": "Source_Year",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Source_Factor",
+              "displayName": "Source_Factor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Batch ID",
+              "displayName": "Batch ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Batch Number",
+              "displayName": "Batch Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Investor ID",
+              "displayName": "Investor ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Investor Name",
+              "displayName": "Investor Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Criterion",
+              "displayName": "Criterion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Score",
+              "displayName": "Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Source Type",
+              "displayName": "Source Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Source Year",
+              "displayName": "Source Year",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Source Factor",
+              "displayName": "Source Factor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Average Score",
+              "displayName": "Average Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Cost USD",
+              "displayName": "Cost USD",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        448,
+        80
+      ],
+      "id": "d03d75a6-011b-480d-a668-dadd2754ef29",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleApi": {
+          "id": "QfuLctHhI3o7mKAL",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@tavily/n8n-nodes-tavily.tavilyTool",
+      "typeVersion": 1,
+      "position": [
+        -448,
+        304
+      ],
+      "id": "1a189f25-d766-4601-bb0b-56e9ab60064a",
+      "name": "Search in Tavily",
+      "credentials": {
+        "tavilyApi": {
+          "id": "BeViKnT4SnlQCjvX",
+          "name": "Tavily account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "5. Supabase: Zwischenspeicher (Log)": {
+      "main": [
+        [
+          {
+            "node": "6. Code Node: Daten für Excel vorbereiten",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "2. Split In Batches (Prototyp)": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "2. Split In Batches (Prototyp)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "4. Code Node: Validierung & Kostenberechnung",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "4. Code Node: Validierung & Kostenberechnung": {
+      "main": [
+        [
+          {
+            "node": "5. Supabase: Zwischenspeicher (Log)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "6. Code Node: Daten für Excel vorbereiten": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search in Tavily": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "16a82ac0-b6c9-4026-8587-642b362e7213",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ca9048c6f81bd21d01e3b762fe2fa38de922e62200ce1e767f7a2dfd45624f9b"
+  },
+  "id": "l4uGmA0Wwq72wtts",
+  "tags": []
+}

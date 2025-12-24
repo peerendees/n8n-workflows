@@ -8,6 +8,8 @@ Dieses Repository enthält n8n Workflows für die Synchronisation zwischen GitHu
 - `github-to-n8n-sync-workflow.json` - Synchronisations-Workflow (GitHub → n8n)
 - `list-workflows-n8n.json` - Workflow zum Auflisten aller Workflows
 - `list-workflows.sh` - Shell-Script zum Auflisten aller Workflows
+- `n8n/` - Gesicherte Workflow-Dateien
+- `workflows/` - Kategorisierte Workflows
 
 ## Setup
 
@@ -15,7 +17,7 @@ Dieses Repository enthält n8n Workflows für die Synchronisation zwischen GitHu
 
 1. **Workflow importieren:**
    - `github-to-n8n-sync-workflow.json` in n8n importieren
-   - **WICHTIG:** n8n URL anpassen:
+   - **WICHTIG:** n8n URL anpassen für Hostinger:
      - In n8n: Workflow öffnen → Environment Variables
      - Variable `N8N_URL` erstellen mit deiner Hostinger n8n URL (z.B. `https://deine-domain.hostinger.com`)
      - Oder direkt in den HTTP Request Nodes die URL ändern
@@ -49,8 +51,8 @@ Der Backup-Workflow (`n8n-Backup-Workflow.json`) sichert automatisch alle n8n Wo
 
 ### Option 2: Shell-Script verwenden
 ```bash
-# n8n URL anpassen falls nötig
-N8N_URL="https://deine-n8n-instanz.com" ./list-workflows.sh
+# n8n URL anpassen für Hostinger
+N8N_URL="https://deine-n8n-instanz.hostinger.com" ./list-workflows.sh
 ```
 
 ## Neue Ordner-Struktur (geplant)
@@ -86,3 +88,6 @@ Dies ermöglicht:
 - **Credentials:** GitHub und n8n API Credentials müssen korrekt konfiguriert sein
 - **Webhook:** Muss von GitHub aus erreichbar sein (öffentliche URL oder Tunnel)
 
+## Docker Setup (optional)
+
+Siehe vorhandene `docker-compose.yml` für lokale Entwicklung.

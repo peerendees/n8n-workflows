@@ -1,0 +1,245 @@
+{
+  "meta": {
+    "instanceId": "bardeen-linkedin-bridge"
+  },
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "linkedin-posts",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "linkedin-webhook",
+      "name": "LinkedIn Webhook (von Bardeen)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [60, 300]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// LinkedIn Post-Daten von Bardeen verarbeiten\nconst postData = $input.item(0).json;\n\n// Daten strukturieren und bereinigen\nfunction cleanText(text) {\n  if (!text) return '';\n  return text\n    .replace(/\\s+/g, ' ')           // Mehrfache Leerzeichen\n    .replace(/\\n\\s*\\n/g, '\\n\\n')    // Doppelte Zeilenumbrüche\n    .trim();\n}\n\n// Hashtags und Mentions extrahieren\nfunction extractHashtags(text) {\n  if (!text) return [];\n  const hashtags = text.match(/#[\\w\\u00c0-\\u024f\\u1e00-\\u1eff]+/gi) || [];\n  return hashtags.map(tag => tag.replace('#', ''));\n}\n\nfunction extractMentions(text) {\n  if (!text) return [];\n  const mentions = text.match(/@[\\w.-]+/gi) || [];\n  return mentions.map(mention => mention.replace('@', ''));\n}\n\n// LinkedIn-spezifische Tags bestimmen\nfunction categorizePost(content, author) {\n  const text = (content + ' ' + author).toLowerCase();\n  const tags = [];\n  \n  // Content-Kategorien\n  if (text.match(/(ai|artificial intelligence|chatgpt|automation|machine learning)/)) {\n    tags.push('AI/Tech');\n  }\n  if (text.match(/(marketing|growth|strategy|sales|business)/)) {\n    tags.push('Business');\n  }\n  if (text.match(/(career|leadership|management|tips|advice)/)) {\n    tags.push('Career');\n  }\n  if (text.match(/(news|industry|trends|market|update)/)) {\n    tags.push('News');\n  }\n  if (text.match(/(personal|story|experience|journey|opinion)/)) {\n    tags.push('Personal');\n  }\n  \n  return tags.length > 0 ? tags : ['General'];\n}\n\n// URL aus LinkedIn-Post extrahieren\nfunction extractUrls(text) {\n  if (!text) return [];\n  const urlRegex = /(https?:\\/\\/[^\\s]+)/gi;\n  return text.match(urlRegex) || [];\n}\n\nreturn {\n  // Grunddaten\n  authorName: postData.author || postData.authorName || 'Unknown',\n  authorTitle: postData.authorTitle || postData.title || '',\n  authorCompany: postData.company || postData.authorCompany || '',\n  \n  // Post-Content\n  content: cleanText(postData.content || postData.text || postData.description),\n  originalUrl: postData.url || postData.postUrl || postData.linkedinUrl,\n  postDate: postData.date || postData.publishedAt || new Date().toISOString(),\n  \n  // Metriken (falls verfügbar)\n  likes: parseInt(postData.likes || postData.reactions || 0),\n  comments: parseInt(postData.comments || 0),\n  shares: parseInt(postData.shares || postData.reposts || 0),\n  \n  // Extracted Data\n  hashtags: extractHashtags(postData.content || postData.text),\n  mentions: extractMentions(postData.content || postData.text),\n  urls: extractUrls(postData.content || postData.text),\n  autoTags: categorizePost(postData.content || postData.text, postData.author),\n  \n  // Notion-spezifische Felder\n  notionTitle: `${postData.author || 'LinkedIn Post'} - ${(postData.content || '').substring(0, 50)}...`,\n  wordCount: (postData.content || '').split(' ').length,\n  characterCount: (postData.content || '').length,\n  \n  // Metadaten\n  source: 'LinkedIn',\n  importedAt: new Date().toISOString(),\n  savedVia: 'Bardeen → n8n'\n};"
+      },
+      "id": "process-linkedin-data",
+      "name": "LinkedIn Daten verarbeiten",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "has-content",
+              "leftValue": "={{ $json.content }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            },
+            {
+              "id": "min-length",
+              "leftValue": "={{ $json.content.length }}",
+              "rightValue": "20",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "validate-content",
+      "name": "Content validieren",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [420, 300]
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "create",
+        "databaseId": "DEINE_LINKEDIN_NOTION_DB_ID",
+        "properties": {
+          "Name": {
+            "type": "title",
+            "title": [
+              {
+                "text": {
+                  "content": "={{ $json.notionTitle }}"
+                }
+              }
+            ]
+          },
+          "Autor": {
+            "type": "rich_text",
+            "rich_text": [
+              {
+                "text": {
+                  "content": "={{ $json.authorName }}"
+                }
+              }
+            ]
+          },
+          "Position": {
+            "type": "rich_text",
+            "rich_text": [
+              {
+                "text": {
+                  "content": "={{ $json.authorTitle }}"
+                }
+              }
+            ]
+          },
+          "Unternehmen": {
+            "type": "rich_text",
+            "rich_text": [
+              {
+                "text": {
+                  "content": "={{ $json.authorCompany }}"
+                }
+              }
+            ]
+          },
+          "Content": {
+            "type": "rich_text",
+            "rich_text": [
+              {
+                "text": {
+                  "content": "={{ $json.content }}"
+                }
+              }
+            ]
+          },
+          "LinkedIn URL": {
+            "type": "url",
+            "url": "={{ $json.originalUrl }}"
+          },
+          "Datum": {
+            "type": "date",
+            "date": {
+              "start": "={{ $json.postDate.split('T')[0] }}"
+            }
+          },
+          "Tags": {
+            "type": "multi_select",
+            "multi_select": "={{ $json.autoTags.map(tag => ({name: tag})) }}"
+          },
+          "Hashtags": {
+            "type": "rich_text",
+            "rich_text": [
+              {
+                "text": {
+                  "content": "={{ $json.hashtags.join(', ') }}"
+                }
+              }
+            ]
+          },
+          "Likes": {
+            "type": "number",
+            "number": "={{ $json.likes }}"
+          },
+          "Comments": {
+            "type": "number",
+            "number": "={{ $json.comments }}"
+          },
+          "Status": {
+            "type": "select",
+            "select": {
+              "name": "Neu"
+            }
+          },
+          "Bewertung": {
+            "type": "select",
+            "select": {
+              "name": "Unbewertet"
+            }
+          },
+          "Quelle": {
+            "type": "select",
+            "select": {
+              "name": "LinkedIn"
+            }
+          }
+        }
+      },
+      "id": "notion-create-linkedin",
+      "name": "LinkedIn Post in Notion speichern",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2,
+      "position": [600, 200]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "chatId": "DEINE_THREEMA_WORK_CHAT_ID",
+        "text": "=📱 **Neuer LinkedIn-Post gespeichert**\\n\\n👤 **{{ $json.authorName }}** {{ $json.authorTitle ? '- ' + $json.authorTitle : '' }}\\n\\n💼 {{ $json.authorCompany }}\\n\\n📝 {{ $json.content.substring(0, 150) }}{{ $json.content.length > 150 ? '...' : '' }}\\n\\n🔗 {{ $json.originalUrl }}\\n\\n💙 {{ $json.likes }} Likes | 💬 {{ $json.comments }} Comments\\n\\n🏷️ {{ $json.autoTags.join(', ') }}\\n\\n✅ Automatisch in Notion gespeichert!"
+      },
+      "id": "threema-linkedin-notification",
+      "name": "Threema Benachrichtigung",
+      "type": "n8n-nodes-base.threema",
+      "typeVersion": 1,
+      "position": [780, 200]
+    }
+  ],
+  "connections": {
+    "linkedin-webhook": {
+      "main": [
+        [
+          {
+            "node": "process-linkedin-data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "process-linkedin-data": {
+      "main": [
+        [
+          {
+            "node": "validate-content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "validate-content": {
+      "main": [
+        [
+          {
+            "node": "notion-create-linkedin",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "notion-create-linkedin": {
+      "main": [
+        [
+          {
+            "node": "threema-linkedin-notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

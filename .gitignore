@@ -14,11 +14,25 @@
 *.log
 npm-debug.log*
 
-# Environment
+# Lokale n8n-Daten und Datenbank
+data/
+data-beta/
+*.sqlite
+
+# Umgebungsvariablen mit Credentials
 .env
 .env.local
+env.list.new
+
+# Docker Volumes
+postgres_data/
+redis_data/
+n8n_data/
 
 # Temporary files
 *.tmp
 *.temp
 
+# Backups
+backups/
+*.backup
