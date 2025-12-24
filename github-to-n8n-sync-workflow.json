@@ -308,6 +308,32 @@
       ],
       "id": "vorbereite-workflow-daten",
       "name": "Vorbereite Workflow-Daten"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Debug: Prüfe ob Erstellen erfolgreich war\nconst response = $json;\n\n// Prüfe auf Fehler\nif (response.error) {\n  return {\n    success: false,\n    error: response.error,\n    workflowName: $node[\"Parse Workflow\"].json.workflowName || 'Unbekannt',\n    workflowId: $node[\"Parse Workflow\"].json.workflowId || '',\n    filePath: $node[\"Parse Workflow\"].json.filePath || '',\n    response: response\n  };\n}\n\n// Prüfe auf Status-Code\nif (response.statusCode && response.statusCode >= 400) {\n  return {\n    success: false,\n    error: `HTTP ${response.statusCode}: ${JSON.stringify(response.body || response)}`,\n    workflowName: $node[\"Parse Workflow\"].json.workflowName || 'Unbekannt',\n    workflowId: $node[\"Parse Workflow\"].json.workflowId || '',\n    filePath: $node[\"Parse Workflow\"].json.filePath || '',\n    response: response\n  };\n}\n\n// Erfolg\nreturn {\n  success: true,\n  workflowName: response.name || $node[\"Parse Workflow\"].json.workflowName || 'Unbekannt',\n  workflowId: response.id || $node[\"Parse Workflow\"].json.workflowId || '',\n  filePath: $node[\"Parse Workflow\"].json.filePath || '',\n  response: response\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1520,
+        -720
+      ],
+      "id": "debug-erstelle-workflow",
+      "name": "Debug: Erstelle Workflow"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Debug: Prüfe ob Update erfolgreich war\nconst response = $json;\n\n// Prüfe auf Fehler\nif (response.error) {\n  return {\n    success: false,\n    error: response.error,\n    workflowName: $node[\"Parse Workflow\"].json.workflowName || 'Unbekannt',\n    workflowId: $node[\"Parse Workflow\"].json.workflowId || '',\n    filePath: $node[\"Parse Workflow\"].json.filePath || '',\n    response: response\n  };\n}\n\n// Prüfe auf Status-Code\nif (response.statusCode && response.statusCode >= 400) {\n  return {\n    success: false,\n    error: `HTTP ${response.statusCode}: ${JSON.stringify(response.body || response)}`,\n    workflowName: $node[\"Parse Workflow\"].json.workflowName || 'Unbekannt',\n    workflowId: $node[\"Parse Workflow\"].json.workflowId || '',\n    filePath: $node[\"Parse Workflow\"].json.filePath || '',\n    response: response\n  };\n}\n\n// Erfolg\nreturn {\n  success: true,\n  workflowName: response.name || $node[\"Parse Workflow\"].json.workflowName || 'Unbekannt',\n  workflowId: response.id || $node[\"Parse Workflow\"].json.workflowId || '',\n  filePath: $node[\"Parse Workflow\"].json.filePath || '',\n  response: response\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1520,
+        -592
+      ],
+      "id": "debug-update-workflow",
+      "name": "Debug: Update Workflow"
     }
   ],
   "connections": {
