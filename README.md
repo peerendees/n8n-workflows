@@ -1,6 +1,6 @@
 # n8n Workflows Repository
 
-Dieses Repository enthält n8n Workflows für die Synchronisation zwischen GitHub und n8n.
+Dieses Repository enthält n8n-Workflows für die Synchronisation zwischen GitHub und n8n.
 
 ## Struktur
 
