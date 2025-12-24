@@ -37,7 +37,7 @@
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const r = $json; // Das ist der Rucksack\nconst wf = r.workflows[r.index];\n\n// Selbst-Backup Sperre\nconst isSelf = wf.id === 'C3QqvJAGjf0KhCZH';\n\nconst name = wf.name || \"unnamed\";\nconst clean = String(name).replace(/[^a-zA-Z0-9-_äöüÄÖÜß ]/g, '').replace(/\\s+/g, '-').toLowerCase();\n\nr.aktueller_name = name;\nr.aktueller_id = wf.id;\nr.aktueller_pfad = `n8n/${clean}.json`;\nr.aktueller_inhalt = Buffer.from(JSON.stringify(wf, null, 2)).toString('base64');\nr.ist_self = isSelf;\n\nreturn r;"
+        "jsCode": "const r = $json; // Das ist der Rucksack\nconst wf = r.workflows[r.index];\n\n// Selbst-Backup Sperre\nconst isSelf = wf.id === 'C3QqvJAGjf0KhCZH';\n\n// Überspringe archivierte Workflows\nif (wf.isArchived === true) {\n  r.skip++;\n  return null; // Wird vom Loop übersprungen\n}\n\nconst name = wf.name || \"unnamed\";\nconst clean = String(name).replace(/[^a-zA-Z0-9-_äöüÄÖÜß ]/g, '').replace(/\\s+/g, '-').toLowerCase();\n\nr.aktueller_name = name;\nr.aktueller_id = wf.id;\nr.aktueller_pfad = `n8n/${clean}.json`;\nr.aktueller_inhalt = Buffer.from(JSON.stringify(wf, null, 2)).toString('base64');\nr.ist_self = isSelf;\n\nreturn r;"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
