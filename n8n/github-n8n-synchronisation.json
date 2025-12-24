@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-24T10:28:21.514Z",
+  "updatedAt": "2025-12-24T10:59:27.815Z",
   "createdAt": "2025-12-24T10:21:45.757Z",
   "id": "MHpLYxsxsy0aSsEC",
   "name": "GitHub → n8n Synchronisation",
@@ -8,6 +8,7 @@
   "nodes": [
     {
       "parameters": {
+        "httpMethod": "POST",
         "path": "github-sync-webhook",
         "options": {}
       },
@@ -56,7 +57,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Extrahiere geänderte Dateien aus GitHub Webhook\nconst body = $json.body || {};\nconst commits = body.commits || [];\nconst changedFiles = [];\n\n// Sammle alle geänderten Dateien\nfor (const commit of commits) {\n  const added = commit.added || [];\n  const modified = commit.modified || [];\n  \n  for (const file of [...added, ...modified]) {\n    // Nur Workflow-Dateien im n8n/ Verzeichnis\n    if (file.startsWith('n8n/') && file.endsWith('.json')) {\n      changedFiles.push(file);\n    }\n  }\n}\n\nreturn changedFiles.map(file => ({ filePath: file }));"
+        "jsCode": "// Extrahiere geänderte Dateien aus GitHub Webhook\nconst body = $json.body || {};\nconst commits = body.commits || [];\nconst changedFiles = [];\n\n// Sammle alle geänderten Dateien\nfor (const commit of commits) {\n  const added = commit.added || [];\n  const modified = commit.modified || [];\n  \n  for (const file of [...added, ...modified]) {\n    // Workflow-Dateien im n8n/ Verzeichnis ODER im Root (z.B. github-to-n8n-sync-workflow.json)\n    if (file.endsWith('.json') && (file.startsWith('n8n/') || file.includes('-workflow.json'))) {\n      changedFiles.push(file);\n    }\n  }\n}\n\nreturn changedFiles.map(file => ({ filePath: file }));"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -415,8 +416,8 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "6a75bbed-6c24-4a83-baf1-7b0d147ea10e",
-  "activeVersionId": "6a75bbed-6c24-4a83-baf1-7b0d147ea10e",
+  "versionId": "c165626e-ec03-4261-b72d-09a8451be170",
+  "activeVersionId": "c165626e-ec03-4261-b72d-09a8451be170",
   "triggerCount": 1,
   "shared": [
     {
@@ -428,13 +429,14 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2025-12-24T10:28:27.000Z",
-    "createdAt": "2025-12-24T10:28:21.515Z",
-    "versionId": "6a75bbed-6c24-4a83-baf1-7b0d147ea10e",
+    "updatedAt": "2025-12-24T10:59:30.000Z",
+    "createdAt": "2025-12-24T10:59:27.816Z",
+    "versionId": "c165626e-ec03-4261-b72d-09a8451be170",
     "workflowId": "MHpLYxsxsy0aSsEC",
     "nodes": [
       {
         "parameters": {
+          "httpMethod": "POST",
           "path": "github-sync-webhook",
           "options": {}
         },
@@ -483,7 +485,7 @@
       },
       {
         "parameters": {
-          "jsCode": "// Extrahiere geänderte Dateien aus GitHub Webhook\nconst body = $json.body || {};\nconst commits = body.commits || [];\nconst changedFiles = [];\n\n// Sammle alle geänderten Dateien\nfor (const commit of commits) {\n  const added = commit.added || [];\n  const modified = commit.modified || [];\n  \n  for (const file of [...added, ...modified]) {\n    // Nur Workflow-Dateien im n8n/ Verzeichnis\n    if (file.startsWith('n8n/') && file.endsWith('.json')) {\n      changedFiles.push(file);\n    }\n  }\n}\n\nreturn changedFiles.map(file => ({ filePath: file }));"
+          "jsCode": "// Extrahiere geänderte Dateien aus GitHub Webhook\nconst body = $json.body || {};\nconst commits = body.commits || [];\nconst changedFiles = [];\n\n// Sammle alle geänderten Dateien\nfor (const commit of commits) {\n  const added = commit.added || [];\n  const modified = commit.modified || [];\n  \n  for (const file of [...added, ...modified]) {\n    // Workflow-Dateien im n8n/ Verzeichnis ODER im Root (z.B. github-to-n8n-sync-workflow.json)\n    if (file.endsWith('.json') && (file.startsWith('n8n/') || file.includes('-workflow.json'))) {\n      changedFiles.push(file);\n    }\n  }\n}\n\nreturn changedFiles.map(file => ({ filePath: file }));"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
@@ -834,7 +836,7 @@
       }
     },
     "authors": "Marcus Kunkel",
-    "name": "Version 6a75bbed",
+    "name": "Version c165626e",
     "description": ""
   },
   "tags": []
