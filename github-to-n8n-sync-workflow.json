@@ -169,7 +169,7 @@
     },
     {
       "parameters": {
-        "url": "=http://localhost:5678/api/v1/workflows/{{ $json.workflowId }}",
+        "url": "={{ $env.N8N_URL || 'http://localhost:5678' }}/api/v1/workflows/{{ $json.workflowId }}",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "options": {
@@ -232,7 +232,7 @@
     {
       "parameters": {
         "method": "PUT",
-        "url": "=http://localhost:5678/api/v1/workflows/{{ $node[\"Parse Workflow\"].json.workflowId }}",
+        "url": "={{ $env.N8N_URL || 'http://localhost:5678' }}/api/v1/workflows/{{ $node[\"Parse Workflow\"].json.workflowId }}",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
