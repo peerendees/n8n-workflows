@@ -114,7 +114,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Extrahiere Workflow-Daten aus GitHub-Datei\nconst githubFile = $json;\n\nif (githubFile.error || !githubFile.content) {\n  return { error: 'Datei konnte nicht geladen werden' };\n}\n\ntry {\n  const content = Buffer.from(githubFile.content, 'base64').toString('utf-8');\n  const workflow = JSON.parse(content);\n  \n  return {\n    workflowId: workflow.id || null,\n    workflowName: workflow.name || 'unnamed',\n    workflowData: workflow,\n    filePath: githubFile.path || githubFile.name\n  };\n} catch (e) {\n  return { error: 'Fehler beim Parsen der Workflow-Datei: ' + e.message };\n}"
+        "jsCode": "// Extrahiere Workflow-Daten aus GitHub-Datei\nconst githubFile = $json;\n\nif (githubFile.error || !githubFile.content) {\n  return { error: 'Datei konnte nicht geladen werden' };\n}\n\ntry {\n  const content = Buffer.from(githubFile.content, 'base64').toString('utf-8');\n  const workflow = JSON.parse(content);\n  \n  // Prüfe ob es ein Backup-Workflow ist (vermeide Kollisionen)\n  const isBackupWorkflow = workflow.name && (\n    workflow.name.toLowerCase().includes('backup') ||\n    workflow.name.toLowerCase().includes('github') && workflow.name.toLowerCase().includes('sync')\n  );\n  \n  if (isBackupWorkflow) {\n    return { error: 'Backup-Workflow wird übersprungen (vermeidet Kollisionen)' };\n  }\n  \n  return {\n    workflowId: workflow.id || null,\n    workflowName: workflow.name || 'unnamed',\n    workflowData: workflow,\n    filePath: githubFile.path || githubFile.name\n  };\n} catch (e) {\n  return { error: 'Fehler beim Parsen der Workflow-Datei: ' + e.message };\n}"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -169,7 +169,7 @@
     },
     {
       "parameters": {
-        "url": "={{ $env.N8N_URL || 'http://localhost:5678' }}/api/v1/workflows/{{ $json.workflowId }}",
+        "url": "=https://n8n.srv1098810.hstgr.cloud/api/v1/workflows/{{ $json.workflowId }}",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "options": {
@@ -259,7 +259,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "={{ $env.N8N_URL || 'http://localhost:5678' }}/api/v1/workflows",
+        "url": "=https://n8n.srv1098810.hstgr.cloud/api/v1/workflows",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
