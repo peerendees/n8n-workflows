@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-24T11:10:47.166Z",
+  "updatedAt": "2025-12-24T11:34:56.513Z",
   "createdAt": "2025-12-24T10:21:45.757Z",
   "id": "MHpLYxsxsy0aSsEC",
   "name": "GitHub → n8n Synchronisation",
@@ -156,7 +156,7 @@
             {
               "id": "check-workflow-id",
               "leftValue": "={{ $json.workflowId }}",
-              "rightValue": "",
+              "rightValue": "null",
               "operator": {
                 "type": "string",
                 "operation": "notEquals"
@@ -416,8 +416,8 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "f477895c-8c36-4a8d-b2ec-2d90d810afe6",
-  "activeVersionId": "f477895c-8c36-4a8d-b2ec-2d90d810afe6",
+  "versionId": "4d361205-6074-48d5-9998-e147ef09bbe5",
+  "activeVersionId": "4d361205-6074-48d5-9998-e147ef09bbe5",
   "triggerCount": 1,
   "shared": [
     {
@@ -429,9 +429,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2025-12-24T11:10:49.000Z",
-    "createdAt": "2025-12-24T11:09:41.464Z",
-    "versionId": "f477895c-8c36-4a8d-b2ec-2d90d810afe6",
+    "updatedAt": "2025-12-24T11:35:00.000Z",
+    "createdAt": "2025-12-24T11:34:56.514Z",
+    "versionId": "4d361205-6074-48d5-9998-e147ef09bbe5",
     "workflowId": "MHpLYxsxsy0aSsEC",
     "nodes": [
       {
@@ -584,7 +584,7 @@
               {
                 "id": "check-workflow-id",
                 "leftValue": "={{ $json.workflowId }}",
-                "rightValue": "",
+                "rightValue": "null",
                 "operator": {
                   "type": "string",
                   "operation": "notEquals"
@@ -836,7 +836,7 @@
       }
     },
     "authors": "Marcus Kunkel",
-    "name": "Version f477895c",
+    "name": "Version 4d361205",
     "description": ""
   },
   "tags": []
