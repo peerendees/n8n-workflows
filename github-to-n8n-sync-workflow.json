@@ -415,11 +415,16 @@
         ],
         [
           {
-            "node": "Vorbereite Workflow-Daten",
+            "node": "Überspringe Workflow",
             "type": "main",
             "index": 0
           }
         ]
+      ]
+    },
+    "Überspringe Workflow": {
+      "main": [
+        []
       ]
     },
     "Prüfe ob Workflow existiert": {
