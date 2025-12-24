@@ -148,9 +148,9 @@
             {
               "id": "check-workflow-id",
               "leftValue": "={{ $json.workflowId }}",
-              "rightValue": "",
+              "rightValue": null,
               "operator": {
-                "type": "string",
+                "type": "any",
                 "operation": "notEquals"
               }
             }
