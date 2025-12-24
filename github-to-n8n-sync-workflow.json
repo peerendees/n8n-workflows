@@ -198,6 +198,19 @@
     },
     {
       "parameters": {
+        "jsCode": "// Analysiere die Antwort vom HTTP Request Node\nconst response = $json;\n\n// Prüfe ob ein Fehler vorhanden ist\nif (response.error) {\n  return {\n    exists: false,\n    error: response.error,\n    originalResponse: response\n  };\n}\n\n// Prüfe ob data vorhanden ist (kann direkt sein oder in einem Array)\n// n8n API gibt bei GET /workflows/{id} die Daten direkt zurück\n// oder in einem data-Array wenn es ein Array ist\nconst hasData = response.data && Array.isArray(response.data) && response.data.length > 0;\nconst hasDirectData = response.id && response.name; // Workflow-Daten direkt im Root\n\nif (hasData || hasDirectData) {\n  return {\n    exists: true,\n    workflowData: hasData ? response.data[0] : response,\n    originalResponse: response\n  };\n}\n\n// Wenn weder Fehler noch Daten vorhanden sind, existiert der Workflow nicht\nreturn {\n  exists: false,\n  originalResponse: response\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1072,
+        -656
+      ],
+      "id": "analysiere-workflow-response",
+      "name": "Analysiere Workflow Response"
+    },
+    {
+      "parameters": {
         "conditions": {
           "options": {
             "caseSensitive": true,
@@ -207,20 +220,11 @@
           },
           "conditions": [
             {
-              "id": "check-no-error",
-              "leftValue": "={{ $json.error || '' }}",
-              "rightValue": "",
+              "id": "check-exists",
+              "leftValue": "={{ $json.exists }}",
+              "rightValue": true,
               "operator": {
-                "type": "string",
-                "operation": "equals"
-              }
-            },
-            {
-              "id": "check-has-data",
-              "leftValue": "={{ $json.data ? 'exists' : '' }}",
-              "rightValue": "exists",
-              "operator": {
-                "type": "string",
+                "type": "boolean",
                 "operation": "equals"
               }
             }
@@ -232,7 +236,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        1072,
+        1296,
         -656
       ],
       "id": "workflow-existiert",
@@ -393,6 +397,17 @@
       ]
     },
     "Prüfe ob Workflow existiert": {
+      "main": [
+        [
+          {
+            "node": "Analysiere Workflow Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analysiere Workflow Response": {
       "main": [
         [
           {
