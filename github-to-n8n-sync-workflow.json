@@ -207,11 +207,20 @@
           },
           "conditions": [
             {
-              "id": "check-exists",
-              "leftValue": "={{ $json.statusCode }}",
-              "rightValue": 200,
+              "id": "check-no-error",
+              "leftValue": "={{ $json.error || '' }}",
+              "rightValue": "",
               "operator": {
-                "type": "number",
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "check-has-data",
+              "leftValue": "={{ $json.data ? 'exists' : '' }}",
+              "rightValue": "exists",
+              "operator": {
+                "type": "string",
                 "operation": "equals"
               }
             }
