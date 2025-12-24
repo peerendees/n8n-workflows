@@ -266,7 +266,8 @@
           "id": "4gc7MePUZVuCyowB",
           "name": "API n8n"
         }
-      }
+      },
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -292,7 +293,8 @@
           "id": "4gc7MePUZVuCyowB",
           "name": "API n8n"
         }
-      }
+      },
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
