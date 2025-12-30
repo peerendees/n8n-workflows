@@ -118,7 +118,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Extrahiere Workflow-Daten aus GitHub-Datei\nconst githubFile = $json;\n\nif (githubFile.error || !githubFile.content) {\n  return { error: 'Datei konnte nicht geladen werden' };\n}\n\ntry {\n  const content = Buffer.from(githubFile.content, 'base64').toString('utf-8');\n  const workflow = JSON.parse(content);\n  \n  // Überspringe archivierte Workflows\n  if (workflow.isArchived === true) {\n    return { error: 'Archivierter Workflow wird übersprungen' };\n  }\n  \n  // Stelle sicher, dass workflowId vorhanden ist\n  const workflowId = workflow.id || '';\n  if (!workflowId) {\n    return { error: 'Workflow-ID fehlt in der Datei' };\n  }\n  \n  // Stelle sicher, dass name vorhanden ist\n  const fileName = (githubFile.path || githubFile.name || '').split('/').pop().replace(/\\.json$/, '') || 'Unnamed Workflow';\n  const finalWorkflowName = workflow.name || fileName;\n  \n  // Stelle sicher, dass workflowData das name-Feld hat\n  const workflowData = {\n    ...workflow,\n    name: finalWorkflowName\n  };\n  \n  return {\n    workflowId: workflowId,\n    workflowName: finalWorkflowName,\n    workflowData: workflowData,\n    filePath: githubFile.path || githubFile.name\n  };\n} catch (e) {\n  return { error: 'Fehler beim Parsen der Workflow-Datei: ' + e.message };\n}"
+        "jsCode": "// Extrahiere Workflow-Daten aus GitHub-Datei\nconst githubFile = $json;\n\nif (githubFile.error || !githubFile.content) {\n  return { error: 'Datei konnte nicht geladen werden' };\n}\n\ntry {\n  const content = Buffer.from(githubFile.content, 'base64').toString('utf-8');\n  const workflow = JSON.parse(content);\n  \n  // Überspringe archivierte Workflows\n  if (workflow.isArchived === true) {\n    return { error: 'Archivierter Workflow wird übersprungen' };\n  }\n  \n  // Stelle sicher, dass workflowId vorhanden ist (kann leer sein für neue Workflows)\n  const workflowId = workflow.id || '';\n  \n  // Stelle sicher, dass name vorhanden ist\n  const fileName = (githubFile.path || githubFile.name || '').split('/').pop().replace(/\\.json$/, '') || 'Unnamed Workflow';\n  const finalWorkflowName = workflow.name || fileName;\n  \n  // Stelle sicher, dass workflowData das name-Feld hat\n  const workflowData = {\n    ...workflow,\n    name: finalWorkflowName\n  };\n  \n  return {\n    workflowId: workflowId,\n    workflowName: finalWorkflowName,\n    workflowData: workflowData,\n    filePath: githubFile.path || githubFile.name\n  };\n} catch (e) {\n  return { error: 'Fehler beim Parsen der Workflow-Datei: ' + e.message };\n}"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -149,12 +149,12 @@
               }
             },
             {
-              "id": "check-workflow-id",
-              "leftValue": "={{ $json.workflowId || '' }}",
+              "id": "check-no-error",
+              "leftValue": "={{ $json.error || '' }}",
               "rightValue": "",
               "operator": {
                 "type": "string",
-                "operation": "notEquals"
+                "operation": "equals"
               }
             }
           ],
@@ -173,6 +173,39 @@
     },
     {
       "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "check-has-id",
+              "leftValue": "={{ $json.workflowId || '' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        848,
+        -656
+      ],
+      "id": "pruefe-ob-id-vorhanden",
+      "name": "Prüfe ob ID vorhanden"
+    },
+    {
+      "parameters": {
         "url": "=https://n8n.srv1098810.hstgr.cloud/api/v1/workflows/{{ $json.workflowId }}",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
@@ -187,7 +220,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        848,
+        1072,
         -656
       ],
       "id": "pruefe-workflow-existiert",
@@ -399,7 +432,7 @@
       "main": [
         [
           {
-            "node": "Prüfe ob Workflow existiert",
+            "node": "Prüfe ob ID vorhanden",
             "type": "main",
             "index": 0
           }
@@ -407,6 +440,24 @@
         [
           {
             "node": "Überspringe Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prüfe ob ID vorhanden": {
+      "main": [
+        [
+          {
+            "node": "Prüfe ob Workflow existiert",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Erstelle Workflow",
             "type": "main",
             "index": 0
           }
