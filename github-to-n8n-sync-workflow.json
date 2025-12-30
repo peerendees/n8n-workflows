@@ -327,7 +327,7 @@
       },
       {
         "parameters": {
-          "jsCode": "// Vorbereite workflowData für Erstellen\nconst parseData = $node[\"Parse Workflow\"].json;\nconst workflowData = parseData.workflowData || {};\nconst workflowName = parseData.workflowName || 'Unnamed Workflow';\n\n// Stelle sicher, dass name vorhanden ist - EXPLIZIT setzen\nconst finalWorkflowData = {\n  ...workflowData,\n  name: workflowName\n};\n\n// Entferne id wenn leer (n8n vergibt neue ID)\nif (!parseData.workflowId) {\n  delete finalWorkflowData.id;\n}\n\n// VALIDIERUNG: Stelle sicher, dass name wirklich vorhanden ist\nif (!finalWorkflowData.name) {\n  finalWorkflowData.name = workflowName;\n}\n\n// Stelle sicher, dass settings vorhanden ist (Pflichtfeld für n8n API)\nif (!finalWorkflowData.settings) {\n  finalWorkflowData.settings = {\n    executionOrder: 'v1'\n  };\n}\n\n// Erstelle Body-String direkt hier\nconst bodyString = JSON.stringify(finalWorkflowData);\n\nreturn {\n  ...parseData,\n  workflowData: finalWorkflowData,\n  bodyString: bodyString,\n  debug: {\n    hasName: !!finalWorkflowData.name,\n    nameValue: finalWorkflowData.name,\n    hasSettings: !!finalWorkflowData.settings\n  }\n};"
+          "jsCode": "// Vorbereite workflowData für Erstellen\nconst parseData = $node[\"Parse Workflow\"].json;\nconst workflowData = parseData.workflowData || {};\nconst workflowName = parseData.workflowName || 'Unnamed Workflow';\n\n// Erlaubte Felder für n8n API beim Erstellen\nconst allowedFields = ['name', 'nodes', 'settings', 'description', 'active', 'tags', 'pinData', 'meta', 'staticData'];\n\n// Erstelle finalWorkflowData nur mit erlaubten Feldern\nconst finalWorkflowData = {};\n\n// Kopiere nur erlaubte Felder\nallowedFields.forEach(field => {\n  if (workflowData.hasOwnProperty(field)) {\n    finalWorkflowData[field] = workflowData[field];\n  }\n});\n\n// Stelle sicher, dass name vorhanden ist\nfinalWorkflowData.name = workflowName;\n\n// Stelle sicher, dass nodes vorhanden ist\nif (!finalWorkflowData.nodes || !Array.isArray(finalWorkflowData.nodes)) {\n  finalWorkflowData.nodes = workflowData.nodes || [];\n}\n\n// Stelle sicher, dass settings vorhanden ist (Pflichtfeld für n8n API)\nif (!finalWorkflowData.settings) {\n  finalWorkflowData.settings = {\n    executionOrder: 'v1'\n  };\n}\n\n// Erstelle Body-String direkt hier\nconst bodyString = JSON.stringify(finalWorkflowData);\n\nreturn {\n  ...parseData,\n  workflowData: finalWorkflowData,\n  bodyString: bodyString,\n  debug: {\n    hasName: !!finalWorkflowData.name,\n    nameValue: finalWorkflowData.name,\n    hasSettings: !!finalWorkflowData.settings,\n    allowedFieldsOnly: true\n  }\n};"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
@@ -523,7 +523,7 @@
       "Update Workflow": {
         "main": [
           [
-            {
+            { 
               "node": "Debug: Ergebnis",
               "type": "main",
               "index": 0
