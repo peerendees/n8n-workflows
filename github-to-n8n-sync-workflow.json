@@ -305,7 +305,7 @@
           "genericAuthType": "httpHeaderAuth",
           "sendBody": true,
           "contentType": "json",
-          "body": "={{ JSON.stringify($json.workflowData) }}",
+          "body": "={{ $json.bodyString || JSON.stringify($json.workflowData) }}",
           "options": {}
         },
         "type": "n8n-nodes-base.httpRequest",
@@ -326,7 +326,7 @@
       },
       {
         "parameters": {
-          "jsCode": "// Vorbereite workflowData für Erstellen\nconst parseData = $node[\"Parse Workflow\"].json;\nconst workflowData = parseData.workflowData || {};\nconst workflowName = parseData.workflowName || 'Unnamed Workflow';\n\n// Stelle sicher, dass name vorhanden ist\nconst finalWorkflowData = {\n  ...workflowData,\n  name: workflowName\n};\n\n// Entferne id wenn leer (n8n vergibt neue ID)\nif (!parseData.workflowId) {\n  delete finalWorkflowData.id;\n}\n\nreturn {\n  ...parseData,\n  workflowData: finalWorkflowData\n};"
+          "jsCode": "// Vorbereite workflowData für Erstellen\nconst parseData = $node[\"Parse Workflow\"].json;\nconst workflowData = parseData.workflowData || {};\nconst workflowName = parseData.workflowName || 'Unnamed Workflow';\n\n// Stelle sicher, dass name vorhanden ist - EXPLIZIT setzen\nconst finalWorkflowData = {\n  ...workflowData,\n  name: workflowName\n};\n\n// Entferne id wenn leer (n8n vergibt neue ID)\nif (!parseData.workflowId) {\n  delete finalWorkflowData.id;\n}\n\n// VALIDIERUNG: Stelle sicher, dass name wirklich vorhanden ist\nif (!finalWorkflowData.name) {\n  finalWorkflowData.name = workflowName;\n}\n\n// Erstelle Body-String direkt hier\nconst bodyString = JSON.stringify(finalWorkflowData);\n\nreturn {\n  ...parseData,\n  workflowData: finalWorkflowData,\n  bodyString: bodyString,\n  debug: {\n    hasName: !!finalWorkflowData.name,\n    nameValue: finalWorkflowData.name\n  }\n};"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
