@@ -278,7 +278,7 @@
           "genericAuthType": "httpHeaderAuth",
           "sendBody": true,
           "contentType": "json",
-          "body": "={{ JSON.stringify($json.workflowData) }}",
+          "body": "={{ JSON.stringify($node[\"Parse Workflow\"].json.workflowData) }}",
           "options": {}
         },
         "type": "n8n-nodes-base.httpRequest",
@@ -305,7 +305,7 @@
           "genericAuthType": "httpHeaderAuth",
           "sendBody": true,
           "contentType": "json",
-          "body": "={{ JSON.stringify($json.workflowData) }}",
+          "body": "={{ JSON.stringify($node[\"Parse Workflow\"].json.workflowData) }}",
           "options": {}
         },
         "type": "n8n-nodes-base.httpRequest",
@@ -435,7 +435,7 @@
               "index": 0
             }
           ]
-        ]
+        ] 
       },
       "Prüfe ob ID vorhanden": {
         "main": [
