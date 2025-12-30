@@ -305,7 +305,7 @@
           "genericAuthType": "httpHeaderAuth",
           "sendBody": true,
           "contentType": "json",
-          "body": "={{ JSON.stringify($node[\"Parse Workflow\"].json.workflowData) }}",
+          "body": "={{ JSON.stringify({ ...$node[\"Parse Workflow\"].json.workflowData, name: $node[\"Parse Workflow\"].json.workflowName || $node[\"Parse Workflow\"].json.workflowData.name || 'Unnamed Workflow' }) }}",
           "options": {}
         },
         "type": "n8n-nodes-base.httpRequest",
