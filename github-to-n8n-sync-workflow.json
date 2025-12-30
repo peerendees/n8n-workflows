@@ -305,7 +305,7 @@
           "genericAuthType": "httpHeaderAuth",
           "sendBody": true,
           "contentType": "json",
-          "body": "={{ JSON.stringify({ ...$node[\"Parse Workflow\"].json.workflowData, name: $node[\"Parse Workflow\"].json.workflowName || $node[\"Parse Workflow\"].json.workflowData.name || 'Unnamed Workflow' }) }}",
+          "body": "={{ JSON.stringify($json.workflowData) }}",
           "options": {}
         },
         "type": "n8n-nodes-base.httpRequest",
@@ -323,6 +323,19 @@
           }
         },
         "onError": "continueRegularOutput"
+      },
+      {
+        "parameters": {
+          "jsCode": "// Vorbereite workflowData für Erstellen\nconst parseData = $node[\"Parse Workflow\"].json;\nconst workflowData = parseData.workflowData || {};\nconst workflowName = parseData.workflowName || 'Unnamed Workflow';\n\n// Stelle sicher, dass name vorhanden ist\nconst finalWorkflowData = {\n  ...workflowData,\n  name: workflowName\n};\n\n// Entferne id wenn leer (n8n vergibt neue ID)\nif (!parseData.workflowId) {\n  delete finalWorkflowData.id;\n}\n\nreturn {\n  ...parseData,\n  workflowData: finalWorkflowData\n};"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1072,
+          -720
+        ],
+        "id": "debug-vor-erstellen",
+        "name": "Debug: Vor Erstellen"
       },
       {
         "parameters": {
@@ -446,6 +459,17 @@
               "index": 0
             }
           ],
+          [
+            {
+              "node": "Debug: Vor Erstellen",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Debug: Vor Erstellen": {
+        "main": [
           [
             {
               "node": "Erstelle Workflow",
