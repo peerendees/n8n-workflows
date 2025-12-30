@@ -1,6 +1,6 @@
 {
   "name": "n8n → GitHub Sicherung",
-  "description": "Automatische Sicherung aller n8n Workflows nach GitHub (alle 15 Minuten) - Test mit JSON-Objekt Body",
+  "description": "Automatische Sicherung aller n8n Workflows nach GitHub (alle 15 Minuten)",
   "nodes": [
     {
       "parameters": {
