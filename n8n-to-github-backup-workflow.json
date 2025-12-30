@@ -1,6 +1,5 @@
 {
   "name": "n8n → GitHub Sicherung",
-  "versionId": "test-sync-001",
   "nodes": [
     {
       "parameters": {
