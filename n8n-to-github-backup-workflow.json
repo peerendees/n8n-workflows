@@ -280,10 +280,122 @@
       ],
       "id": "backup-statistik",
       "name": "Backup-Statistik"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "threema-secret",
+              "name": "secret",
+              "value": "18DOvPKBV7ize3Nh",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -720,
+        -592
+      ],
+      "id": "config",
+      "name": "Config"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "check-has-changes",
+              "leftValue": "={{ $json.hasChanges }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1744,
+        -656
+      ],
+      "id": "pruefe-aenderungen",
+      "name": "Prüfe Änderungen"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://msgapi.threema.ch/send_simple",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "from",
+              "value": "*BERENT1"
+            },
+            {
+              "name": "to",
+              "value": "BUMFMZ39"
+            },
+            {
+              "name": "secret",
+              "value": "={{ $('Config').first().json.secret }}"
+            },
+            {
+              "name": "text",
+              "value": "={{ $json.text }}\n\n🔗 https://github.com/peerendees/n8n-workflows/n8n"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1968,
+        -656
+      ],
+      "id": "threema-benachrichtigung",
+      "name": "Threema Benachrichtigung",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "nSNvIRCSAnKXrLyH",
+          "name": "API Threema Work BERENT1"
+        }
+      }
     }
   ],
   "connections": {
     "Zeitplan: alle 15 Minuten": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
       "main": [
         [
           {
@@ -419,6 +531,29 @@
       ]
     },
     "Backup-Statistik": {
+      "main": [
+        [
+          {
+            "node": "Prüfe Änderungen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prüfe Änderungen": {
+      "main": [
+        [
+          {
+            "node": "Threema Benachrichtigung",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Threema Benachrichtigung": {
       "main": [
         []
       ]
