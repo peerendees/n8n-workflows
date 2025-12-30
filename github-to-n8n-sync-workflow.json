@@ -305,7 +305,8 @@
           "genericAuthType": "httpHeaderAuth",
           "sendBody": true,
           "contentType": "json",
-          "body": "={{ $json.bodyString || JSON.stringify($json.workflowData) }}",
+          "specifyBody": "json",
+          "jsonBody": "={{ $json.workflowData }}",
           "options": {}
         },
         "type": "n8n-nodes-base.httpRequest",
