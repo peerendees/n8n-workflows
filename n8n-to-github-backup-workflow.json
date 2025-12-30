@@ -1,0 +1,433 @@
+{
+  "name": "n8n → GitHub Sicherung",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "*/15 * * * *"
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Zeitplan: alle 15 Minuten",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -720,
+        -656
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://n8n.srv1098810.hstgr.cloud/api/v1/workflows",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -496,
+        -656
+      ],
+      "id": "hole-alle-workflows",
+      "name": "Hole alle Workflows",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "4gc7MePUZVuCyowB",
+          "name": "API n8n"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const workflows = $json.data || [];\nreturn {\n  workflows: workflows,\n  index: 0,\n  anzahl: workflows.length,\n  neu: 0,\n  updates: 0,\n  skip: 0,\n  tabelle: []\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -272,
+        -656
+      ],
+      "id": "initialisierung",
+      "name": "Initialisierung"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const r = $json; // Rucksack\nconst wf = r.workflows[r.index];\n\n// Überspringe archivierte Workflows\nif (wf.isArchived === true) {\n  return null;\n}\n\nconst workflowId = wf.id || '';\nconst workflowName = wf.name || 'Unnamed Workflow';\nconst cleanName = String(workflowName).replace(/[^a-zA-Z0-9-_äöüÄÖÜß ]/g, '').replace(/\\s+/g, '-').toLowerCase();\n\n// Neue Struktur: n8n/{workflowId}/{workflowName}.json\nconst dateipfad = `n8n/${workflowId}/${cleanName}.json`;\nconst workflowContent = Buffer.from(JSON.stringify(wf, null, 2)).toString('base64');\n\nreturn {\n  ...r,\n  workflowId: workflowId,\n  workflowName: workflowName,\n  workflowData: wf,\n  dateipfad: dateipfad,\n  workflowContent: workflowContent,\n  updatedAt: wf.updatedAt || wf.createdAt || new Date().toISOString()\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -48,
+        -656
+      ],
+      "id": "extrahiere-workflow",
+      "name": "Extrahiere Workflow"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "get",
+        "owner": {
+          "__rl": true,
+          "value": "peerendees",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "n8n-workflows",
+          "mode": "list",
+          "cachedResultName": "n8n-workflows",
+          "cachedResultUrl": "https://github.com/peerendees/n8n-workflows"
+        },
+        "filePath": "={{ $json.dateipfad }}",
+        "asBinaryProperty": false,
+        "additionalParameters": {
+          "reference": "main"
+        }
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        176,
+        -656
+      ],
+      "id": "pruefe-github-datei",
+      "name": "Prüfe GitHub Datei",
+      "webhookId": "694567e2-c3e8-4bfc-91af-aae5697aca36",
+      "credentials": {
+        "githubApi": {
+          "id": "uE78TkEY6lWLV4oP",
+          "name": "API GitHub"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const r = $json; // Rucksack\nconst githubFile = $node[\"Prüfe GitHub Datei\"].json;\n\nlet action = 'skip';\nlet sha = null;\n\n// Prüfe ob Datei auf GitHub existiert\nif (githubFile && !githubFile.error && githubFile.sha) {\n  sha = githubFile.sha;\n  \n  // Vergleich: Inhalt geändert?\n  const remoteContent = (githubFile.content || '').replace(/\\s/g, '');\n  const localContent = (r.workflowContent || '').replace(/\\s/g, '');\n  \n  if (remoteContent !== localContent) {\n    action = 'update';\n  }\n} else {\n  // Datei existiert nicht - neu anlegen\n  action = 'create';\n}\n\nreturn {\n  ...r,\n  action: action,\n  sha: sha\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        -656
+      ],
+      "id": "bestimme-handlung",
+      "name": "Bestimme Handlung"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "check-action",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "skip",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        624,
+        -656
+      ],
+      "id": "pruefe-ob-sichern",
+      "name": "Prüfe ob Sichern"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://api.github.com/repos/peerendees/n8n-workflows/contents/{{ $json.dateipfad }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "message",
+              "value": "=🤖 Auto-Backup: {{ $json.workflowName }} ({{ $json.action }})"
+            },
+            {
+              "name": "content",
+              "value": "={{ $json.workflowContent }}"
+            },
+            {
+              "name": "branch",
+              "value": "main"
+            },
+            {
+              "name": "sha",
+              "value": "={{ $json.sha || undefined }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        848,
+        -656
+      ],
+      "id": "sichere-auf-github",
+      "name": "Sichere auf GitHub",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "aZMd0okvVFkvyGnj",
+          "name": "GitHub Token"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Aktualisiere Statistiken\n// Hole Rucksack von Bestimme Handlung\nconst r = $node[\"Bestimme Handlung\"].json;\nconst githubResponse = $json;\n\nif (r.action === 'create') {\n  r.neu++;\n} else if (r.action === 'update') {\n  r.updates++;\n} else {\n  r.skip++;\n}\n\n// Füge zur Tabelle hinzu\nif (r.action !== 'skip') {\n  const status = githubResponse.error ? '❌ Fehler' : '✅ Erfolg';\n  r.tabelle.push(`${status} ${r.action === 'create' ? 'NEU' : 'UPDATE'}: ${r.workflowName}`);\n}\n\n// Zähler erhöhen\nr.index++;\n\nreturn r;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1072,
+        -656
+      ],
+      "id": "aktualisiere-statistik",
+      "name": "Aktualisiere Statistik"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Wenn skip: Aktualisiere Statistik direkt\nconst r = $json;\n\nr.skip++;\nr.index++;\n\nreturn r;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        624,
+        -720
+      ],
+      "id": "skip-statistik",
+      "name": "Skip Statistik"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "check-loop",
+              "leftValue": "={{ $json.index }}",
+              "rightValue": "={{ $json.anzahl }}",
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1296,
+        -656
+      ],
+      "id": "schleife-pruefen",
+      "name": "Schleife prüfen"
+    },
+    {
+      "parameters": {
+        "jsCode": "const r = $json;\nconst wort = r.anzahl === 1 ? 'Workflow' : 'Workflows';\n\nreturn {\n  hasChanges: (r.neu + r.updates) > 0,\n  text: `✅ Backup beendet: ${r.anzahl} ${wort} geprüft.\\n` +\n        `Ergebnis: ${r.neu} neu, ${r.updates} aktualisiert, ${r.skip} unverändert.\\n\\n` +\n        `${r.tabelle.join('\\n') || 'Keine Änderungen'}`\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1520,
+        -656
+      ],
+      "id": "backup-statistik",
+      "name": "Backup-Statistik"
+    }
+  ],
+  "connections": {
+    "Zeitplan: alle 15 Minuten": {
+      "main": [
+        [
+          {
+            "node": "Hole alle Workflows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hole alle Workflows": {
+      "main": [
+        [
+          {
+            "node": "Initialisierung",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Initialisierung": {
+      "main": [
+        [
+          {
+            "node": "Extrahiere Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extrahiere Workflow": {
+      "main": [
+        [
+          {
+            "node": "Prüfe GitHub Datei",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prüfe GitHub Datei": {
+      "main": [
+        [
+          {
+            "node": "Bestimme Handlung",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bestimme Handlung": {
+      "main": [
+        [
+          {
+            "node": "Prüfe ob Sichern",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prüfe ob Sichern": {
+      "main": [
+        [
+          {
+            "node": "Sichere auf GitHub",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Skip Statistik",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Skip Statistik": {
+      "main": [
+        [
+          {
+            "node": "Schleife prüfen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sichere auf GitHub": {
+      "main": [
+        [
+          {
+            "node": "Aktualisiere Statistik",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aktualisiere Statistik": {
+      "main": [
+        [
+          {
+            "node": "Schleife prüfen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schleife prüfen": {
+      "main": [
+        [
+          {
+            "node": "Extrahiere Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Backup-Statistik",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Backup-Statistik": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "n8n-to-github-backup"
+  }
+}
+
