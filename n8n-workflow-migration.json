@@ -1,0 +1,399 @@
+{
+  "name": "n8n Workflow Migration - Alte zu Neue Struktur",
+  "description": "Einmaliger Workflow zur Migration aller Workflows von alter Struktur (n8n/workflow-name.json) zu neuer Struktur (n8n/{workflowId}/{workflowName}.json)",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://n8n.srv1098810.hstgr.cloud/api/v1/workflows",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -720,
+        -656
+      ],
+      "id": "hole-alle-workflows",
+      "name": "Hole alle Workflows",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "4gc7MePUZVuCyowB",
+          "name": "API n8n"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const workflows = $json.data || [];\nreturn {\n  workflows: workflows,\n  index: 0,\n  anzahl: workflows.length,\n  migriert: 0,\n  uebersprungen: 0,\n  fehler: 0,\n  tabelle: []\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -496,
+        -656
+      ],
+      "id": "initialisierung",
+      "name": "Initialisierung"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const r = $json; // Rucksack\nconst wf = r.workflows[r.index];\n\n// Überspringe archivierte Workflows\nif (wf.isArchived === true) {\n  r.uebersprungen++;\n  r.index++;\n  return null;\n}\n\nconst workflowId = wf.id || '';\nconst workflowName = wf.name || 'Unnamed Workflow';\nconst cleanName = String(workflowName).replace(/[^a-zA-Z0-9-_äöüÄÖÜß ]/g, '').replace(/\\s+/g, '-').toLowerCase();\n\n// Neue Struktur: n8n/{workflowId}/{workflowName}.json\nconst neueStrukturPfad = `n8n/${workflowId}/${cleanName}.json`;\nconst workflowContent = Buffer.from(JSON.stringify(wf, null, 2)).toString('base64');\n\n// Alte Struktur: n8n/{workflowName}.json (ohne ID)\nconst alteStrukturPfad = `n8n/${cleanName}.json`;\n\nreturn {\n  ...r,\n  workflowId: workflowId,\n  workflowName: workflowName,\n  workflowData: wf,\n  neueStrukturPfad: neueStrukturPfad,\n  alteStrukturPfad: alteStrukturPfad,\n  workflowContent: workflowContent\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -272,
+        -656
+      ],
+      "id": "extrahiere-workflow",
+      "name": "Extrahiere Workflow"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "get",
+        "owner": {
+          "__rl": true,
+          "value": "peerendees",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "n8n-workflows",
+          "mode": "list",
+          "cachedResultName": "n8n-workflows",
+          "cachedResultUrl": "https://github.com/peerendees/n8n-workflows"
+        },
+        "filePath": "={{ $json.neueStrukturPfad }}",
+        "asBinaryProperty": false,
+        "additionalParameters": {
+          "reference": "main"
+        }
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        -48,
+        -656
+      ],
+      "id": "pruefe-neue-struktur",
+      "name": "Prüfe neue Struktur",
+      "webhookId": "694567e2-c3e8-4bfc-91af-aae5697aca36",
+      "credentials": {
+        "githubApi": {
+          "id": "uE78TkEY6lWLV4oP",
+          "name": "API GitHub"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const r = $json; // Rucksack\nconst neueStrukturFile = $node[\"Prüfe neue Struktur\"].json;\n\n// Prüfe ob Workflow bereits in neuer Struktur existiert\nconst existiertInNeuerStruktur = neueStrukturFile && !neueStrukturFile.error && neueStrukturFile.sha;\n\nlet mussMigrieren = false;\nlet alteDateiSha = null;\n\nif (!existiertInNeuerStruktur) {\n  // Workflow existiert nicht in neuer Struktur - muss migriert werden\n  mussMigrieren = true;\n}\n\nreturn {\n  ...r,\n  existiertInNeuerStruktur: existiertInNeuerStruktur,\n  mussMigrieren: mussMigrieren,\n  neueStrukturSha: existiertInNeuerStruktur ? neueStrukturFile.sha : null\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        176,
+        -656
+      ],
+      "id": "bestimme-migration",
+      "name": "Bestimme Migration"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "check-muss-migrieren",
+              "leftValue": "={{ $json.mussMigrieren }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        400,
+        -656
+      ],
+      "id": "pruefe-ob-migrieren",
+      "name": "Prüfe ob Migrieren"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://api.github.com/repos/peerendees/n8n-workflows/contents/{{ $json.neueStrukturPfad }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "message",
+              "value": "🔄 Migration: {{ $json.workflowName }} → neue Struktur"
+            },
+            {
+              "name": "content",
+              "value": "={{ $json.workflowContent }}"
+            },
+            {
+              "name": "branch",
+              "value": "main"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        624,
+        -656
+      ],
+      "id": "migriere-workflow",
+      "name": "Migriere Workflow",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "aZMd0okvVFkvyGnj",
+          "name": "GitHub Token"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const r = $node[\"Bestimme Migration\"].json;\nconst migrationResponse = $json;\n\nif (migrationResponse.error) {\n  r.fehler++;\n  r.tabelle.push(`❌ Fehler: ${r.workflowName} - ${migrationResponse.error.message || JSON.stringify(migrationResponse.error)}`);\n} else {\n  r.migriert++;\n  r.tabelle.push(`✅ Migriert: ${r.workflowName}`);\n}\n\nr.index++;\n\nreturn r;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        848,
+        -656
+      ],
+      "id": "aktualisiere-statistik",
+      "name": "Aktualisiere Statistik"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const r = $json;\n\nr.uebersprungen++;\nr.index++;\n\nreturn r;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        -720
+      ],
+      "id": "skip-statistik",
+      "name": "Skip Statistik"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "check-loop",
+              "leftValue": "={{ $json.index }}",
+              "rightValue": "={{ $json.anzahl }}",
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1072,
+        -656
+      ],
+      "id": "schleife-pruefen",
+      "name": "Schleife prüfen"
+    },
+    {
+      "parameters": {
+        "jsCode": "const r = $json;\nconst wort = r.anzahl === 1 ? 'Workflow' : 'Workflows';\n\nreturn {\n  text: `🔄 Migration abgeschlossen: ${r.anzahl} ${wort} geprüft.\\n` +\n        `Ergebnis: ${r.migriert} migriert, ${r.uebersprungen} übersprungen, ${r.fehler} Fehler.\\n\\n` +\n        `${r.tabelle.join('\\n') || 'Keine Migrationen'}`\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1296,
+        -656
+      ],
+      "id": "migrations-statistik",
+      "name": "Migrations-Statistik"
+    }
+  ],
+  "connections": {
+    "Hole alle Workflows": {
+      "main": [
+        [
+          {
+            "node": "Initialisierung",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Initialisierung": {
+      "main": [
+        [
+          {
+            "node": "Extrahiere Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extrahiere Workflow": {
+      "main": [
+        [
+          {
+            "node": "Prüfe neue Struktur",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prüfe neue Struktur": {
+      "main": [
+        [
+          {
+            "node": "Bestimme Migration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bestimme Migration": {
+      "main": [
+        [
+          {
+            "node": "Prüfe ob Migrieren",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prüfe ob Migrieren": {
+      "main": [
+        [
+          {
+            "node": "Migriere Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Skip Statistik",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Skip Statistik": {
+      "main": [
+        [
+          {
+            "node": "Schleife prüfen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Migriere Workflow": {
+      "main": [
+        [
+          {
+            "node": "Aktualisiere Statistik",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aktualisiere Statistik": {
+      "main": [
+        [
+          {
+            "node": "Schleife prüfen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schleife prüfen": {
+      "main": [
+        [
+          {
+            "node": "Extrahiere Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Migrations-Statistik",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Migrations-Statistik": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "n8n-workflow-migration"
+  }
+}
+
