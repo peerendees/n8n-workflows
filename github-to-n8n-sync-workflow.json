@@ -272,13 +272,27 @@
       },
       {
         "parameters": {
+          "jsCode": "// Vorbereite workflowData für Update\n// Stelle sicher, dass alle Pflichtfelder vorhanden sind\nconst analysiereData = $json;\nconst parseData = $node[\"Parse Workflow\"].json;\nconst workflowData = parseData.workflowData || {};\nconst workflowName = parseData.workflowName || 'Unnamed Workflow';\n\n// Pflichtfelder für Update (ähnlich wie Create)\nconst finalWorkflowData = {\n  name: workflowName,\n  nodes: workflowData.nodes || [],\n  connections: workflowData.connections || {},\n  settings: workflowData.settings || {\n    executionOrder: 'v1'\n  }\n};\n\n// Optional: Füge weitere Felder hinzu, wenn sie vorhanden sind\nif (workflowData.description !== undefined) finalWorkflowData.description = workflowData.description;\nif (workflowData.active !== undefined) finalWorkflowData.active = workflowData.active;\nif (workflowData.tags !== undefined) finalWorkflowData.tags = workflowData.tags;\nif (workflowData.staticData !== undefined) finalWorkflowData.staticData = workflowData.staticData;\n\nreturn {\n  ...analysiereData,\n  workflowData: finalWorkflowData\n};"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1072,
+          -592
+        ],
+        "id": "vorbereite-update",
+        "name": "Vorbereite Update"
+      },
+      {
+        "parameters": {
           "method": "PUT",
           "url": "=https://n8n.srv1098810.hstgr.cloud/api/v1/workflows/{{ $json.workflowId }}",
           "authentication": "genericCredentialType",
           "genericAuthType": "httpHeaderAuth",
           "sendBody": true,
           "contentType": "json",
-          "body": "={{ JSON.stringify($node[\"Parse Workflow\"].json.workflowData) }}",
+          "specifyBody": "json",
+          "jsonBody": "={{ $json.workflowData }}",
           "options": {}
         },
         "type": "n8n-nodes-base.httpRequest",
@@ -506,7 +520,7 @@
         "main": [
           [
             {
-              "node": "Update Workflow",
+              "node": "Vorbereite Update",
               "type": "main",
               "index": 0
             }
@@ -514,6 +528,17 @@
           [
             {
               "node": "Erstelle Workflow",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Vorbereite Update": {
+        "main": [
+          [
+            {
+              "node": "Update Workflow",
               "type": "main",
               "index": 0
             }
