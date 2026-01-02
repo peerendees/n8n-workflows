@@ -126,23 +126,25 @@ ln -s /Users/Shared/n8n-workflows ~/n8n-workflows
 
 ### Wichtige Regeln
 
-**Alle Git-Operationen erfolgen aus `/Users/Shared/n8n-workflows`:**
+**Git-Operationen funktionieren sowohl direkt als auch über Symlink:**
 
+**Option 1: Direkt im Shared-Verzeichnis (empfohlen für Git-Operationen):**
 ```bash
-# Commits und Push
 cd /Users/Shared/n8n-workflows
 git add .
 git commit -m "Beschreibung"
 git push origin main
 ```
 
-**Oder über den Symlink:**
+**Option 2: Über Symlink (funktioniert auch, Git löst Symlink auf):**
 ```bash
 cd ~/n8n-workflows  # Symlink zeigt auf /Users/Shared/n8n-workflows
 git add .
 git commit -m "Beschreibung"
 git push origin main
 ```
+
+**Beide Wege sind gleichwertig** - Git erkennt automatisch das Repository-Verzeichnis.
 
 ### Synchronisation zwischen Rechnern
 
@@ -163,12 +165,17 @@ git push origin main
 - Push erfolgt nur vom Rechner, der Änderungen gemacht hat
 - Pull erfolgt auf allen anderen Rechnern, um Änderungen zu holen
 - Keine automatische Synchronisation - manuell `git pull` nötig
+- Git-Operationen funktionieren sowohl direkt (`/Users/Shared/n8n-workflows`) als auch über Symlink (`~/n8n-workflows`)
 
 ### Täglicher Workflow
 
 **Auf Rechner 1:**
 ```bash
-cd /Users/Shared/n8n-workflows  # Oder über Symlink
+# Option A: Direkt im Shared-Verzeichnis (empfohlen)
+cd /Users/Shared/n8n-workflows
+# Oder Option B: Über Symlink (funktioniert auch)
+# cd ~/n8n-workflows
+
 # Arbeiten, Dateien ändern
 git add .
 git commit -m "Änderungsbeschreibung"
@@ -177,10 +184,16 @@ git push origin main
 
 **Auf Rechner 2 (beim Wechseln):**
 ```bash
+# Option A: Direkt im Shared-Verzeichnis (empfohlen)
 cd /Users/Shared/n8n-workflows
+# Oder Option B: Über Symlink
+# cd ~/n8n-workflows
+
 git pull origin main  # Holt alle Änderungen von GitHub
 # Jetzt weiterarbeiten
 ```
+
+**Hinweis:** Beide Wege funktionieren. Der direkte Pfad ist klarer für Git-Operationen, der Symlink ist praktischer für Cursor/Datei-Zugriff.
 
 ---
 
