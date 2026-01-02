@@ -22,6 +22,58 @@ echo ""
 # Prüfungen
 echo "🔍 Prüfe Voraussetzungen..."
 
+# Prüfe ob aktueller Benutzer Admin-Rechte hat
+CURRENT_USER=$(whoami)
+IS_ADMIN=false
+
+# Prüfe ob Benutzer in admin-Gruppe ist
+if groups | grep -q "admin"; then
+    IS_ADMIN=true
+elif dscl . -read /Groups/admin GroupMembership 2>/dev/null | grep -q "$CURRENT_USER"; then
+    IS_ADMIN=true
+fi
+
+if [ "$IS_ADMIN" = false ] && [ "$EUID" -ne 0 ]; then
+    echo -e "${RED}❌ Fehler: Aktueller Benutzer '$CURRENT_USER' hat keine Admin-Rechte!${NC}"
+    echo ""
+    echo "Dieses Script benötigt Admin-Rechte für:"
+    echo "  - Verschieben von Dateien nach /Users/Shared/"
+    echo "  - Setzen von Berechtigungen"
+    echo ""
+    echo "🔧 Lösung: Führe das Script als Admin-Benutzer aus:"
+    echo ""
+    
+    # Versuche Admin-Benutzer zu finden
+    ADMIN_USERS=$(dscl . -read /Groups/admin GroupMembership 2>/dev/null | tr ' ' '\n' | grep -v "^GroupMembership:" | grep -v "^$" | grep -v "^root$")
+    
+    if [ -n "$ADMIN_USERS" ]; then
+        echo "   Verfügbare Admin-Benutzer:"
+        echo "$ADMIN_USERS" | while read admin_user; do
+            echo "   - $admin_user"
+        done
+        echo ""
+        FIRST_ADMIN=$(echo "$ADMIN_USERS" | head -1)
+        echo "   Option 1: Direkt als Admin-Benutzer einloggen (empfohlen)"
+        echo "   - Abmelden und als '$FIRST_ADMIN' anmelden"
+        echo "   - Oder: Terminal öffnen und Benutzer wechseln"
+        echo ""
+        echo "   Option 2: Script-Pfad kopieren und als Admin ausführen"
+        echo "   cd $SOURCE_DIR"
+        echo "   ./docs/setup/move-to-shared.sh"
+        echo ""
+        echo "   WICHTIG: 'sudo su -' funktioniert nicht, wenn der aktuelle"
+        echo "   Benutzer kein sudo-Recht hat. Bitte direkt als Admin einloggen!"
+    else
+        echo "   Bitte direkt als Admin-Benutzer einloggen und dann:"
+        echo "   cd $SOURCE_DIR"
+        echo "   ./docs/setup/move-to-shared.sh"
+    fi
+    
+    echo ""
+    exit 1
+fi
+echo -e "${GREEN}✅ Admin-Rechte bestätigt (Benutzer: $CURRENT_USER)${NC}"
+
 # Prüfe ob Source existiert
 if [ ! -d "$SOURCE_DIR" ]; then
     echo -e "${RED}❌ Fehler: Source-Verzeichnis nicht gefunden: $SOURCE_DIR${NC}"
@@ -48,7 +100,11 @@ if [ -d "$TARGET_DIR" ]; then
     echo
     if [[ $REPLY =~ ^[JjYy]$ ]]; then
         echo "📦 Erstelle Backup..."
-        sudo mv "$TARGET_DIR" "$BACKUP_DIR"
+        if [ "$EUID" -ne 0 ]; then
+            sudo mv "$TARGET_DIR" "$BACKUP_DIR"
+        else
+            mv "$TARGET_DIR" "$BACKUP_DIR"
+        fi
         echo -e "${GREEN}✅ Backup erstellt: $BACKUP_DIR${NC}"
     else
         echo "Abgebrochen."
@@ -93,7 +149,12 @@ fi
 
 echo ""
 echo "📦 Schritt 1: Verschiebe Workspace..."
-sudo mv "$SOURCE_DIR" "$TARGET_DIR"
+# Prüfe ob sudo nötig ist (falls nicht als root)
+if [ "$EUID" -ne 0 ]; then
+    sudo mv "$SOURCE_DIR" "$TARGET_DIR"
+else
+    mv "$SOURCE_DIR" "$TARGET_DIR"
+fi
 echo -e "${GREEN}✅ Workspace verschoben${NC}"
 
 echo ""
@@ -104,24 +165,44 @@ echo -e "${GREEN}✅ Symlink erstellt: $SOURCE_DIR -> $TARGET_DIR${NC}"
 echo ""
 echo "🔐 Schritt 3: Setze Berechtigungen..."
 # Owner und Gruppe setzen
-sudo chown -R hpcn:staff "$TARGET_DIR"
+if [ "$EUID" -ne 0 ]; then
+    sudo chown -R hpcn:staff "$TARGET_DIR"
+else
+    chown -R hpcn:staff "$TARGET_DIR"
+fi
 echo -e "${GREEN}✅ Owner/Gruppe gesetzt${NC}"
 
 # Verzeichnisse: 775 (rwxrwxr-x)
-find "$TARGET_DIR" -type d -exec sudo chmod 775 {} \;
+if [ "$EUID" -ne 0 ]; then
+    find "$TARGET_DIR" -type d -exec sudo chmod 775 {} \;
+else
+    find "$TARGET_DIR" -type d -exec chmod 775 {} \;
+fi
 echo -e "${GREEN}✅ Verzeichnis-Berechtigungen gesetzt (775)${NC}"
 
 # Dateien: 664 (rw-rw-r--)
-find "$TARGET_DIR" -type f -exec sudo chmod 664 {} \;
+if [ "$EUID" -ne 0 ]; then
+    find "$TARGET_DIR" -type f -exec sudo chmod 664 {} \;
+else
+    find "$TARGET_DIR" -type f -exec chmod 664 {} \;
+fi
 echo -e "${GREEN}✅ Datei-Berechtigungen gesetzt (664)${NC}"
 
 # Scripts ausführbar machen: 775
-find "$TARGET_DIR" -type f \( -name "*.sh" -o -name "*.py" \) -exec sudo chmod 775 {} \;
+if [ "$EUID" -ne 0 ]; then
+    find "$TARGET_DIR" -type f \( -name "*.sh" -o -name "*.py" \) -exec sudo chmod 775 {} \;
+else
+    find "$TARGET_DIR" -type f \( -name "*.sh" -o -name "*.py" \) -exec chmod 775 {} \;
+fi
 echo -e "${GREEN}✅ Script-Berechtigungen gesetzt (775)${NC}"
 
 # .git Verzeichnis: 775
 if [ -d "$TARGET_DIR/.git" ]; then
-    sudo chmod -R 775 "$TARGET_DIR/.git"
+    if [ "$EUID" -ne 0 ]; then
+        sudo chmod -R 775 "$TARGET_DIR/.git"
+    else
+        chmod -R 775 "$TARGET_DIR/.git"
+    fi
     echo -e "${GREEN}✅ Git-Verzeichnis-Berechtigungen gesetzt${NC}"
 fi
 
