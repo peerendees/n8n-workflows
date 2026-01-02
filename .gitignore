@@ -36,3 +36,6 @@ n8n_data/
 # Backups
 backups/
 *.backup
+
+# Symlinks (sollten nicht ins Repository)
+n8n-workflows

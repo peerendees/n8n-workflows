@@ -5,9 +5,13 @@ Diese Dokumentation ist nach Themenbereichen organisiert.
 ## 📁 Verzeichnisstruktur
 
 ### `/docs/setup/` - Setup-Anleitungen
-- **`CURSOR-MULTI-COMPUTER-SETUP.md`** - ⭐ **HAUPTANLEITUNG** für Multi-Computer Multi-User Setup mit Cloud-Sync
-- `setup-cursor-cloud-sync.sh` - Setup-Script für ersten Rechner/Benutzer
-- `setup-cursor-cloud-sync-remote.sh` - Setup-Script für weitere Rechner/Benutzer
+- **`SETUP-ANLEITUNG.md`** - ⭐ **HAUPTANLEITUNG** - Komplette Schritt-für-Schritt Anleitung für Multi-Computer Multi-User Setup
+- `move-to-shared.sh` - Workspace nach `/Users/Shared/` verschieben (Schritt 1)
+- `fix-permissions.sh` - Berechtigungen korrigieren
+- `check-cursor-workspace.sh` - Cursor Workspace-Storage prüfen
+- `CURSOR-MULTI-COMPUTER-SETUP.md` - Multi-Computer Chat-Historie Setup (optional)
+- `setup-cursor-cloud-sync.sh` - Cloud-Sync für Chat-Historie (Schritt 5)
+- `setup-cursor-cloud-sync-remote.sh` - Cloud-Sync für weitere Rechner
 - `GITHUB-SYNC-ANLEITUNG.md` - GitHub ↔ n8n Synchronisation
 - `SETUP-SCRIPTS.md` - Weitere Setup-Scripts
 - `sudoers-macos-anleitung.md` - macOS sudoers Konfiguration
@@ -33,21 +37,32 @@ Diese Dokumentation ist nach Themenbereichen organisiert.
 
 ### Cursor Multi-Computer Setup
 
-Für mehrere Rechner mit mehreren Benutzern:
+**Für neue Rechner/Benutzer:** Siehe **[SETUP-ANLEITUNG.md](setup/SETUP-ANLEITUNG.md)** für die komplette Schritt-für-Schritt Anleitung.
 
-1. **Erster Rechner/Benutzer:**
-```bash
-cd /path/to/n8n-workflows
-./docs/setup/setup-cursor-cloud-sync.sh [WORKFLOW_ID] [CLOUD_PROVIDER]
-```
+**Kurze Übersicht:**
 
-2. **Weitere Rechner/Benutzer:**
-```bash
-cd /path/to/n8n-workflows
-./docs/setup/setup-cursor-cloud-sync-remote.sh [WORKFLOW_ID] [CLOUD_PROVIDER] [LOCAL_PATH]
-```
+1. **Erster Rechner:** Workspace nach `/Users/Shared/` verschieben
+   ```bash
+   ./docs/setup/move-to-shared.sh
+   ```
 
-Siehe **[CURSOR-MULTI-COMPUTER-SETUP.md](setup/CURSOR-MULTI-COMPUTER-SETUP.md)** für Details.
+2. **Weitere Rechner:** Git klonen und Berechtigungen setzen
+   ```bash
+   git clone [repo-url] /Users/Shared/n8n-workflows
+   ./docs/setup/fix-permissions.sh
+   ```
+
+3. **Weitere Benutzer:** Symlink erstellen
+   ```bash
+   ln -s /Users/Shared/n8n-workflows ~/n8n-workflows
+   ```
+
+4. **Cursor Workspace prüfen:**
+   ```bash
+   ./docs/setup/check-cursor-workspace.sh
+   ```
+
+Siehe **[SETUP-ANLEITUNG.md](setup/SETUP-ANLEITUNG.md)** für Details und Troubleshooting.
 
 ## 📚 Weitere Dokumentation
 

@@ -14,18 +14,37 @@ Dieses Repository enthält n8n-Workflows für die Synchronisation zwischen GitHu
 
 ## 🚀 Cursor Multi-Computer Setup
 
-Für mehrere Rechner mit mehreren Benutzern und gemeinsamer Chat-Historie:
+Für mehrere Rechner mit mehreren Benutzern:
 
-**Siehe:** [`docs/setup/CURSOR-MULTI-COMPUTER-SETUP.md`](docs/setup/CURSOR-MULTI-COMPUTER-SETUP.md)
+**⭐ Hauptanleitung:** [`docs/setup/SETUP-ANLEITUNG.md`](docs/setup/SETUP-ANLEITUNG.md)
 
 **Schnellstart:**
-```bash
-# Erster Rechner/Benutzer
-./docs/setup/setup-cursor-cloud-sync.sh [WORKFLOW_ID] [CLOUD_PROVIDER]
 
-# Weitere Rechner/Benutzer
-./docs/setup/setup-cursor-cloud-sync-remote.sh [WORKFLOW_ID] [CLOUD_PROVIDER] [LOCAL_PATH]
-```
+1. **Erster Rechner:** Workspace nach `/Users/Shared/` verschieben
+   ```bash
+   ./docs/setup/move-to-shared.sh
+   ```
+
+2. **Weitere Rechner:** Git klonen und Setup
+   ```bash
+   git clone [repo-url] /Users/Shared/n8n-workflows
+   cd /Users/Shared/n8n-workflows
+   ./docs/setup/fix-permissions.sh
+   ```
+
+3. **Weitere Benutzer:** Symlink erstellen
+   ```bash
+   ln -s /Users/Shared/n8n-workflows ~/n8n-workflows
+   ```
+
+4. **Cursor Workspace prüfen:**
+   ```bash
+   ./docs/setup/check-cursor-workspace.sh
+   ```
+
+**Weitere Dokumentation:**
+- [`docs/setup/SETUP-ANLEITUNG.md`](docs/setup/SETUP-ANLEITUNG.md) - Komplette Schritt-für-Schritt Anleitung
+- [`docs/setup/CURSOR-MULTI-COMPUTER-SETUP.md`](docs/setup/CURSOR-MULTI-COMPUTER-SETUP.md) - Gemeinsame Chat-Historie (optional)
 
 ## Setup
 
@@ -87,6 +106,28 @@ Dies ermöglicht:
 - Automatische Erkennung von Umbenennungen
 
 ## Entwicklungsworkflow
+
+### Multi-Computer Workflow
+
+**Wichtig:** Alle Git-Operationen erfolgen aus `/Users/Shared/n8n-workflows` (oder über Symlink)
+
+**Auf Rechner 1 (Haupt-Rechner):**
+```bash
+cd /Users/Shared/n8n-workflows  # Oder: cd ~/n8n-workflows
+# Arbeiten, Dateien ändern
+git add .
+git commit -m "Änderungsbeschreibung"
+git push origin main
+```
+
+**Auf Rechner 2 (beim Wechseln):**
+```bash
+cd /Users/Shared/n8n-workflows
+git pull origin main  # Holt alle Änderungen von GitHub
+# Jetzt weiterarbeiten
+```
+
+### n8n Synchronisation
 
 1. **In Cursor entwickeln:**
    - Workflow-Dateien bearbeiten
