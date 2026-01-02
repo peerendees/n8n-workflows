@@ -3,6 +3,17 @@
   "description": "Einmaliger Workflow zur Migration aller Workflows von alter Struktur (n8n/workflow-name.json) zu neuer Struktur (n8n/{workflowId}/{workflowName}.json) - Test Push 2",
   "nodes": [
     {
+      "parameters": {},
+      "id": "manual-trigger",
+      "name": "Manueller Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -944,
+        -656
+      ]
+    },
+    {
       "parameters": {
         "method": "GET",
         "url": "=https://n8n.srv1098810.hstgr.cloud/api/v1/workflows",
@@ -260,6 +271,17 @@
     }
   ],
   "connections": {
+    "Manueller Trigger": {
+      "main": [
+        [
+          {
+            "node": "Hole alle Workflows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Hole alle Workflows": {
       "main": [
         [
