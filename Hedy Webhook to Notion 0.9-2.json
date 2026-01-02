@@ -1,8 +1,9 @@
 {
-  "name": "Hedy Webhook to Notion 0.9 - OPTIMIZED",
+  "name": "Hedy Webhook to Notion 0.9",
   "nodes": [
     {
       "parameters": {
+        "httpMethod": "POST",
         "path": "Hedy-Events",
         "authentication": "headerAuth",
         "options": {}
@@ -10,16 +11,16 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        0,
-        0
+        2352,
+        240
       ],
-      "id": "6ee2556f-14fa-491a-a23f-fc8232698e60",
+      "id": "217a120d-3a61-4beb-89ba-6540349858d6",
       "name": "Hedy API",
       "webhookId": "b9081b42-f39a-4933-9964-4dcfa7aa227e",
       "credentials": {
         "httpHeaderAuth": {
-          "id": "aZMd0okvVFkvyGnj",
-          "name": "GitHub Token"
+          "id": "ddbOaicomtaiLVQV",
+          "name": "Hedy Webhook Auth"
         }
       }
     },
@@ -30,10 +31,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        208,
-        0
+        2576,
+        240
       ],
-      "id": "parse-hedy-data",
+      "id": "8b862374-2f39-4c0a-b2ca-834f1216ce75",
       "name": "Parse Hedy Daten"
     },
     {
@@ -41,10 +42,10 @@
         "resource": "databasePage",
         "databaseId": {
           "__rl": true,
-          "value": "2ca31cc6-fd56-8079-8a58-d74ec1097a36",
+          "value": "50466f0c-d204-4e54-b2e5-d4d2f874e9e8",
           "mode": "list",
-          "cachedResultName": "Hedy Transkripte 0.9",
-          "cachedResultUrl": "https://www.notion.so/2ca31cc6fd5680798a58d74ec1097a36"
+          "cachedResultName": "Hedy Events",
+          "cachedResultUrl": "https://www.notion.so/50466f0cd2044e54b2e5d4d2f874e9e8"
         },
         "title": "Hedy Transkript",
         "propertiesUi": {
@@ -88,10 +89,10 @@
       "type": "n8n-nodes-base.notion",
       "typeVersion": 2.2,
       "position": [
-        416,
-        0
+        2800,
+        240
       ],
-      "id": "a82bbbce-23bd-4926-8852-a525f1f28791",
+      "id": "466fbad2-d590-4882-a535-d318ee406b7b",
       "name": "Hedy Transkript 0.9",
       "credentials": {
         "notionApi": {
@@ -130,7 +131,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "d5c50f6c-dfe2-464b-ba03-10eb68e1e42d",
+  "versionId": "b754a45f-4db8-4dfd-b901-03e885a1d6a3",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "ca9048c6f81bd21d01e3b762fe2fa38de922e62200ce1e767f7a2dfd45624f9b"
@@ -138,4 +139,3 @@
   "id": "p4WBXmtWQqToEtLw",
   "tags": []
 }
-

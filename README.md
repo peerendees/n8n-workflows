@@ -2,7 +2,7 @@
 
 Dieses Repository enthält n8n-Workflows für die Synchronisation zwischen GitHub und n8n.
 
-## Struktur
+## 📁 Struktur
 
 - `n8n-Backup-Workflow.json` - Backup-Workflow (n8n → GitHub)
 - `github-to-n8n-sync-workflow.json` - Synchronisations-Workflow (GitHub → n8n)
@@ -10,6 +10,22 @@ Dieses Repository enthält n8n-Workflows für die Synchronisation zwischen GitHu
 - `list-workflows.sh` - Shell-Script zum Auflisten aller Workflows
 - `n8n/` - Gesicherte Workflow-Dateien
 - `workflows/` - Kategorisierte Workflows
+- `docs/` - 📚 **Dokumentation** (siehe [docs/README.md](docs/README.md))
+
+## 🚀 Cursor Multi-Computer Setup
+
+Für mehrere Rechner mit mehreren Benutzern und gemeinsamer Chat-Historie:
+
+**Siehe:** [`docs/setup/CURSOR-MULTI-COMPUTER-SETUP.md`](docs/setup/CURSOR-MULTI-COMPUTER-SETUP.md)
+
+**Schnellstart:**
+```bash
+# Erster Rechner/Benutzer
+./docs/setup/setup-cursor-cloud-sync.sh [WORKFLOW_ID] [CLOUD_PROVIDER]
+
+# Weitere Rechner/Benutzer
+./docs/setup/setup-cursor-cloud-sync-remote.sh [WORKFLOW_ID] [CLOUD_PROVIDER] [LOCAL_PATH]
+```
 
 ## Setup
 
