@@ -15,6 +15,35 @@
     },
     {
       "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "test-modus",
+              "name": "testModus",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "test-workflow-name",
+              "name": "testWorkflowName",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -720,
+        -656
+      ],
+      "id": "config",
+      "name": "Config"
+    },
+    {
+      "parameters": {
         "method": "GET",
         "url": "=https://n8n.srv1098810.hstgr.cloud/api/v1/workflows",
         "authentication": "genericCredentialType",
@@ -58,7 +87,7 @@
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const r = $json; // Rucksack\nconst wf = r.workflows[r.index];\n\n// Überspringe archivierte Workflows\nif (wf.isArchived === true) {\n  r.uebersprungen++;\n  r.index++;\n  return null;\n}\n\nconst workflowId = wf.id || '';\nconst workflowName = wf.name || 'Unnamed Workflow';\nconst cleanName = String(workflowName).replace(/[^a-zA-Z0-9-_äöüÄÖÜß ]/g, '').replace(/\\s+/g, '-').toLowerCase();\n\n// Neue Struktur: n8n/{workflowId}/{workflowName}.json\nconst neueStrukturPfad = `n8n/${workflowId}/${cleanName}.json`;\nconst workflowContent = Buffer.from(JSON.stringify(wf, null, 2)).toString('base64');\n\n// Alte Struktur: n8n/{workflowName}.json (ohne ID)\nconst alteStrukturPfad = `n8n/${cleanName}.json`;\n\nreturn {\n  ...r,\n  workflowId: workflowId,\n  workflowName: workflowName,\n  workflowData: wf,\n  neueStrukturPfad: neueStrukturPfad,\n  alteStrukturPfad: alteStrukturPfad,\n  workflowContent: workflowContent\n};"
+        "jsCode": "const r = $json; // Rucksack\nconst wf = r.workflows[r.index];\nconst config = $node[\"Config\"].json || {};\nconst testModus = config.testModus === true;\nconst testWorkflowName = (config.testWorkflowName || '').trim();\n\n// Überspringe archivierte Workflows\nif (wf.isArchived === true) {\n  r.uebersprungen++;\n  r.index++;\n  return null;\n}\n\n// Test-Modus: Nur bestimmten Workflow migrieren\nif (testModus && testWorkflowName) {\n  if (wf.name !== testWorkflowName) {\n    r.uebersprungen++;\n    r.index++;\n    return null;\n  }\n}\n\nconst workflowId = wf.id || '';\nconst workflowName = wf.name || 'Unnamed Workflow';\nconst cleanName = String(workflowName).replace(/[^a-zA-Z0-9-_äöüÄÖÜß ]/g, '').replace(/\\s+/g, '-').toLowerCase();\n\n// Neue Struktur: n8n/{workflowId}/{workflowName}.json\nconst neueStrukturPfad = `n8n/${workflowId}/${cleanName}.json`;\nconst workflowContent = Buffer.from(JSON.stringify(wf, null, 2)).toString('base64');\n\n// Alte Struktur: n8n/{workflowName}.json (ohne ID)\nconst alteStrukturPfad = `n8n/${cleanName}.json`;\n\nreturn {\n  ...r,\n  workflowId: workflowId,\n  workflowName: workflowName,\n  workflowData: wf,\n  neueStrukturPfad: neueStrukturPfad,\n  alteStrukturPfad: alteStrukturPfad,\n  workflowContent: workflowContent,\n  testModus: testModus\n};"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -272,6 +301,17 @@
   ],
   "connections": {
     "Manueller Trigger": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
       "main": [
         [
           {
