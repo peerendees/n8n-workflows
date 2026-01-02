@@ -216,12 +216,9 @@
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
-        "bodyParameters": {
-          "parameters": [
-            {}
-          ]
-        },
-        "options": {}
+        "options": {},
+        "bodyContentType": "json",
+        "jsonBody": "={{ $node[\"Parse Workflow\"].json.workflowData }}"
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -246,12 +243,9 @@
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
-        "bodyParameters": {
-          "parameters": [
-            {}
-          ]
-        },
-        "options": {}
+        "options": {},
+        "bodyContentType": "json",
+        "jsonBody": "={{ $node[\"Parse Workflow\"].json.workflowData }}"
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
