@@ -1,6 +1,6 @@
 {
   "name": "n8n Workflow Migration - Alte zu Neue Struktur",
-  "description": "Einmaliger Workflow zur Migration aller Workflows von alter Struktur (n8n/workflow-name.json) zu neuer Struktur (n8n/{workflowId}/{workflowName}.json) - Test Push 2",
+  "description": "Einmaliger Workflow zur Migration aller Workflows von alter Struktur (n8n/workflow-name.json) zu neuer Struktur (n8n/{workflowId}/{workflowName}.json) - Mit Manual Trigger",
   "nodes": [
     {
       "parameters": {},
