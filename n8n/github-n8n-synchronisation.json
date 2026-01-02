@@ -123,7 +123,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Extrahiere Workflow-Daten aus GitHub-Datei\nconst githubFile = $json;\n\nif (githubFile.error || !githubFile.content) {\n  return { error: 'Datei konnte nicht geladen werden' };\n}\n\ntry {\n  const content = Buffer.from(githubFile.content, 'base64').toString('utf-8');\n  const workflow = JSON.parse(content);\n  \n  return {\n    workflowId: workflow.id || null,\n    workflowName: workflow.name || 'unnamed',\n    workflowData: workflow,\n    filePath: githubFile.path || githubFile.name\n  };\n} catch (e) {\n  return { error: 'Fehler beim Parsen der Workflow-Datei: ' + e.message };\n}"
+        "jsCode": "// Extrahiere Workflow-Daten aus GitHub-Datei\nconst githubFile = $json;\n\nif (githubFile.error || !githubFile.content) {\n  return { error: 'Datei konnte nicht geladen werden' };\n}\n\ntry {\n  const content = Buffer.from(githubFile.content, 'base64').toString('utf-8');\n  const workflow = JSON.parse(content);\n  \n  // Stelle sicher, dass name immer vorhanden ist\n  const workflowName = workflow.name || 'Unnamed Workflow';\n  \n  // Erstelle workflowData mit garantiertem name-Feld\n  const workflowData = {\n    ...workflow,\n    name: workflowName\n  };\n  \n  return {\n    workflowId: workflow.id || null,\n    workflowName: workflowName,\n    workflowData: workflowData,\n    filePath: githubFile.path || githubFile.name\n  };\n} catch (e) {\n  return { error: 'Fehler beim Parsen der Workflow-Datei: ' + e.message };\n}"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
