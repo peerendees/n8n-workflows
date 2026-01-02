@@ -1,7 +1,7 @@
 {
   "updatedAt": "2025-12-24T11:34:56.513Z",
   "createdAt": "2025-12-24T10:21:45.757Z",
-  "id": "MHpLYxsxsy0aSsEC",
+  "id": "R307XPK2xOtEQ2UW",
   "name": "GitHub → n8n Synchronisation",
   "active": true,
   "isArchived": false,
@@ -123,7 +123,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Extrahiere Workflow-Daten aus GitHub-Datei\nconst githubFile = $json;\n\nif (githubFile.error || !githubFile.content) {\n  return { error: 'Datei konnte nicht geladen werden' };\n}\n\ntry {\n  const content = Buffer.from(githubFile.content, 'base64').toString('utf-8');\n  const workflow = JSON.parse(content);\n  \n  // Selbst-Sync Sperre: Überspringe den Sync-Workflow selbst\n  const isSelf = workflow.id === 'MHpLYxsxsy0aSsEC';\n  if (isSelf) {\n    return { error: 'Sync-Workflow wird übersprungen (Selbst-Sync Sperre)' };\n  }\n  \n  // Stelle sicher, dass name immer vorhanden ist\n  const workflowName = workflow.name || 'Unnamed Workflow';\n  \n  // Erstelle workflowData mit garantiertem name-Feld\n  const workflowData = {\n    ...workflow,\n    name: workflowName\n  };\n  \n  return {\n    workflowId: workflow.id || null,\n    workflowName: workflowName,\n    workflowData: workflowData,\n    filePath: githubFile.path || githubFile.name\n  };\n} catch (e) {\n  return { error: 'Fehler beim Parsen der Workflow-Datei: ' + e.message };\n}"
+        "jsCode": "// Extrahiere Workflow-Daten aus GitHub-Datei\nconst githubFile = $json;\n\nif (githubFile.error || !githubFile.content) {\n  return { error: 'Datei konnte nicht geladen werden' };\n}\n\ntry {\n  const content = Buffer.from(githubFile.content, 'base64').toString('utf-8');\n  const workflow = JSON.parse(content);\n  \n  // Selbst-Sync Sperre: Überspringe den Sync-Workflow selbst\n  const isSelf = workflow.id === 'R307XPK2xOtEQ2UW';\n  if (isSelf) {\n    return { error: 'Sync-Workflow wird übersprungen (Selbst-Sync Sperre)' };\n  }\n  \n  // Stelle sicher, dass name immer vorhanden ist\n  const workflowName = workflow.name || 'Unnamed Workflow';\n  \n  // Erstelle workflowData mit garantiertem name-Feld\n  const workflowData = {\n    ...workflow,\n    name: workflowName\n  };\n  \n  return {\n    workflowId: workflow.id || null,\n    workflowName: workflowName,\n    workflowData: workflowData,\n    filePath: githubFile.path || githubFile.name\n  };\n} catch (e) {\n  return { error: 'Fehler beim Parsen der Workflow-Datei: ' + e.message };\n}"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -418,7 +418,7 @@
       "updatedAt": "2025-12-24T10:21:45.762Z",
       "createdAt": "2025-12-24T10:21:45.762Z",
       "role": "workflow:owner",
-      "workflowId": "MHpLYxsxsy0aSsEC",
+      "workflowId": "R307XPK2xOtEQ2UW",
       "projectId": "yr4Hj71ou1NOsi2p"
     }
   ],
@@ -426,7 +426,7 @@
     "updatedAt": "2025-12-24T11:35:00.000Z",
     "createdAt": "2025-12-24T11:34:56.514Z",
     "versionId": "4d361205-6074-48d5-9998-e147ef09bbe5",
-    "workflowId": "MHpLYxsxsy0aSsEC",
+    "workflowId": "R307XPK2xOtEQ2UW",
     "nodes": [
       {
         "parameters": {
@@ -545,7 +545,7 @@
       },
       {
         "parameters": {
-          "jsCode": "// Extrahiere Workflow-Daten aus GitHub-Datei\nconst githubFile = $json;\n\nif (githubFile.error || !githubFile.content) {\n  return { error: 'Datei konnte nicht geladen werden' };\n}\n\ntry {\n  const content = Buffer.from(githubFile.content, 'base64').toString('utf-8');\n  const workflow = JSON.parse(content);\n  \n  // Selbst-Sync Sperre: Überspringe den Sync-Workflow selbst\n  const isSelf = workflow.id === 'MHpLYxsxsy0aSsEC';\n  if (isSelf) {\n    return { error: 'Sync-Workflow wird übersprungen (Selbst-Sync Sperre)' };\n  }\n  \n  // Stelle sicher, dass name immer vorhanden ist\n  const workflowName = workflow.name || 'Unnamed Workflow';\n  \n  // Erstelle workflowData mit garantiertem name-Feld\n  const workflowData = {\n    ...workflow,\n    name: workflowName\n  };\n  \n  return {\n    workflowId: workflow.id || null,\n    workflowName: workflowName,\n    workflowData: workflowData,\n    filePath: githubFile.path || githubFile.name\n  };\n} catch (e) {\n  return { error: 'Fehler beim Parsen der Workflow-Datei: ' + e.message };\n}"
+          "jsCode": "// Extrahiere Workflow-Daten aus GitHub-Datei\nconst githubFile = $json;\n\nif (githubFile.error || !githubFile.content) {\n  return { error: 'Datei konnte nicht geladen werden' };\n}\n\ntry {\n  const content = Buffer.from(githubFile.content, 'base64').toString('utf-8');\n  const workflow = JSON.parse(content);\n  \n  // Selbst-Sync Sperre: Überspringe den Sync-Workflow selbst\n  const isSelf = workflow.id === 'R307XPK2xOtEQ2UW';\n  if (isSelf) {\n    return { error: 'Sync-Workflow wird übersprungen (Selbst-Sync Sperre)' };\n  }\n  \n  // Stelle sicher, dass name immer vorhanden ist\n  const workflowName = workflow.name || 'Unnamed Workflow';\n  \n  // Erstelle workflowData mit garantiertem name-Feld\n  const workflowData = {\n    ...workflow,\n    name: workflowName\n  };\n  \n  return {\n    workflowId: workflow.id || null,\n    workflowName: workflowName,\n    workflowData: workflowData,\n    filePath: githubFile.path || githubFile.name\n  };\n} catch (e) {\n  return { error: 'Fehler beim Parsen der Workflow-Datei: ' + e.message };\n}"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
