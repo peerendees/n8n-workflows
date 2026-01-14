@@ -9,19 +9,22 @@ Diese Anleitung beschreibt das komplette Setup für mehrere Rechner mit mehreren
 ```
 Rechner 1:
   /Users/Shared/n8n-workflows/  ← Haupt-Workspace (Git Repository)
+  Owner: kunkel:staff
   Symlinks:
-    /Users/hpcn/n8n-workflows → /Users/Shared/n8n-workflows
     /Users/kunkel/n8n-workflows → /Users/Shared/n8n-workflows
 
 Rechner 2:
   /Users/Shared/n8n-workflows/  ← Git Clone
+  Owner: kunkel:staff
   Symlinks:
-    /Users/benutzer1/n8n-workflows → /Users/Shared/n8n-workflows
-    /Users/benutzer2/n8n-workflows → /Users/Shared/n8n-workflows
+    /Users/kunkel/n8n-workflows → /Users/Shared/n8n-workflows
+    /Users/hpcn/n8n-workflows → /Users/Shared/n8n-workflows
 
 Zwischen Rechnern: Git Push/Pull
 Chat-Historie: Cloud-Sync (iCloud/Dropbox) - optional
 ```
+
+**Wichtig:** Der Owner ist immer `kunkel:staff` (auch auf Rechner 2, damit beide Benutzer Zugriff haben).
 
 ---
 
@@ -36,28 +39,33 @@ Chat-Historie: Cloud-Sync (iCloud/Dropbox) - optional
 ### Ausführung
 
 ```bash
-cd /Users/hpcn/n8n-workflows  # Oder wo auch immer der Workspace liegt
+cd /Users/kunkel/n8n-workflows  # Oder wo auch immer der Workspace liegt
 ./docs/setup/move-to-shared.sh
 ```
 
 Das Script:
 1. ✅ Verschiebt Workspace nach `/Users/Shared/n8n-workflows`
-2. ✅ Erstellt Symlink `/Users/hpcn/n8n-workflows` → `/Users/Shared/n8n-workflows`
+2. ✅ Erstellt Symlink `/Users/kunkel/n8n-workflows` → `/Users/Shared/n8n-workflows`
 3. ✅ Setzt Berechtigungen (`775` für Verzeichnisse, `664` für Dateien)
-4. ✅ Unterstützt Resume bei Abbruch
+4. ✅ Setzt Owner auf `kunkel:staff`
+5. ✅ Unterstützt Resume bei Abbruch
 
 ### Prüfung
 
 ```bash
 # Prüfe Symlink
-ls -la /Users/hpcn/n8n-workflows
+ls -la /Users/kunkel/n8n-workflows
 
 # Prüfe Berechtigungen
 stat -f "%Sp %N" /Users/Shared/n8n-workflows
 stat -f "%Sp %N" /Users/Shared/n8n-workflows/README.md
 
+# Prüfe Owner
+ls -ld /Users/Shared/n8n-workflows
+# Sollte zeigen: kunkel staff
+
 # Prüfe Schreibzugriff
-cd /Users/hpcn/n8n-workflows
+cd /Users/kunkel/n8n-workflows
 touch test.txt && rm test.txt
 ```
 
@@ -94,18 +102,46 @@ sudo dseditgroup -o edit -a [benutzername] -t user staff
 ```bash
 # Als Admin-Benutzer auf neuem Rechner
 cd /Users/Shared
-git clone [dein-github-repo-url] n8n-workflows
+git clone https://github.com/peerendees/n8n-workflows.git n8n-workflows
 cd n8n-workflows
+```
+
+**✅ Prüfung:**
+```bash
+ls -la
+# Sollte alle Dateien zeigen (README.md, docs/, n8n/, etc.)
 ```
 
 ### 3.2 Berechtigungen setzen
 
+**Wichtig:** Das Script muss als Admin-Benutzer ausgeführt werden!
+
 ```bash
 # Als Admin-Benutzer
+cd /Users/Shared/n8n-workflows
 ./docs/setup/fix-permissions.sh
 ```
 
-Oder manuell:
+**Falls das Script nicht ausführbar ist:**
+```bash
+chmod +x docs/setup/fix-permissions.sh
+./docs/setup/fix-permissions.sh
+```
+
+**Was das Script macht:**
+- ✅ Setzt Owner/Gruppe auf `kunkel:staff` (falls vorhanden, sonst automatische Erkennung)
+- ✅ Setzt Verzeichnis-Berechtigungen auf `775`
+- ✅ Setzt Datei-Berechtigungen auf `664`
+- ✅ Macht Scripts ausführbar (`775`)
+
+**✅ Prüfung:**
+```bash
+stat -f "%Sp %N" /Users/Shared/n8n-workflows
+stat -f "%Sp %N" /Users/Shared/n8n-workflows/README.md
+# Sollte zeigen: drwxrwxr-x für Verzeichnisse, -rw-rw-r-- für Dateien
+```
+
+**Oder manuell (falls Script nicht funktioniert):**
 ```bash
 sudo chown -R [erster-benutzer]:staff /Users/Shared/n8n-workflows
 sudo find /Users/Shared/n8n-workflows -type d -exec chmod 775 {} \;
@@ -119,6 +155,63 @@ Für jeden Benutzer auf dem Rechner:
 ```bash
 ln -s /Users/Shared/n8n-workflows ~/n8n-workflows
 ```
+
+**✅ Prüfung:**
+```bash
+cd ~/n8n-workflows
+ls -la
+# Sollte alle Dateien zeigen
+```
+
+**Wichtig:** Alle Benutzer müssen in der `staff`-Gruppe sein:
+```bash
+# Als Admin prüfen:
+groups [benutzername]
+
+# Falls nicht: Hinzufügen
+sudo dseditgroup -o edit -a [benutzername] -t user staff
+```
+
+### 3.4 Git Pull (neueste Änderungen holen)
+
+**Wichtig:** Bevor du arbeitest, hole die neuesten Änderungen!
+
+```bash
+cd /Users/Shared/n8n-workflows
+git pull origin main
+```
+
+**✅ Prüfung:**
+```bash
+git status
+# Sollte "nothing to commit, working tree clean" zeigen
+```
+
+### 3.5 Cursor Workspace öffnen
+
+**Wichtig:** Immer den Symlink verwenden, nicht den direkten Pfad!
+
+1. **Cursor öffnen**
+2. **File → Open Folder**
+3. **Symlink auswählen:** `/Users/[benutzername]/n8n-workflows`
+   - **NICHT:** `/Users/Shared/n8n-workflows` ❌
+
+**✅ Prüfung:**
+```bash
+cd ~/n8n-workflows
+./docs/setup/check-cursor-workspace.sh
+```
+
+### 3.6 Schreibzugriff testen
+
+```bash
+cd ~/n8n-workflows
+touch test-datei.txt
+echo "Test" > test-datei.txt
+rm test-datei.txt
+```
+
+**✅ Wenn das funktioniert:** Alles ist korrekt eingerichtet!
 
 ---
 
@@ -217,11 +310,15 @@ Das Script zeigt:
 **Wichtig:** Immer den Symlink verwenden, nicht den direkten Pfad!
 
 ```bash
-# Richtig:
+# Richtig (als kunkel):
+open /Users/kunkel/n8n-workflows
+
+# Oder (als hpcn auf Rechner 2):
 open /Users/hpcn/n8n-workflows
 
 # Oder in Cursor:
-# File → Open Folder → /Users/hpcn/n8n-workflows
+# File → Open Folder → /Users/kunkel/n8n-workflows
+# Oder: File → Open Folder → /Users/hpcn/n8n-workflows
 ```
 
 **Nicht verwenden:**
@@ -254,7 +351,7 @@ Für gemeinsame Chat-Historie zwischen Rechnern siehe:
 
 **Lösung:**
 1. Cursor öffnen
-2. File → Open Folder → `/Users/hpcn/n8n-workflows` (Symlink!)
+2. File → Open Folder → `/Users/kunkel/n8n-workflows` oder `/Users/hpcn/n8n-workflows` (Symlink!)
 3. Workspace-Storage wird automatisch erstellt
 
 ### Problem: Chats nicht sichtbar
@@ -262,7 +359,7 @@ Für gemeinsame Chat-Historie zwischen Rechnern siehe:
 **Ursache:** Falscher Pfad verwendet (direkter Pfad statt Symlink)
 
 **Lösung:**
-- Immer den Symlink verwenden: `/Users/hpcn/n8n-workflows`
+- Immer den Symlink verwenden: `/Users/kunkel/n8n-workflows` oder `/Users/hpcn/n8n-workflows`
 - Nicht den direkten Pfad: `/Users/Shared/n8n-workflows`
 
 ### Problem: Git-Status zeigt Änderungen nach Klonen
@@ -288,14 +385,14 @@ git status
 
 ## Checkliste für neuen Rechner
 
-- [ ] Git Repository geklont nach `/Users/Shared/n8n-workflows`
-- [ ] Berechtigungen gesetzt (`fix-permissions.sh` ausgeführt)
-- [ ] Symlinks für alle Benutzer erstellt
-- [ ] Git Pull durchgeführt (`git pull origin main`) um neueste Änderungen zu holen
-- [ ] Cursor Workspace-Storage geprüft (`check-cursor-workspace.sh`)
-- [ ] Workspace in Cursor geöffnet (über Symlink!)
+- [ ] Git Repository geklont nach `/Users/Shared/n8n-workflows` (Schritt 3.1)
+- [ ] Berechtigungen gesetzt (`fix-permissions.sh` ausgeführt) (Schritt 3.2)
+- [ ] Symlinks für alle Benutzer erstellt (Schritt 3.3)
+- [ ] Git Pull durchgeführt (`git pull origin main`) um neueste Änderungen zu holen (Schritt 3.4)
+- [ ] Cursor Workspace-Storage geprüft (`check-cursor-workspace.sh`) (Schritt 3.5)
+- [ ] Workspace in Cursor geöffnet (über Symlink!) (Schritt 3.5)
+- [ ] Schreibzugriff getestet (Test-Datei erstellen) (Schritt 3.6)
 - [ ] Git funktioniert (`git status`)
-- [ ] Schreibzugriff funktioniert (Test-Datei erstellen)
 
 ---
 

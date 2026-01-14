@@ -19,10 +19,25 @@ fi
 echo "📁 Workspace: $WORKSPACE_DIR"
 echo ""
 
+# Benutzer für Owner-Berechtigung
+# Primärer Benutzer: kunkel (falls vorhanden)
+# Falls nicht vorhanden, automatisch ersten Benutzer erkennen
+if [ -d "/Users/kunkel" ]; then
+    OWNER_USER="kunkel"
+else
+    OWNER_USER=$(ls -1 /Users | grep -v "^Shared$" | grep -v "^Guest" | head -1)
+    if [ -z "$OWNER_USER" ]; then
+        OWNER_USER=$(whoami)
+    fi
+fi
+
+echo "👤 Owner-Benutzer: $OWNER_USER"
+echo ""
+
 # Owner und Gruppe setzen
 echo "🔐 Schritt 1: Setze Owner/Gruppe..."
-sudo chown -R hpcn:staff "$WORKSPACE_DIR"
-echo "✅ Owner/Gruppe gesetzt"
+sudo chown -R "$OWNER_USER:staff" "$WORKSPACE_DIR"
+echo "✅ Owner/Gruppe gesetzt ($OWNER_USER:staff)"
 
 # Verzeichnisse: 775 (rwxrwxr-x)
 echo ""
