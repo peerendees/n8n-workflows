@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-02T16:04:00.473Z",
+  "updatedAt": "2026-01-20T19:11:52.654Z",
   "createdAt": "2026-01-02T15:51:21.900Z",
   "id": "b2iHqxoS7bY4geyi",
   "name": "n8n → GitHub Sicherung",
@@ -1017,8 +1017,8 @@
   },
   "meta": null,
   "pinData": {},
-  "versionId": "3345b319-6144-4f8d-8758-a70de4b25783",
-  "activeVersionId": "3345b319-6144-4f8d-8758-a70de4b25783",
+  "versionId": "7e8c3b7e-acf1-4854-84a7-ef3898cbedf7",
+  "activeVersionId": "7e8c3b7e-acf1-4854-84a7-ef3898cbedf7",
   "triggerCount": 1,
   "shared": [
     {
@@ -1030,9 +1030,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-01-14T13:55:56.000Z",
-    "createdAt": "2026-01-02T16:04:00.474Z",
-    "versionId": "3345b319-6144-4f8d-8758-a70de4b25783",
+    "updatedAt": "2026-01-20T19:11:52.655Z",
+    "createdAt": "2026-01-20T19:11:52.655Z",
+    "versionId": "7e8c3b7e-acf1-4854-84a7-ef3898cbedf7",
     "workflowId": "b2iHqxoS7bY4geyi",
     "nodes": [
       {
@@ -1098,7 +1098,7 @@
       },
       {
         "parameters": {
-          "content": "## Version v3.1\n- Archiv-Bereinigung Aktiv\n- Rekursiver Link Fix",
+          "content": "## Version v3.2\n- Archiv-Bereinigung Aktiv\n- Rucksack-Flow Fix",
           "height": 113,
           "width": 234
         },
@@ -1113,8 +1113,41 @@
       },
       {
         "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 1
+            },
+            "conditions": [
+              {
+                "id": "check-skip-condition",
+                "leftValue": "={{ $json.skipIteration }}",
+                "rightValue": true,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "notEquals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "check-skip",
+        "name": "Check Skip",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          60,
+          -512
+        ]
+      },
+      {
+        "parameters": {
           "mode": "runOnceForEachItem",
-          "jsCode": "const r = $json; // Rucksack\nconst wf = r.workflows[r.index];\n\n// Überspringe archivierte Workflows\nif (wf.isArchived === true) {\n  return null;\n}\n\nconst workflowId = wf.id || '';\nconst workflowName = wf.name || 'Unnamed Workflow';\nconst cleanName = String(workflowName).replace(/[^a-zA-Z0-9-_äöüÄÖÜß ]/g, '').replace(/\\s+/g, '-').toLowerCase();\n\n// Neue Struktur: n8n/{workflowId}/{workflowName}.json\nconst dateipfad = `n8n/${workflowId}/${cleanName}.json`;\nconst workflowContent = Buffer.from(JSON.stringify(wf, null, 2)).toString('base64');\n\nreturn {\n  ...r,\n  workflowId: workflowId,\n  workflowName: workflowName,\n  workflowData: wf,\n  dateipfad: dateipfad,\n  workflowContent: workflowContent,\n  updatedAt: wf.updatedAt || wf.createdAt || new Date().toISOString()\n};"
+          "jsCode": "const r = $json; // Rucksack\nconst wf = r.workflows[r.index];\n\nconst workflowId = wf.id || '';\nconst workflowName = wf.name || 'Unnamed Workflow';\nconst cleanName = String(workflowName).replace(/[^a-zA-Z0-9-_äöüÄÖÜß ]/g, '').replace(/\\s+/g, '-').toLowerCase();\n\n// Neue Struktur: n8n/${workflowId}/${cleanName}.json\nconst dateipfad = `n8n/${workflowId}/${cleanName}.json`;\nconst workflowContent = Buffer.from(JSON.stringify(wf, null, 2)).toString('base64');\n\n// Archiv-Logik: löschen statt sichern?\nlet actionOverride = null;\nif (wf.isArchived === true) {\n  actionOverride = 'delete';\n}\n\nreturn {\n  ...r,\n  workflowId: workflowId,\n  workflowName: workflowName,\n  workflowData: wf,\n  dateipfad: dateipfad,\n  workflowContent: workflowContent,\n  updatedAt: wf.updatedAt || wf.createdAt || new Date().toISOString(),\n  actionOverride: actionOverride,\n  skipIteration: false\n};"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
@@ -1166,7 +1199,7 @@
       },
       {
         "parameters": {
-          "jsCode": "const r = $json; // Rucksack\nconst githubFile = $node[\"Prüfe GitHub Datei\"].json;\n\nlet action = 'skip';\nlet sha = null;\nlet alteDateiZuLoeschen = null;\nlet debugInfo = {};\n\n// Debug: Log GitHub File Status\ndebugInfo.githubFileExists = !!githubFile;\ndebugInfo.hasError = !!(githubFile && githubFile.error);\ndebugInfo.hasSha = !!(githubFile && githubFile.sha);\ndebugInfo.errorMessage = githubFile && githubFile.error ? (githubFile.error.message || JSON.stringify(githubFile.error)) : null;\n\n// Prüfe ob Datei auf GitHub existiert\nif (githubFile && !githubFile.error && githubFile.sha) {\n  sha = githubFile.sha;\n  \n  // Vergleich: Inhalt geändert?\n  const remoteContent = (githubFile.content || '').replace(/\\s/g, '');\n  const localContent = (r.workflowContent || '').replace(/\\s/g, '');\n  \n  debugInfo.contentMatch = remoteContent === localContent;\n  \n  if (remoteContent !== localContent) {\n    action = 'update';\n  }\n} else {\n  // Datei existiert nicht - könnte umbenannt worden sein\n  // Prüfe ob Ordner existiert und andere Dateien enthält\n  action = 'create';\n  debugInfo.reason = 'Datei existiert nicht in neuer Struktur';\n}\n\ndebugInfo.action = action;\ndebugInfo.dateipfad = r.dateipfad;\ndebugInfo.workflowId = r.workflowId;\ndebugInfo.workflowName = r.workflowName;\n\nreturn {\n  ...r,\n  action: action,\n  sha: sha,\n  alteDateiZuLoeschen: alteDateiZuLoeschen,\n  debugInfo: debugInfo\n};"
+          "jsCode": "const r = $node[\"Extrahiere Workflow\"].json;\nconst githubFile = $node[\"Prüfe GitHub Datei\"].json;\n\nlet action = 'skip';\nlet sha = null;\n\n// Falls im vorherigen Node bereits 'delete' bestimmt wurde (weil archiviert)\nif (r.actionOverride === 'delete') {\n  if (githubFile && !githubFile.error && githubFile.sha) {\n    action = 'delete';\n    sha = githubFile.sha;\n  } else {\n    action = 'skip'; // Archiviert but not on GitHub\n  }\n} else if (githubFile && !githubFile.error && githubFile.sha) {\n  sha = githubFile.sha;\n  const remoteContent = (githubFile.content || '').replace(/\\s/g, '');\n  const localContent = (r.workflowContent || '').replace(/\\s/g, '');\n  if (remoteContent !== localContent) {\n    action = 'update';\n  }\n} else {\n  action = 'create';\n}\n\nreturn {\n  ...r,\n  action: action,\n  sha: sha\n};"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
@@ -1184,11 +1217,11 @@
               "caseSensitive": true,
               "leftValue": "",
               "typeValidation": "strict",
-              "version": 3
+              "version": 1
             },
             "conditions": [
               {
-                "id": "check-action",
+                "id": "check-is-skip",
                 "leftValue": "={{ $json.action }}",
                 "rightValue": "skip",
                 "operator": {
@@ -1198,17 +1231,89 @@
               }
             ],
             "combinator": "and"
-          },
-          "options": {}
+          }
         },
+        "id": "pruefe-ob-sichern",
+        "name": "Prüfe ob Sichern/Löschen",
         "type": "n8n-nodes-base.if",
-        "typeVersion": 2.3,
+        "typeVersion": 2,
         "position": [
           848,
           -584
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 1
+            },
+            "conditions": [
+              {
+                "id": "check-is-delete",
+                "leftValue": "={{ $json.action }}",
+                "rightValue": "delete",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          }
+        },
+        "id": "entscheide-löschen",
+        "name": "Entscheide Löschen",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          1000,
+          -750
+        ]
+      },
+      {
+        "parameters": {
+          "method": "DELETE",
+          "url": "=https://api.github.com/repos/peerendees/n8n-workflows/contents/{{ $json.dateipfad }}",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendBody": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "message",
+                "value": "=🗑️ Auto-Backup: Archivierten Workflow von GitHub gelöscht"
+              },
+              {
+                "name": "sha",
+                "value": "={{ $json.sha }}"
+              },
+              {
+                "name": "branch",
+                "value": "main"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "Lösche Archivdatei",
+        "name": "Lösche Archivdatei",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.1,
+        "position": [
+          1200,
+          -850
         ],
-        "id": "pruefe-ob-sichern",
-        "name": "Prüfe ob Sichern"
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "aZMd0okvVFkvyGnj",
+            "name": "GitHub Token"
+          }
+        },
+        "onError": "continueRegularOutput"
       },
       {
         "parameters": {
@@ -1442,7 +1547,7 @@
       {
         "parameters": {
           "mode": "runOnceForEachItem",
-          "jsCode": "// Aktualisiere Statistiken\nconst r = $node[\"Extrahiere Workflow\"].json;\nconst actionData = $node[\"Bestimme Handlung\"].json;\n\n// Erfasse Ergebnis der Aktion (HTTP Antworten)\nlet githubResponse = {};\ntry {\n  if (actionData.action === 'delete') {\n    githubResponse = $node[\"Lösche Archivdatei\"].json;\n  } else if (actionData.action === 'create' || actionData.action === 'update') {\n    githubResponse = $node[\"Sichere auf GitHub\"].json;\n  }\n} catch (e) {}\n\n// Inkrementiere Zähler im Rucksack\nif (actionData.action === 'create') {\n  r.neu++;\n} else if (actionData.action === 'update') {\n  r.updates++;\n} else if (actionData.action === 'delete') {\n  // Archivlöschung werten wir als Skip für die Hauptstatistik\n  // Aber wir vermerken es in der Tabelle\n  r.skip++;\n} else {\n  r.skip++;\n}\n\n// Eintrag in Tabelle\nif (actionData.action !== 'skip') {\n  const status = (githubResponse && githubResponse.error) ? '❌ Fehler' : '✅ Erfolg';\n  const label = actionData.action === 'delete' ? 'GELÖSCHT' : (actionData.action === 'create' ? 'NEU' : 'UPDATE');\n  r.tabelle.push(`${status} ${label}: ${r.workflowId} - ${r.workflowName || 'Unbekannt'}`);\n}\n\nr.index++;\nreturn r;"
+          "jsCode": "// Aktualisiere Statistiken\n// Hole Rucksack von Prüfe alte Dateien\nlet r;\ntry {\n  r = $node[\"Prüfe alte Dateien\"].json;\n} catch (e) {\n  // Fallback: Hole von Bestimme Handlung\n  try {\n    r = $node[\"Bestimme Handlung\"].json;\n  } catch (e2) {\n    r = {};\n  }\n}\n\n// Stelle sicher, dass r ein Objekt ist\nif (!r || typeof r !== 'object') {\n  r = {};\n}\n\nconst githubResponse = r.githubResponse || {};\n\n// Stelle sicher, dass alle Felder vorhanden sind\nif (!Array.isArray(r.tabelle)) r.tabelle = [];\nif (typeof r.neu !== 'number') r.neu = 0;\nif (typeof r.updates !== 'number') r.updates = 0;\nif (typeof r.skip !== 'number') r.skip = 0;\nif (typeof r.index !== 'number') r.index = 0;\nif (!Array.isArray(r.alteDateien)) r.alteDateien = [];\n\nif (r.action === 'create') {\n  r.neu++;\n} else if (r.action === 'update') {\n  r.updates++;\n} else {\n  r.skip++;\n}\n\n// Füge zur Tabelle hinzu\nif (r.action !== 'skip') {\n  const status = githubResponse.error ? '❌ Fehler' : '✅ Erfolg';\n  const alteDateienInfo = r.alteDateien && r.alteDateien.length > 0 ? ` (${r.alteDateien.length} alte Datei${r.alteDateien.length > 1 ? 'en' : ''} gelöscht)` : '';\n  r.tabelle.push(`${status} ${r.action === 'create' ? 'NEU' : 'UPDATE'}: ${r.workflowName || 'Unbekannt'}${alteDateienInfo}`);\n}\n\n// Zähler erhöhen\nr.index++;\n\nreturn r;"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
@@ -1930,8 +2035,8 @@
       }
     },
     "authors": "Marcus Kunkel",
-    "name": "Version v3.2 - Rucksack Flow Fix",
-    "description": "",
+    "name": null,
+    "description": null,
     "autosaved": false
   },
   "tags": []
