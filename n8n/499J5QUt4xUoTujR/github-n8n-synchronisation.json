@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-20T18:57:35.346Z",
+  "updatedAt": "2026-01-20T19:40:49.011Z",
   "createdAt": "2026-01-02T14:58:17.255Z",
   "id": "499J5QUt4xUoTujR",
   "name": "GitHub → n8n Synchronisation",
@@ -578,8 +578,8 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "d7290e39-bc5a-49c6-9937-53c583da10ef",
-  "activeVersionId": "d7290e39-bc5a-49c6-9937-53c583da10ef",
+  "versionId": "4d7b0bec-6154-4e57-a29a-0c3e8f65ab43",
+  "activeVersionId": "4d7b0bec-6154-4e57-a29a-0c3e8f65ab43",
   "triggerCount": 1,
   "shared": [
     {
@@ -591,9 +591,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-01-20T18:57:57.000Z",
-    "createdAt": "2026-01-20T18:57:35.347Z",
-    "versionId": "d7290e39-bc5a-49c6-9937-53c583da10ef",
+    "updatedAt": "2026-01-20T19:40:49.013Z",
+    "createdAt": "2026-01-20T19:40:49.013Z",
+    "versionId": "4d7b0bec-6154-4e57-a29a-0c3e8f65ab43",
     "workflowId": "499J5QUt4xUoTujR",
     "nodes": [
       {
@@ -867,7 +867,7 @@
       },
       {
         "parameters": {
-          "jsCode": "// Vorbereite workflowData für Update\n// NUR die 4 Pflichtfelder - KEINE zusätzlichen Felder!\nconst analysiereData = $json;\nconst parseData = $node[\"Parse Workflow\"].json;\nconst workflowData = parseData.workflowData || {};\nconst workflowName = parseData.workflowName || 'Unnamed Workflow';\n\n// NUR die absolut notwendigen Felder - identisch mit Create!\nconst finalWorkflowData = {\n  name: workflowName,\n  nodes: workflowData.nodes || [],\n  connections: workflowData.connections || {},\n  settings: workflowData.settings || {\n    executionOrder: 'v1'\n  }\n};\n\n// WICHTIG: Keine weiteren Felder!\n// description, active, tags, staticData, meta, pinData, id, createdAt, updatedAt werden NICHT gesendet\n// Diese werden von n8n automatisch verwaltet\n\nreturn {\n  workflowId: analysiereData.workflowId,\n  workflowName: analysiereData.workflowName,\n  filePath: analysiereData.filePath,\n  exists: analysiereData.exists,\n  workflowData: finalWorkflowData\n};"
+          "jsCode": "// Vorbereite workflowData für Update\nconst analysiereData = $json;\nconst parseData = $node[\"Parse Workflow\"].json;\nconst workflowData = parseData.workflowData || {};\nconst workflowName = parseData.workflowName || 'Unnamed Workflow';\n\n// Pflichtfelder + active status\nconst finalWorkflowData = {\n  name: workflowName,\n  nodes: workflowData.nodes || [],\n  connections: workflowData.connections || {},\n  active: workflowData.active === true,\n  settings: workflowData.settings || {\n    executionOrder: 'v1'\n  }\n};\n\nreturn {\n  workflowId: analysiereData.workflowId,\n  workflowName: analysiereData.workflowName,\n  filePath: analysiereData.filePath,\n  exists: analysiereData.exists,\n  workflowData: finalWorkflowData\n};"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
@@ -934,7 +934,7 @@
       },
       {
         "parameters": {
-          "jsCode": "// Vorbereite workflowData für Erstellen\n// NUR die 4 Pflichtfelder für n8n API beim Erstellen\nconst parseData = $node[\"Parse Workflow\"].json;\nconst workflowData = parseData.workflowData || {};\nconst workflowName = parseData.workflowName || 'Unnamed Workflow';\n\n// Nur die absolut notwendigen Felder - keine optionalen Felder!\nconst finalWorkflowData = {\n  name: workflowName,\n  nodes: workflowData.nodes || [],\n  connections: workflowData.connections || {},\n  settings: workflowData.settings || {\n    executionOrder: 'v1'\n  }\n};\n\n// WICHTIG: Keine weiteren Felder hinzufügen!\n// description, active, tags, staticData, meta, pinData werden NICHT gesendet\n// Diese werden von n8n automatisch gesetzt oder beim Update hinzugefügt\n\n// Erstelle Body-String direkt hier\nconst bodyString = JSON.stringify(finalWorkflowData);\n\nreturn {\n  ...parseData,\n  workflowData: finalWorkflowData,\n  bodyString: bodyString,\n  debug: {\n    hasName: !!finalWorkflowData.name,\n    nameValue: finalWorkflowData.name,\n    hasSettings: !!finalWorkflowData.settings,\n    hasConnections: !!finalWorkflowData.connections,\n    fields: Object.keys(finalWorkflowData)\n  }\n};"
+          "jsCode": "// Vorbereite workflowData für Erstellen\nconst parseData = $node[\"Parse Workflow\"].json;\nconst workflowData = parseData.workflowData || {};\nconst workflowName = parseData.workflowName || 'Unnamed Workflow';\n\n// Pflichtfelder + active status\nconst finalWorkflowData = {\n  name: workflowName,\n  nodes: workflowData.nodes || [],\n  connections: workflowData.connections || {},\n  active: workflowData.active === true,\n  settings: workflowData.settings || {\n    executionOrder: 'v1'\n  }\n};\n\nreturn {\n  ...parseData,\n  workflowData: finalWorkflowData\n};"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
@@ -1161,8 +1161,8 @@
       }
     },
     "authors": "Marcus Kunkel",
-    "name": "Version d7290e39",
-    "description": "Überarbeitete Version",
+    "name": null,
+    "description": null,
     "autosaved": false
   },
   "tags": []
