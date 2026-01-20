@@ -69,8 +69,41 @@
     },
     {
       "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "check-skip-condition",
+              "leftValue": "={{ $json.skipIteration }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-skip",
+      "name": "Check Skip",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        60,
+        -512
+      ]
+    },
+    {
+      "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const r = $json; // Rucksack\nconst wf = r.workflows[r.index];\n\n// Überspringe archivierte Workflows\nif (wf.isArchived === true) {\n  return null;\n}\n\nconst workflowId = wf.id || '';\nconst workflowName = wf.name || 'Unnamed Workflow';\nconst cleanName = String(workflowName).replace(/[^a-zA-Z0-9-_äöüÄÖÜß ]/g, '').replace(/\\s+/g, '-').toLowerCase();\n\n// Neue Struktur: n8n/{workflowId}/{workflowName}.json\nconst dateipfad = `n8n/${workflowId}/${cleanName}.json`;\nconst workflowContent = Buffer.from(JSON.stringify(wf, null, 2)).toString('base64');\n\nreturn {\n  ...r,\n  workflowId: workflowId,\n  workflowName: workflowName,\n  workflowData: wf,\n  dateipfad: dateipfad,\n  workflowContent: workflowContent,\n  updatedAt: wf.updatedAt || wf.createdAt || new Date().toISOString()\n};"
+        "jsCode": "const r = $json; // Rucksack\nconst wf = r.workflows[r.index];\n\n// Default values\nlet skipIteration = false;\n\n// Überspringe archivierte Workflows\nif (wf.isArchived === true) {\n  skipIteration = true;\n}\n\nif (skipIteration) {\n    return { ...r, skipIteration: true };\n}\n\nconst workflowId = wf.id || '';\nconst workflowName = wf.name || 'Unnamed Workflow';\nconst cleanName = String(workflowName).replace(/[^a-zA-Z0-9-_äöüÄÖÜß ]/g, '').replace(/\\s+/g, '-').toLowerCase();\n\n// Neue Struktur: n8n/${workflowId}/${cleanName}.json\nconst dateipfad = `n8n/${workflowId}/${cleanName}.json`;\nconst workflowContent = Buffer.from(JSON.stringify(wf, null, 2)).toString('base64');\n\nreturn {\n  ...r,\n  workflowId: workflowId,\n  workflowName: workflowName,\n  workflowData: wf,\n  dateipfad: dateipfad,\n  workflowContent: workflowContent,\n  updatedAt: wf.updatedAt || wf.createdAt || new Date().toISOString(),\n  skipIteration: false\n};"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -605,22 +638,40 @@
         ]
       ]
     },
-    "Initialisierung": {
+    "initialisierung": {
       "main": [
         [
           {
-            "node": "Extrahiere Workflow",
+            "node": "extrahiere-workflow",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Extrahiere Workflow": {
+    "extrahiere-workflow": {
       "main": [
         [
           {
-            "node": "Prüfe GitHub Datei",
+            "node": "check-skip",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "check-skip": {
+      "main": [
+        [
+          {
+            "node": "pruefe-github-datei",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "skip-statistik",
             "type": "main",
             "index": 0
           }
@@ -1482,7 +1533,25 @@
         "main": [
           [
             {
+              "node": "Check Skip",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Check Skip": {
+        "main": [
+          [
+            {
               "node": "Prüfe GitHub Datei",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Skip Statistik",
               "type": "main",
               "index": 0
             }
