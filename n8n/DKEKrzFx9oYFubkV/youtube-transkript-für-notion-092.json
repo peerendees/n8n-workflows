@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-23T22:49:15.404Z",
+  "updatedAt": "2026-01-20T12:44:25.123Z",
   "createdAt": "2025-11-11T22:30:16.638Z",
   "id": "DKEKrzFx9oYFubkV",
   "name": "YouTube-Transkript für Notion 0.9.2",
@@ -332,7 +332,9 @@
     }
   },
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
   },
   "staticData": null,
   "meta": {
