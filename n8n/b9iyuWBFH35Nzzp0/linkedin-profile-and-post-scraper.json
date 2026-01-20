@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-11-11T19:11:17.811Z",
+  "updatedAt": "2026-01-20T12:45:46.509Z",
   "createdAt": "2025-11-11T19:11:17.811Z",
   "id": "b9iyuWBFH35Nzzp0",
   "name": "LinkedIn Profile and Post Scraper",
@@ -8,7 +8,9 @@
   "nodes": [],
   "connections": {},
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
   },
   "staticData": null,
   "meta": null,
