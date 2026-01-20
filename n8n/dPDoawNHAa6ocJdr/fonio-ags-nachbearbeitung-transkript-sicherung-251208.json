@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-08T15:12:07.204Z",
+  "updatedAt": "2026-01-20T12:45:57.899Z",
   "createdAt": "2025-12-08T15:12:07.204Z",
   "id": "dPDoawNHAa6ocJdr",
   "name": "fonio AGS Nachbearbeitung Transkript Sicherung 251208",
@@ -147,7 +147,7 @@
       "credentials": {
         "googleApi": {
           "id": "vRVq7GTwn9kTIi8N",
-          "name": "Google Sheets account 2"
+          "name": "n8n Sheets Service"
         }
       }
     },
@@ -230,7 +230,7 @@
       "credentials": {
         "smtp": {
           "id": "8O5B5z4vS8yeagJh",
-          "name": "SMTP account"
+          "name": "AGS SMTP Einstellungen"
         }
       }
     }
@@ -320,7 +320,9 @@
     }
   },
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
   },
   "staticData": null,
   "meta": {
