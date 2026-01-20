@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-09T06:09:21.164Z",
+  "updatedAt": "2026-01-20T12:46:51.253Z",
   "createdAt": "2025-12-09T06:09:21.164Z",
   "id": "kgTzmuCqtvJrv16s",
   "name": "fonio AGS Nachbearbeitung Transkript 20251209",
@@ -422,7 +422,9 @@
     }
   },
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
   },
   "staticData": null,
   "meta": {
