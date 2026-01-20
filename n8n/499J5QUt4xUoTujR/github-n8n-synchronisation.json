@@ -23,30 +23,6 @@
       "webhookId": "github-sync-webhook"
     },
     {
-      "parameters": {},
-      "id": "manual-sync-trigger",
-      "name": "Manueller Sync",
-      "type": "n8n-nodes-base.manualTrigger",
-      "typeVersion": 1,
-      "position": [
-        -720,
-        -864
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "return [\n  { filePath: 'n8n/b2iHqxoS7bY4geyi/n8n-github-sicherung.json' },\n  { filePath: 'n8n/499J5QUt4xUoTujR/github-n8n-synchronisation.json' }\n];"
-      },
-      "id": "manual-file-list",
-      "name": "Manuelle Dateiliste",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -496,
-        -864
-      ]
-    },
-    {
       "parameters": {
         "conditions": {
           "options": {
@@ -1204,29 +1180,7 @@
         "main": [
           []
         ]
-      },
-      "Manueller Sync": {
-        "main": [
-          [
-            {
-              "node": "Manuelle Dateiliste",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Manuelle Dateiliste": {
-        "main": [
-          [
-            {
-              "node": "Vorbereiten Datei",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
+      }
     },
     "authors": "Marcus Kunkel",
     "name": "Version 95430e04",

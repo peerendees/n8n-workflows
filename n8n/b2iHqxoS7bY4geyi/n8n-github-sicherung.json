@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-20T16:15:00.000Z", // Sync Pulse Fix
+  "updatedAt": "2026-01-02T16:04:00.473Z",
   "createdAt": "2026-01-02T15:51:21.900Z",
   "id": "b2iHqxoS7bY4geyi",
   "name": "n8n → GitHub Sicherung",
@@ -103,7 +103,7 @@
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const r = $json; // Rucksack\nconst wf = r.workflows[r.index];\n\n// Default values\nlet skipIteration = false;\n\n// Überspringe archivierte Workflows\nif (wf.isArchived === true) {\n  skipIteration = true;\n}\n\nif (skipIteration) {\n    return { ...r, skipIteration: true };\n}\n\nconst workflowId = wf.id || '';\nconst workflowName = wf.name || 'Unnamed Workflow';\nconst cleanName = String(workflowName).replace(/[^a-zA-Z0-9-_äöüÄÖÜß ]/g, '').replace(/\\s+/g, '-').toLowerCase();\n\n// Neue Struktur: n8n/${workflowId}/${cleanName}.json\nconst dateipfad = `n8n/${workflowId}/${cleanName}.json`;\nconst workflowContent = Buffer.from(JSON.stringify(wf, null, 2)).toString('base64');\n\nreturn {\n  ...r,\n  workflowId: workflowId,\n  workflowName: workflowName,\n  workflowData: wf,\n  dateipfad: dateipfad,\n  workflowContent: workflowContent,\n  updatedAt: wf.updatedAt || wf.createdAt || new Date().toISOString(),\n  skipIteration: false\n};"
+        "jsCode": "const r = $json; // Rucksack\nconst wf = r.workflows[r.index];\n\nconst workflowId = wf.id || '';\nconst workflowName = wf.name || 'Unnamed Workflow';\nconst cleanName = String(workflowName).replace(/[^a-zA-Z0-9-_äöüÄÖÜß ]/g, '').replace(/\\s+/g, '-').toLowerCase();\n\n// Neue Struktur: n8n/${workflowId}/${cleanName}.json\nconst dateipfad = `n8n/${workflowId}/${cleanName}.json`;\nconst workflowContent = Buffer.from(JSON.stringify(wf, null, 2)).toString('base64');\n\n// Archiv-Logik: löschen statt sichern?\nlet actionOverride = null;\nif (wf.isArchived === true) {\n  actionOverride = 'delete';\n}\n\nreturn {\n  ...r,\n  workflowId: workflowId,\n  workflowName: workflowName,\n  workflowData: wf,\n  dateipfad: dateipfad,\n  workflowContent: workflowContent,\n  updatedAt: wf.updatedAt || wf.createdAt || new Date().toISOString(),\n  actionOverride: actionOverride,\n  skipIteration: false\n};"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -155,7 +155,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const r = $json; // Rucksack\nconst githubFile = $node[\"Prüfe GitHub Datei\"].json;\n\nlet action = 'skip';\nlet sha = null;\nlet alteDateiZuLoeschen = null;\nlet debugInfo = {};\n\n// Debug: Log GitHub File Status\ndebugInfo.githubFileExists = !!githubFile;\ndebugInfo.hasError = !!(githubFile && githubFile.error);\ndebugInfo.hasSha = !!(githubFile && githubFile.sha);\ndebugInfo.errorMessage = githubFile && githubFile.error ? (githubFile.error.message || JSON.stringify(githubFile.error)) : null;\n\n// Prüfe ob Datei auf GitHub existiert\nif (githubFile && !githubFile.error && githubFile.sha) {\n  sha = githubFile.sha;\n  \n  // Vergleich: Inhalt geändert?\n  const remoteContent = (githubFile.content || '').replace(/\\s/g, '');\n  const localContent = (r.workflowContent || '').replace(/\\s/g, '');\n  \n  debugInfo.contentMatch = remoteContent === localContent;\n  \n  if (remoteContent !== localContent) {\n    action = 'update';\n  }\n} else {\n  // Datei existiert nicht - könnte umbenannt worden sein\n  // Prüfe ob Ordner existiert und andere Dateien enthält\n  action = 'create';\n  debugInfo.reason = 'Datei existiert nicht in neuer Struktur';\n}\n\ndebugInfo.action = action;\ndebugInfo.dateipfad = r.dateipfad;\ndebugInfo.workflowId = r.workflowId;\ndebugInfo.workflowName = r.workflowName;\n\nreturn {\n  ...r,\n  action: action,\n  sha: sha,\n  alteDateiZuLoeschen: alteDateiZuLoeschen,\n  debugInfo: debugInfo\n};"
+        "jsCode": "const r = $json; // Rucksack\nconst githubFile = $node[\"Prüfe GitHub Datei\"].json;\n\nlet action = 'skip';\nlet sha = null;\nlet debugInfo = {};\n\n// Falls im vorherigen Node bereits 'delete' bestimmt wurde (weil archiviert)\nif (r.actionOverride === 'delete') {\n  if (githubFile && !githubFile.error && githubFile.sha) {\n    action = 'delete';\n    sha = githubFile.sha;\n  } else {\n    action = 'skip'; // Archiviert but not on GitHub\n  }\n} else if (githubFile && !githubFile.error && githubFile.sha) {\n  sha = githubFile.sha;\n  const remoteContent = (githubFile.content || '').replace(/\\s/g, '');\n  const localContent = (r.workflowContent || '').replace(/\\s/g, '');\n  if (remoteContent !== localContent) {\n    action = 'update';\n  }\n} else {\n  action = 'create';\n}\n\nreturn {\n  ...r,\n  action: action,\n  sha: sha\n};"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -173,11 +173,11 @@
             "caseSensitive": true,
             "leftValue": "",
             "typeValidation": "strict",
-            "version": 3
+            "version": 1
           },
           "conditions": [
             {
-              "id": "check-action",
+              "id": "check-is-skip",
               "leftValue": "={{ $json.action }}",
               "rightValue": "skip",
               "operator": {
@@ -187,17 +187,89 @@
             }
           ],
           "combinator": "and"
-        },
-        "options": {}
+        }
       },
+      "id": "pruefe-ob-sichern",
+      "name": "Prüfe ob Sichern/Löschen",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2,
       "position": [
         848,
         -584
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "check-is-delete",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "delete",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "entscheide-löschen",
+      "name": "Entscheide Löschen",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1000,
+        -750
+      ]
+    },
+    {
+      "parameters": {
+        "method": "DELETE",
+        "url": "=https://api.github.com/repos/peerendees/n8n-workflows/contents/{{ $json.dateipfad }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "message",
+              "value": "=🗑️ Auto-Backup: Archivierten Workflow von GitHub gelöscht"
+            },
+            {
+              "name": "sha",
+              "value": "={{ $json.sha }}"
+            },
+            {
+              "name": "branch",
+              "value": "main"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "Lösche Archivdatei",
+      "name": "Lösche Archivdatei",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1200,
+        -850
       ],
-      "id": "pruefe-ob-sichern",
-      "name": "Prüfe ob Sichern"
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "aZMd0okvVFkvyGnj",
+          "name": "GitHub Token"
+        }
+      },
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -693,18 +765,18 @@
       "main": [
         [
           {
-            "node": "Prüfe ob Sichern",
+            "node": "Prüfe ob Sichern/Löschen",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Prüfe ob Sichern": {
+    "Prüfe ob Sichern/Löschen": {
       "main": [
         [
           {
-            "node": "Sichere auf GitHub",
+            "node": "Entscheide Löschen",
             "type": "main",
             "index": 0
           }
@@ -712,6 +784,35 @@
         [
           {
             "node": "Skip Statistik",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Entscheide Löschen": {
+      "main": [
+        [
+          {
+            "node": "Lösche Archivdatei",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Sichere auf GitHub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lösche Archivdatei": {
+      "main": [
+        [
+          {
+            "node": "Aktualisiere Statistik",
             "type": "main",
             "index": 0
           }
@@ -1569,22 +1670,11 @@
           ]
         ]
       },
-      "Bestimme Handlung": {
+      "Prüfe ob Sichern/Löschen": {
         "main": [
           [
             {
-              "node": "Prüfe ob Sichern",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Prüfe ob Sichern": {
-        "main": [
-          [
-            {
-              "node": "Sichere auf GitHub",
+              "node": "Entscheide Löschen",
               "type": "main",
               "index": 0
             }
@@ -1592,6 +1682,35 @@
           [
             {
               "node": "Skip Statistik",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Entscheide Löschen": {
+        "main": [
+          [
+            {
+              "node": "Lösche Archivdatei",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Sichere auf GitHub",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Lösche Archivdatei": {
+        "main": [
+          [
+            {
+              "node": "Aktualisiere Statistik",
               "type": "main",
               "index": 0
             }
@@ -1770,7 +1889,7 @@
       }
     },
     "authors": "Marcus Kunkel",
-    "name": "Version 3345b319",
+    "name": "Version v3.0 - Loop Fix & Archive Cleanup",
     "description": "",
     "autosaved": false
   },
