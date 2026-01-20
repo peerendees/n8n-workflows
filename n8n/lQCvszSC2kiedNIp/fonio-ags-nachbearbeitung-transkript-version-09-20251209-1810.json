@@ -292,7 +292,7 @@
       "maxTries": 5,
       "credentials": {
         "httpHeaderAuth": {
-          "id": "4gc7MePUZVuCyowB",
+          "id": "oaJkHRuARNWjW2UA",
           "name": "Header Auth account"
         },
         "httpBearerAuth": {

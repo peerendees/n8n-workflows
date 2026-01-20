@@ -49,8 +49,8 @@
       "name": "Hole alle Workflows",
       "credentials": {
         "httpHeaderAuth": {
-          "id": "4gc7MePUZVuCyowB",
-          "name": "API n8n"
+          "id": "oaJkHRuARNWjW2UA",
+          "name": "API n8n für n8n"
         }
       }
     },
@@ -911,8 +911,8 @@
         "name": "Hole alle Workflows",
         "credentials": {
           "httpHeaderAuth": {
-            "id": "4gc7MePUZVuCyowB",
-            "name": "API n8n"
+            "id": "oaJkHRuARNWjW2UA",
+            "name": "API n8n für n8n"
           }
         }
       },

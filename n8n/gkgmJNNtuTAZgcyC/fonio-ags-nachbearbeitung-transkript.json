@@ -319,7 +319,7 @@
       "maxTries": 5,
       "credentials": {
         "httpHeaderAuth": {
-          "id": "4gc7MePUZVuCyowB",
+          "id": "oaJkHRuARNWjW2UA",
           "name": "API n8n für Azure"
         },
         "httpBearerAuth": {
@@ -1074,7 +1074,7 @@
         "maxTries": 5,
         "credentials": {
           "httpHeaderAuth": {
-            "id": "4gc7MePUZVuCyowB",
+            "id": "oaJkHRuARNWjW2UA",
             "name": "API n8n für Azure"
           },
           "httpBearerAuth": {

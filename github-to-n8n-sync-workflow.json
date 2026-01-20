@@ -218,8 +218,8 @@
         "name": "Prüfe ob Workflow existiert",
         "credentials": {
           "httpHeaderAuth": {
-            "id": "4gc7MePUZVuCyowB",
-            "name": "API n8n"
+            "id": "oaJkHRuARNWjW2UA",
+            "name": "API n8n für n8n"
           }
         },
         "onError": "continueRegularOutput"
@@ -305,8 +305,8 @@
         "name": "Update Workflow",
         "credentials": {
           "httpHeaderAuth": {
-            "id": "4gc7MePUZVuCyowB",
-            "name": "API n8n"
+            "id": "oaJkHRuARNWjW2UA",
+            "name": "API n8n für n8n"
           }
         },
         "onError": "continueRegularOutput"
@@ -333,8 +333,8 @@
         "name": "Erstelle Workflow",
         "credentials": {
           "httpHeaderAuth": {
-            "id": "4gc7MePUZVuCyowB",
-            "name": "API n8n"
+            "id": "oaJkHRuARNWjW2UA",
+            "name": "API n8n für n8n"
           }
         },
         "onError": "continueRegularOutput"
