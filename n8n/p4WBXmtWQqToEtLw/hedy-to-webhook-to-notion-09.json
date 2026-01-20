@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-15T16:30:39.366Z",
+  "updatedAt": "2026-01-20T12:47:35.388Z",
   "createdAt": "2025-11-24T19:30:01.014Z",
   "id": "p4WBXmtWQqToEtLw",
   "name": "Hedy to Webhook to Notion 0.9",
@@ -130,7 +130,9 @@
     }
   },
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
   },
   "staticData": null,
   "meta": {
@@ -138,7 +140,7 @@
   },
   "pinData": {},
   "versionId": "11006de3-5f18-4b61-96ef-660493b6047a",
-  "activeVersionId": "8788c0a6-be5b-4b2e-bbc8-317828ec9e36",
+  "activeVersionId": "11006de3-5f18-4b61-96ef-660493b6047a",
   "triggerCount": 1,
   "shared": [
     {
@@ -150,9 +152,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-01-06T17:28:22.000Z",
-    "createdAt": "2026-01-05T20:52:11.600Z",
-    "versionId": "8788c0a6-be5b-4b2e-bbc8-317828ec9e36",
+    "updatedAt": "2026-01-15T16:30:39.369Z",
+    "createdAt": "2026-01-15T16:30:39.369Z",
+    "versionId": "11006de3-5f18-4b61-96ef-660493b6047a",
     "workflowId": "p4WBXmtWQqToEtLw",
     "nodes": [
       {
@@ -162,10 +164,10 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          2560,
-          240
+          3424,
+          608
         ],
-        "id": "8b862374-2f39-4c0a-b2ca-834f1216ce75",
+        "id": "407444d0-2fe9-4aa5-8f02-544b400c163c",
         "name": "Parse Hedy Daten"
       },
       {
@@ -173,10 +175,10 @@
           "resource": "databasePage",
           "databaseId": {
             "__rl": true,
-            "value": "50466f0c-d204-4e54-b2e5-d4d2f874e9e8",
+            "value": "2ca31cc6-fd56-8079-8a58-d74ec1097a36",
             "mode": "list",
-            "cachedResultName": "Hedy Events",
-            "cachedResultUrl": "https://www.notion.so/50466f0cd2044e54b2e5d4d2f874e9e8"
+            "cachedResultName": "Hedy Transkripte 0.9",
+            "cachedResultUrl": "https://www.notion.so/2ca31cc6fd5680798a58d74ec1097a36"
           },
           "title": "Hedy Transkript",
           "propertiesUi": {
@@ -218,11 +220,11 @@
         "type": "n8n-nodes-base.notion",
         "typeVersion": 2.2,
         "position": [
-          2784,
-          240
+          3648,
+          608
         ],
-        "id": "466fbad2-d590-4882-a535-d318ee406b7b",
-        "name": "Hedy Transkript 0.9",
+        "id": "10b7195b-9c75-40d0-9d99-f3a24a6761c6",
+        "name": "Hedy Events Notion 0.9",
         "credentials": {
           "notionApi": {
             "id": "KpKj51GJ0big0oYv",
@@ -240,12 +242,12 @@
         "type": "n8n-nodes-base.webhook",
         "typeVersion": 2.1,
         "position": [
-          2336,
-          240
+          3200,
+          608
         ],
-        "id": "d19757dc-1883-4c69-b951-9976e6e70bd2",
-        "name": "Webhook",
-        "webhookId": "87d92549-9d8e-4acd-9f07-7edcabc9baa5",
+        "id": "a6cf4fa8-e3b1-4b7f-8606-cac75e9ce15f",
+        "name": "Hedy Events API",
+        "webhookId": "b9081b42-f39a-4933-9964-4dcfa7aa227e",
         "credentials": {
           "httpHeaderAuth": {
             "id": "ddbOaicomtaiLVQV",
@@ -259,14 +261,14 @@
         "main": [
           [
             {
-              "node": "Hedy Transkript 0.9",
+              "node": "Hedy Events Notion 0.9",
               "type": "main",
               "index": 0
             }
           ]
         ]
       },
-      "Webhook": {
+      "Hedy Events API": {
         "main": [
           [
             {
@@ -279,8 +281,8 @@
       }
     },
     "authors": "Marcus Kunkel",
-    "name": "Version 8788c0a6",
-    "description": "",
+    "name": null,
+    "description": null,
     "autosaved": false
   },
   "tags": []
