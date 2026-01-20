@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-24T07:40:13.668Z",
+  "updatedAt": "2026-01-20T12:49:05.812Z",
   "createdAt": "2025-12-24T07:34:20.196Z",
   "id": "zRP9CikPPmQ6OPmC",
   "name": "Senden-/Empfangen-Trigger",
@@ -117,7 +117,9 @@
   ],
   "connections": {},
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
   },
   "staticData": null,
   "meta": null,
