@@ -115,7 +115,7 @@
       "webhookId": "694567e2-c3e8-4bfc-91af-aae5697aca36",
       "credentials": {
         "githubApi": {
-          "id": "uE78TkEY6lWLV4oP",
+          "id": "aZMd0okvVFkvyGnj",
           "name": "API GitHub"
         }
       },
@@ -658,7 +658,7 @@
       },
       {
         "parameters": {
-          "jsCode": "// Extrahiere geänderte Dateien aus GitHub Webhook\nconst body = $json.body || {};\nconst commits = body.commits || [];\nconst changedFiles = [];\n\n// Liste der Workflow-Suffixe, die synchronisiert werden sollen\nconst workflowSuffixes = [\n  '-workflow.json',\n  '-Workflow.json',\n  '-migration.json',\n  '-Migration.json',\n  '-backup.json',\n  '-Backup.json',\n  '-sync.json',\n  '-Sync.json'\n];\n\n// Sammle alle geänderten Dateien\nfor (const commit of commits) {\n  const added = commit.added || [];\n  const modified = commit.modified || [];\n  \n  for (const file of [...added, ...modified]) {\n    if (!file.endsWith('.json')) continue;\n    \n    // Workflow-Dateien:\n    // - Im n8n/ Verzeichnis (alte Struktur: n8n/workflow-name.json)\n    // - In n8n/{workflowId}/ (neue Struktur: n8n/{workflowId}/{workflowName}.json)\n    // - Im Root mit Workflow-Suffixen (z.B. github-to-n8n-sync-workflow.json, n8n-workflow-migration.json)\n    const isInN8nDir = file.startsWith('n8n/');\n    const hasWorkflowSuffix = workflowSuffixes.some(suffix => file.includes(suffix));\n    \n    // Ignoriere bekannte Config-Dateien im Root\n    const isConfigFile = ['package.json', 'tsconfig.json', 'package-lock.json'].includes(file.split('/').pop());\n    \n    if ((isInN8nDir || hasWorkflowSuffix) && !isConfigFile) {\n      changedFiles.push(file);\n    }\n  }\n}\n\nreturn changedFiles.map(file => ({ filePath: file }));"
+          "jsCode": "// Extrahiere geänderte Dateien aus GitHub Webhook\nconst body = $json.body || {};\nconst commits = body.commits || [];\nconst changedFiles = [];\n\n// Sammle alle geänderten Dateien\nfor (const commit of commits) {\n  const added = commit.added || [];\n  const modified = commit.modified || [];\n  \n  for (const file of [...added, ...modified]) {\n    if (!file.endsWith('.json')) continue;\n    \n    // Ignoriere bekannte Config-Dateien im Root\n    const isConfigFile = ['package.json', 'tsconfig.json', 'package-lock.json'].includes(file.split('/').pop());\n    \n    if (!isConfigFile) {\n      changedFiles.push(file);\n    }\n  }\n}\n\nreturn changedFiles.map(file => ({ filePath: file }));"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
@@ -716,7 +716,7 @@
         "webhookId": "694567e2-c3e8-4bfc-91af-aae5697aca36",
         "credentials": {
           "githubApi": {
-            "id": "uE78TkEY6lWLV4oP",
+            "id": "aZMd0okvVFkvyGnj",
             "name": "API GitHub"
           }
         },
