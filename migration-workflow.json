@@ -1,5 +1,5 @@
 {
-  "name": "n8n Workflow Migration - Alte zu Neue Struktur (v2)",
+  "name": "n8n Workflow Migration - Alte zu Neue Struktur (v3)",
   "nodes": [
     {
       "parameters": {},
@@ -170,7 +170,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const r = $json; // Rucksack\nconst neueStrukturFile = $node[\"Prüfe neue Struktur\"].json;\n\n// Prüfe ob Workflow bereits in neuer Struktur existiert\nconst existiertInNeuerStruktur = neueStrukturFile && !neueStrukturFile.error && neueStrukturFile.sha;\n\nlet mussMigrieren = false;\nlet alteDateiSha = null;\n\nif (!existiertInNeuerStruktur) {\n  // Workflow existiert nicht in neuer Struktur - muss migriert werden\n  mussMigrieren = true;\n}\n\nreturn {\n  ...r,\n  existiertInNeuerStruktur: existiertInNeuerStruktur,\n  mussMigrieren: mussMigrieren,\n  neueStrukturSha: existiertInNeuerStruktur ? neueStrukturFile.sha : null\n};"
+        "jsCode": "const r = $node[\"Check Skip\"].json; // Rucksack wiederherstellen (da GitHub Check den Input überschreibt)\nconst neueStrukturFile = $node[\"Prüfe neue Struktur\"].json;\n\n// Prüfe ob Workflow bereits in neuer Struktur existiert\nconst existiertInNeuerStruktur = neueStrukturFile && !neueStrukturFile.error && neueStrukturFile.sha;\n\nlet mussMigrieren = false;\nlet alteDateiSha = null;\n\nif (!existiertInNeuerStruktur) {\n  // Workflow existiert nicht in neuer Struktur - muss migriert werden\n  mussMigrieren = true;\n}\n\nreturn {\n  ...r,\n  existiertInNeuerStruktur: existiertInNeuerStruktur,\n  mussMigrieren: mussMigrieren,\n  neueStrukturSha: existiertInNeuerStruktur ? neueStrukturFile.sha : null\n};"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
