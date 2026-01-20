@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-09T17:10:51.893Z",
+  "updatedAt": "2026-01-20T12:47:18.901Z",
   "createdAt": "2025-12-09T17:10:51.893Z",
   "id": "lQCvszSC2kiedNIp",
   "name": "fonio AGS Nachbearbeitung Transkript Version 0.9 20251209 18:10",
@@ -153,7 +153,7 @@
       "credentials": {
         "googleApi": {
           "id": "vRVq7GTwn9kTIi8N",
-          "name": "Google Sheets account 2"
+          "name": "n8n Sheets Service"
         }
       }
     },
@@ -218,7 +218,7 @@
       "credentials": {
         "smtp": {
           "id": "8O5B5z4vS8yeagJh",
-          "name": "SMTP account"
+          "name": "AGS SMTP Einstellungen"
         }
       }
     },
@@ -292,8 +292,8 @@
       "maxTries": 5,
       "credentials": {
         "httpHeaderAuth": {
-          "id": "oaJkHRuARNWjW2UA",
-          "name": "Header Auth account"
+          "id": "4gc7MePUZVuCyowB",
+          "name": "API LLM in Azure (Mistral)"
         },
         "httpBearerAuth": {
           "id": "24SORzPv91ZRH2UW",
@@ -469,7 +469,9 @@
     }
   },
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
   },
   "staticData": null,
   "meta": {
