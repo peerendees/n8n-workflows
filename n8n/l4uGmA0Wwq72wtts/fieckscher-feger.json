@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-11-12T18:31:04.000Z",
+  "updatedAt": "2026-01-20T12:47:05.290Z",
   "createdAt": "2025-11-10T13:45:58.896Z",
   "id": "l4uGmA0Wwq72wtts",
   "name": "Fieckscher Feger",
@@ -105,7 +105,7 @@
       "credentials": {
         "googleApi": {
           "id": "QfuLctHhI3o7mKAL",
-          "name": "Google Sheets account"
+          "name": "n8n Google Sheets account"
         }
       }
     },
@@ -372,7 +372,7 @@
       "credentials": {
         "googleApi": {
           "id": "QfuLctHhI3o7mKAL",
-          "name": "Google Sheets account"
+          "name": "n8n Google Sheets account"
         }
       }
     },
@@ -517,7 +517,9 @@
     }
   },
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
   },
   "staticData": null,
   "meta": {
