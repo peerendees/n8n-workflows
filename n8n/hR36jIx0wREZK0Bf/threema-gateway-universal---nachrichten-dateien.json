@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-11-11T21:32:22.000Z",
+  "updatedAt": "2026-01-20T12:46:47.052Z",
   "createdAt": "2025-11-06T20:35:24.122Z",
   "id": "hR36jIx0wREZK0Bf",
   "name": "Threema Gateway Universal - Nachrichten & Dateien",
@@ -117,8 +117,8 @@
       ],
       "credentials": {
         "httpHeaderAuth": {
-          "id": "oaJkHRuARNWjW2UA",
-          "name": "Header Auth account"
+          "id": "4gc7MePUZVuCyowB",
+          "name": "API LLM in Azure (Mistral)"
         }
       }
     },
@@ -397,8 +397,8 @@
       ],
       "credentials": {
         "httpHeaderAuth": {
-          "id": "oaJkHRuARNWjW2UA",
-          "name": "Header Auth account"
+          "id": "4gc7MePUZVuCyowB",
+          "name": "API LLM in Azure (Mistral)"
         }
       }
     },
@@ -661,7 +661,9 @@
     }
   },
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
   },
   "staticData": null,
   "meta": null,
