@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-11-23T14:11:41.000Z",
+  "updatedAt": "2026-01-20T12:45:04.540Z",
   "createdAt": "2025-11-23T13:33:43.638Z",
   "id": "QxKsC28H7gqaUd3j",
   "name": "fonio AGS Anrufername",
@@ -58,7 +58,7 @@
       "credentials": {
         "googleApi": {
           "id": "vRVq7GTwn9kTIi8N",
-          "name": "Google Sheets account 2"
+          "name": "n8n Sheets Service"
         }
       }
     },
@@ -247,7 +247,9 @@
     }
   },
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
   },
   "staticData": null,
   "meta": null,
