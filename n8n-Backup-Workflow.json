@@ -37,7 +37,7 @@
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const r = $json; // Das ist der Rucksack\nconst wf = r.workflows[r.index];\n\n// Selbst-Backup Sperre\nconst isSelf = wf.id === 'C3QqvJAGjf0KhCZH';\n\n// Überspringe archivierte Workflows\nif (wf.isArchived === true) {\n  r.skip++;\n  return null; // Wird vom Loop übersprungen\n}\n\nconst workflowId = wf.id || '';\nconst workflowName = wf.name || 'Unnamed Workflow';\nconst cleanName = String(workflowName).replace(/[^a-zA-Z0-9-_äöüÄÖÜß ]/g, '').replace(/\\s+/g, '-').toLowerCase();\n\n// Neue Struktur: n8n/{workflowId}/{workflowName}.json\nr.aktueller_name = workflowName;\nr.aktueller_id = workflowId;\nr.aktueller_pfad = `n8n/${workflowId}/${cleanName}.json`;\nr.aktueller_inhalt = Buffer.from(JSON.stringify(wf, null, 2)).toString('base64');\nr.ist_self = isSelf;\n\nreturn r;"
+        "jsCode": "const r = $json; // Das ist der Rucksack\nconst wf = r.workflows[r.index];\n\n// Default values\nlet skipIteration = false;\n\n// Selbst-Backup Sperre\nconst isSelf = wf.id === 'C3QqvJAGjf0KhCZH';\n\n// Überspringe archivierte Workflows\nif (wf.isArchived === true) {\n  skipIteration = true;\n}\n\nif (skipIteration) {\n    return { ...r, skipIteration: true };\n}\n\nconst workflowId = wf.id || '';\nconst workflowName = wf.name || 'Unnamed Workflow';\nconst cleanName = String(workflowName).replace(/[^a-zA-Z0-9-_äöüÄÖÜß ]/g, '').replace(/\\s+/g, '-').toLowerCase();\n\n// Neue Struktur: n8n/{workflowId}/{workflowName}.json\nr.aktueller_name = workflowName;\nr.aktueller_id = workflowId;\nr.aktueller_pfad = `n8n/${workflowId}/${cleanName}.json`;\nr.aktueller_inhalt = Buffer.from(JSON.stringify(wf, null, 2)).toString('base64');\nr.ist_self = isSelf;\nr.skipIteration = false;\n\nreturn r;"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -306,6 +306,39 @@
       ],
       "id": "bfebb75e-854b-4e01-9183-f51fb8064fc1",
       "name": "Initialisierung"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "check-skip-condition",
+              "leftValue": "={{ $json.skipIteration }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-skip-backup",
+      "name": "Check Skip Backup",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        600,
+        -928
+      ]
     },
     {
       "parameters": {
@@ -731,7 +764,25 @@
       "main": [
         [
           {
+            "node": "Check Skip Backup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Skip Backup": {
+      "main": [
+        [
+          {
             "node": "Suche nach Workflow-ID",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Tabelle pflegen",
             "type": "main",
             "index": 0
           }

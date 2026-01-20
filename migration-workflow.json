@@ -1,5 +1,5 @@
 {
-  "name": "n8n Workflow Migration - Alte zu Neue Struktur (v3)",
+  "name": "n8n Workflow Migration - Alte zu Neue Struktur (v4)",
   "nodes": [
     {
       "parameters": {},
@@ -25,6 +25,12 @@
             {
               "id": "test-workflow-name",
               "name": "testWorkflowName",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "threema-secret",
+              "name": "secret",
               "value": "",
               "type": "string"
             }
