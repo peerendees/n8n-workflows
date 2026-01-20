@@ -11,8 +11,8 @@
         "rule": {
           "interval": [
             {
-              "field": "cronExpression",
-              "expression": "0 */15 * * *"
+              "field": "minutes",
+              "minutesInterval": 15
             }
           ]
         }
@@ -1022,7 +1022,7 @@
   "triggerCount": 1,
   "shared": [
     {
-      "updatedAt": "2026-01-02T15:51:21.902Z",
+      "updatedAt": "2026-01-20T21:09:21.000Z",
       "createdAt": "2026-01-02T15:51:21.902Z",
       "role": "workflow:owner",
       "workflowId": "b2iHqxoS7bY4geyi",
@@ -1040,8 +1040,8 @@
           "rule": {
             "interval": [
               {
-                "field": "cronExpression",
-                "expression": "0 */15 * * *"
+                "field": "minutes",
+                "minutesInterval": 15
               }
             ]
           }
