@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-14T13:55:09.237Z",
+  "updatedAt": "2026-01-20T12:48:50.665Z",
   "createdAt": "2025-12-10T13:39:41.038Z",
   "id": "xLbZnYQSKv2X7LYn",
   "name": "KIS 17 fonio-Outbound Trigger",
@@ -511,7 +511,9 @@
     }
   },
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
   },
   "staticData": null,
   "meta": {
