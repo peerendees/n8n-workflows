@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-11-11T19:56:36.000Z",
+  "updatedAt": "2026-01-20T12:47:48.768Z",
   "createdAt": "2025-11-11T19:55:46.546Z",
   "id": "qKt4bbsURorhPjBI",
   "name": "Brainstorming Assistent Sprachesteuerung",
@@ -437,7 +437,9 @@
     }
   },
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
   },
   "staticData": null,
   "meta": null,
