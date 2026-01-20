@@ -1,0 +1,1709 @@
+{
+  "updatedAt": "2026-01-02T16:04:00.473Z",
+  "createdAt": "2026-01-02T15:51:21.900Z",
+  "id": "b2iHqxoS7bY4geyi",
+  "name": "n8n → GitHub Sicherung",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 */15 * * *"
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Zeitplan: alle 15 Minuten",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -720,
+        -512
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://n8n.srv1098810.hstgr.cloud/api/v1/workflows",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -272,
+        -512
+      ],
+      "id": "hole-alle-workflows",
+      "name": "Hole alle Workflows",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "4gc7MePUZVuCyowB",
+          "name": "API n8n"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const workflows = $json.data || [];\nreturn {\n  workflows: workflows,\n  index: 0,\n  anzahl: workflows.length,\n  neu: 0,\n  updates: 0,\n  skip: 0,\n  tabelle: []\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -48,
+        -512
+      ],
+      "id": "initialisierung",
+      "name": "Initialisierung"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const r = $json; // Rucksack\nconst wf = r.workflows[r.index];\n\n// Überspringe archivierte Workflows\nif (wf.isArchived === true) {\n  return null;\n}\n\nconst workflowId = wf.id || '';\nconst workflowName = wf.name || 'Unnamed Workflow';\nconst cleanName = String(workflowName).replace(/[^a-zA-Z0-9-_äöüÄÖÜß ]/g, '').replace(/\\s+/g, '-').toLowerCase();\n\n// Neue Struktur: n8n/{workflowId}/{workflowName}.json\nconst dateipfad = `n8n/${workflowId}/${cleanName}.json`;\nconst workflowContent = Buffer.from(JSON.stringify(wf, null, 2)).toString('base64');\n\nreturn {\n  ...r,\n  workflowId: workflowId,\n  workflowName: workflowName,\n  workflowData: wf,\n  dateipfad: dateipfad,\n  workflowContent: workflowContent,\n  updatedAt: wf.updatedAt || wf.createdAt || new Date().toISOString()\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        176,
+        -512
+      ],
+      "id": "extrahiere-workflow",
+      "name": "Extrahiere Workflow"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "get",
+        "owner": {
+          "__rl": true,
+          "value": "peerendees",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "n8n-workflows",
+          "mode": "list",
+          "cachedResultName": "n8n-workflows",
+          "cachedResultUrl": "https://github.com/peerendees/n8n-workflows"
+        },
+        "filePath": "={{ $json.dateipfad }}",
+        "asBinaryProperty": false,
+        "additionalParameters": {
+          "reference": "main"
+        }
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        400,
+        -584
+      ],
+      "id": "pruefe-github-datei",
+      "name": "Prüfe GitHub Datei",
+      "webhookId": "694567e2-c3e8-4bfc-91af-aae5697aca36",
+      "credentials": {
+        "githubApi": {
+          "id": "uE78TkEY6lWLV4oP",
+          "name": "API GitHub"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const r = $json; // Rucksack\nconst githubFile = $node[\"Prüfe GitHub Datei\"].json;\n\nlet action = 'skip';\nlet sha = null;\nlet alteDateiZuLoeschen = null;\nlet debugInfo = {};\n\n// Debug: Log GitHub File Status\ndebugInfo.githubFileExists = !!githubFile;\ndebugInfo.hasError = !!(githubFile && githubFile.error);\ndebugInfo.hasSha = !!(githubFile && githubFile.sha);\ndebugInfo.errorMessage = githubFile && githubFile.error ? (githubFile.error.message || JSON.stringify(githubFile.error)) : null;\n\n// Prüfe ob Datei auf GitHub existiert\nif (githubFile && !githubFile.error && githubFile.sha) {\n  sha = githubFile.sha;\n  \n  // Vergleich: Inhalt geändert?\n  const remoteContent = (githubFile.content || '').replace(/\\s/g, '');\n  const localContent = (r.workflowContent || '').replace(/\\s/g, '');\n  \n  debugInfo.contentMatch = remoteContent === localContent;\n  \n  if (remoteContent !== localContent) {\n    action = 'update';\n  }\n} else {\n  // Datei existiert nicht - könnte umbenannt worden sein\n  // Prüfe ob Ordner existiert und andere Dateien enthält\n  action = 'create';\n  debugInfo.reason = 'Datei existiert nicht in neuer Struktur';\n}\n\ndebugInfo.action = action;\ndebugInfo.dateipfad = r.dateipfad;\ndebugInfo.workflowId = r.workflowId;\ndebugInfo.workflowName = r.workflowName;\n\nreturn {\n  ...r,\n  action: action,\n  sha: sha,\n  alteDateiZuLoeschen: alteDateiZuLoeschen,\n  debugInfo: debugInfo\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        624,
+        -584
+      ],
+      "id": "bestimme-handlung",
+      "name": "Bestimme Handlung"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "check-action",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "skip",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        848,
+        -584
+      ],
+      "id": "pruefe-ob-sichern",
+      "name": "Prüfe ob Sichern"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://api.github.com/repos/peerendees/n8n-workflows/contents/{{ $json.dateipfad }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "message",
+              "value": "=🤖 Auto-Backup: {{ $json.workflowName }} ({{ $json.action }})"
+            },
+            {
+              "name": "content",
+              "value": "={{ $json.workflowContent }}"
+            },
+            {
+              "name": "branch",
+              "value": "main"
+            },
+            {
+              "name": "sha",
+              "value": "={{ $json.sha || undefined }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1072,
+        -680
+      ],
+      "id": "sichere-auf-github",
+      "name": "Sichere auf GitHub",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "aZMd0okvVFkvyGnj",
+          "name": "GitHub Token"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Prüfe ob erfolgreich gespeichert und ob alte Dateien gelöscht werden müssen\n// Hole Daten aus beiden vorherigen Nodes\nconst r = $node[\"Bestimme Handlung\"].json;\nconst githubResponse = $json;\n\n// Stelle sicher, dass alle benötigten Felder vorhanden sind\nif (!r.tabelle) r.tabelle = [];\nif (r.neu === undefined) r.neu = 0;\nif (r.updates === undefined) r.updates = 0;\nif (r.skip === undefined) r.skip = 0;\n\n// Nur wenn erfolgreich UND create-Action, müssen wir alte Dateien prüfen\nif (!githubResponse.error && r.action === 'create' && r.workflowId) {\n  // Bereite Ordner-Pfad vor\n  const ordnerPfad = `n8n/${r.workflowId}`;\n  const aktuelleDatei = r.dateipfad.split('/').pop();\n  \n  return {\n    ...r,\n    githubResponse: githubResponse,\n    ordnerPfad: ordnerPfad,\n    aktuelleDatei: aktuelleDatei,\n    mussPruefen: true,\n    alteDateien: r.alteDateien || []\n  };\n}\n\n// Keine Prüfung nötig - direkt zur Statistik\nreturn {\n  ...r,\n  githubResponse: githubResponse,\n  mussPruefen: false,\n  alteDateien: r.alteDateien || []\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1296,
+        -680
+      ],
+      "id": "pruefe-alte-dateien",
+      "name": "Prüfe alte Dateien"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "check-muss-pruefen",
+              "leftValue": "={{ $json.mussPruefen }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1520,
+        -680
+      ],
+      "id": "pruefe-ob-ordner-pruefen",
+      "name": "Prüfe ob Ordner prüfen"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "list",
+        "owner": {
+          "__rl": true,
+          "value": "peerendees",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "n8n-workflows",
+          "mode": "list",
+          "cachedResultName": "n8n-workflows",
+          "cachedResultUrl": "https://github.com/peerendees/n8n-workflows"
+        },
+        "filePath": "={{ $json.ordnerPfad }}"
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        1744,
+        -752
+      ],
+      "id": "liste-ordner",
+      "name": "Liste Ordner",
+      "webhookId": "694567e2-c3e8-4bfc-91af-aae5697aca36",
+      "credentials": {
+        "githubApi": {
+          "id": "uE78TkEY6lWLV4oP",
+          "name": "API GitHub"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Finde alte Dateien im Ordner und bereite sie zum Löschen vor\nconst r = $json;\nconst ordnerInhaltNode = $node[\"Liste Ordner\"];\n\n// Wenn Node nicht ausgeführt wurde oder Fehler, überspringe\nif (!ordnerInhaltNode || !ordnerInhaltNode.json) {\n  return {\n    ...r,\n    alteDateien: []\n  };\n}\n\nconst ordnerInhalt = ordnerInhaltNode.json;\n\n// GitHub API gibt bei Ordner-Liste ein Array zurück\n// Wenn Fehler oder kein Array, überspringe\nif (ordnerInhalt.error || !Array.isArray(ordnerInhalt)) {\n  return {\n    ...r,\n    alteDateien: []\n  };\n}\n\n// Finde alle JSON-Dateien außer der aktuellen\nconst alteDateien = ordnerInhalt\n  .filter(file => file.type === 'file' && file.name && file.name.endsWith('.json') && file.name !== r.aktuelleDatei)\n  .map(file => ({\n    path: file.path,\n    name: file.name,\n    sha: file.sha\n  }));\n\nreturn {\n  ...r,\n  alteDateien: alteDateien\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1968,
+        -752
+      ],
+      "id": "finde-alte-dateien",
+      "name": "Finde alte Dateien"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "check-alte-dateien",
+              "leftValue": "={{ $json.alteDateien.length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2192,
+        -752
+      ],
+      "id": "pruefe-ob-loeschen",
+      "name": "Prüfe ob Löschen"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Erstelle Lösch-Items für jede alte Datei\nconst r = $json;\nconst alteDateien = r.alteDateien || [];\n\nreturn alteDateien.map(datei => ({\n  ...r,\n  zuLoeschendeDatei: datei.path,\n  zuLoeschendeSha: datei.sha,\n  zuLoeschenderName: datei.name\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2416,
+        -800
+      ],
+      "id": "vorbereite-loeschen",
+      "name": "Vorbereite Löschen"
+    },
+    {
+      "parameters": {
+        "method": "DELETE",
+        "url": "=https://api.github.com/repos/peerendees/n8n-workflows/contents/{{ $json.zuLoeschendeDatei }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "message",
+              "value": "=🗑️ Auto-Backup: Alte Datei gelöscht (Workflow umbenannt)"
+            },
+            {
+              "name": "sha",
+              "value": "={{ $json.zuLoeschendeSha }}"
+            },
+            {
+              "name": "branch",
+              "value": "main"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2640,
+        -800
+      ],
+      "id": "loesche-alte-datei",
+      "name": "Lösche alte Datei",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "aZMd0okvVFkvyGnj",
+          "name": "GitHub Token"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Aktualisiere Statistiken\n// Hole Rucksack von Prüfe alte Dateien\nlet r;\ntry {\n  r = $node[\"Prüfe alte Dateien\"].json;\n} catch (e) {\n  // Fallback: Hole von Bestimme Handlung\n  try {\n    r = $node[\"Bestimme Handlung\"].json;\n  } catch (e2) {\n    r = {};\n  }\n}\n\n// Stelle sicher, dass r ein Objekt ist\nif (!r || typeof r !== 'object') {\n  r = {};\n}\n\nconst githubResponse = r.githubResponse || {};\n\n// Stelle sicher, dass alle Felder vorhanden sind\nif (!Array.isArray(r.tabelle)) r.tabelle = [];\nif (typeof r.neu !== 'number') r.neu = 0;\nif (typeof r.updates !== 'number') r.updates = 0;\nif (typeof r.skip !== 'number') r.skip = 0;\nif (typeof r.index !== 'number') r.index = 0;\nif (!Array.isArray(r.alteDateien)) r.alteDateien = [];\n\nif (r.action === 'create') {\n  r.neu++;\n} else if (r.action === 'update') {\n  r.updates++;\n} else {\n  r.skip++;\n}\n\n// Füge zur Tabelle hinzu\nif (r.action !== 'skip') {\n  const status = githubResponse.error ? '❌ Fehler' : '✅ Erfolg';\n  const alteDateienInfo = r.alteDateien && r.alteDateien.length > 0 ? ` (${r.alteDateien.length} alte Datei${r.alteDateien.length > 1 ? 'en' : ''} gelöscht)` : '';\n  r.tabelle.push(`${status} ${r.action === 'create' ? 'NEU' : 'UPDATE'}: ${r.workflowName || 'Unbekannt'}${alteDateienInfo}`);\n}\n\n// Zähler erhöhen\nr.index++;\n\nreturn r;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2864,
+        -656
+      ],
+      "id": "aktualisiere-statistik",
+      "name": "Aktualisiere Statistik"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Wenn skip: Aktualisiere Statistik direkt\nlet r = $json || {};\n\n// Stelle sicher, dass alle Felder vorhanden sind\nif (typeof r.skip !== 'number') r.skip = 0;\nif (typeof r.index !== 'number') r.index = 0;\nif (!Array.isArray(r.tabelle)) r.tabelle = [];\nif (typeof r.neu !== 'number') r.neu = 0;\nif (typeof r.updates !== 'number') r.updates = 0;\n\nr.skip++;\nr.index++;\n\nreturn r;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2864,
+        -416
+      ],
+      "id": "skip-statistik",
+      "name": "Skip Statistik"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "check-loop",
+              "leftValue": "={{ $json.index }}",
+              "rightValue": "={{ $json.anzahl }}",
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3088,
+        -416
+      ],
+      "id": "schleife-pruefen",
+      "name": "Schleife prüfen"
+    },
+    {
+      "parameters": {
+        "jsCode": "const r = $json;\nconst wort = r.anzahl === 1 ? 'Workflow' : 'Workflows';\n\nreturn {\n  hasChanges: (r.neu + r.updates) > 0,\n  text: `✅ Backup beendet: ${r.anzahl} ${wort} geprüft.\\n` +\n        `Ergebnis: ${r.neu} neu, ${r.updates} aktualisiert, ${r.skip} unverändert.\\n\\n` +\n        `${r.tabelle.join('\\n') || 'Keine Änderungen'}`\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3312,
+        -416
+      ],
+      "id": "backup-statistik",
+      "name": "Backup-Statistik"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "threema-secret",
+              "name": "secret",
+              "value": "18DOvPKBV7ize3Nh",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -496,
+        -512
+      ],
+      "id": "config",
+      "name": "Config"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "check-has-changes",
+              "leftValue": "={{ $json.hasChanges }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3536,
+        -416
+      ],
+      "id": "pruefe-aenderungen",
+      "name": "Prüfe Änderungen"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://msgapi.threema.ch/send_simple",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "from",
+              "value": "*BERENT1"
+            },
+            {
+              "name": "to",
+              "value": "BUMFMZ39"
+            },
+            {
+              "name": "secret",
+              "value": "={{ $('Config').first().json.secret }}"
+            },
+            {
+              "name": "text",
+              "value": "={{ $json.text }}\n\n🔗 https://github.com/peerendees/n8n-workflows/n8n"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3760,
+        -416
+      ],
+      "id": "threema-benachrichtigung",
+      "name": "Threema Benachrichtigung",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "nSNvIRCSAnKXrLyH",
+          "name": "API Threema Work BERENT1"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Zeitplan: alle 15 Minuten": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Hole alle Workflows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hole alle Workflows": {
+      "main": [
+        [
+          {
+            "node": "Initialisierung",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Initialisierung": {
+      "main": [
+        [
+          {
+            "node": "Extrahiere Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extrahiere Workflow": {
+      "main": [
+        [
+          {
+            "node": "Prüfe GitHub Datei",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prüfe GitHub Datei": {
+      "main": [
+        [
+          {
+            "node": "Bestimme Handlung",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bestimme Handlung": {
+      "main": [
+        [
+          {
+            "node": "Prüfe ob Sichern",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prüfe ob Sichern": {
+      "main": [
+        [
+          {
+            "node": "Sichere auf GitHub",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Skip Statistik",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Skip Statistik": {
+      "main": [
+        [
+          {
+            "node": "Schleife prüfen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sichere auf GitHub": {
+      "main": [
+        [
+          {
+            "node": "Prüfe alte Dateien",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prüfe alte Dateien": {
+      "main": [
+        [
+          {
+            "node": "Prüfe ob Ordner prüfen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prüfe ob Ordner prüfen": {
+      "main": [
+        [
+          {
+            "node": "Liste Ordner",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Aktualisiere Statistik",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Liste Ordner": {
+      "main": [
+        [
+          {
+            "node": "Finde alte Dateien",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Finde alte Dateien": {
+      "main": [
+        [
+          {
+            "node": "Prüfe ob Löschen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prüfe ob Löschen": {
+      "main": [
+        [
+          {
+            "node": "Vorbereite Löschen",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Aktualisiere Statistik",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vorbereite Löschen": {
+      "main": [
+        [
+          {
+            "node": "Lösche alte Datei",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lösche alte Datei": {
+      "main": [
+        [
+          {
+            "node": "Aktualisiere Statistik",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aktualisiere Statistik": {
+      "main": [
+        [
+          {
+            "node": "Schleife prüfen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schleife prüfen": {
+      "main": [
+        [
+          {
+            "node": "Extrahiere Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Backup-Statistik",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Backup-Statistik": {
+      "main": [
+        [
+          {
+            "node": "Prüfe Änderungen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prüfe Änderungen": {
+      "main": [
+        [
+          {
+            "node": "Threema Benachrichtigung",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Threema Benachrichtigung": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": {
+    "node:Zeitplan: alle 15 Minuten": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": null,
+  "pinData": {},
+  "versionId": "3345b319-6144-4f8d-8758-a70de4b25783",
+  "activeVersionId": "3345b319-6144-4f8d-8758-a70de4b25783",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-01-02T15:51:21.902Z",
+      "createdAt": "2026-01-02T15:51:21.902Z",
+      "role": "workflow:owner",
+      "workflowId": "b2iHqxoS7bY4geyi",
+      "projectId": "yr4Hj71ou1NOsi2p"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-01-14T13:55:56.000Z",
+    "createdAt": "2026-01-02T16:04:00.474Z",
+    "versionId": "3345b319-6144-4f8d-8758-a70de4b25783",
+    "workflowId": "b2iHqxoS7bY4geyi",
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "expression": "0 */15 * * *"
+              }
+            ]
+          }
+        },
+        "id": "schedule-trigger",
+        "name": "Zeitplan: alle 15 Minuten",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          -720,
+          -512
+        ]
+      },
+      {
+        "parameters": {
+          "url": "=https://n8n.srv1098810.hstgr.cloud/api/v1/workflows",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "options": {
+            "response": {
+              "response": {
+                "responseFormat": "json"
+              }
+            }
+          }
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          -272,
+          -512
+        ],
+        "id": "hole-alle-workflows",
+        "name": "Hole alle Workflows",
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "4gc7MePUZVuCyowB",
+            "name": "API n8n"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const workflows = $json.data || [];\nreturn {\n  workflows: workflows,\n  index: 0,\n  anzahl: workflows.length,\n  neu: 0,\n  updates: 0,\n  skip: 0,\n  tabelle: []\n};"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -48,
+          -512
+        ],
+        "id": "initialisierung",
+        "name": "Initialisierung"
+      },
+      {
+        "parameters": {
+          "mode": "runOnceForEachItem",
+          "jsCode": "const r = $json; // Rucksack\nconst wf = r.workflows[r.index];\n\n// Überspringe archivierte Workflows\nif (wf.isArchived === true) {\n  return null;\n}\n\nconst workflowId = wf.id || '';\nconst workflowName = wf.name || 'Unnamed Workflow';\nconst cleanName = String(workflowName).replace(/[^a-zA-Z0-9-_äöüÄÖÜß ]/g, '').replace(/\\s+/g, '-').toLowerCase();\n\n// Neue Struktur: n8n/{workflowId}/{workflowName}.json\nconst dateipfad = `n8n/${workflowId}/${cleanName}.json`;\nconst workflowContent = Buffer.from(JSON.stringify(wf, null, 2)).toString('base64');\n\nreturn {\n  ...r,\n  workflowId: workflowId,\n  workflowName: workflowName,\n  workflowData: wf,\n  dateipfad: dateipfad,\n  workflowContent: workflowContent,\n  updatedAt: wf.updatedAt || wf.createdAt || new Date().toISOString()\n};"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          176,
+          -512
+        ],
+        "id": "extrahiere-workflow",
+        "name": "Extrahiere Workflow"
+      },
+      {
+        "parameters": {
+          "resource": "file",
+          "operation": "get",
+          "owner": {
+            "__rl": true,
+            "value": "peerendees",
+            "mode": "name"
+          },
+          "repository": {
+            "__rl": true,
+            "value": "n8n-workflows",
+            "mode": "list",
+            "cachedResultName": "n8n-workflows",
+            "cachedResultUrl": "https://github.com/peerendees/n8n-workflows"
+          },
+          "filePath": "={{ $json.dateipfad }}",
+          "asBinaryProperty": false,
+          "additionalParameters": {
+            "reference": "main"
+          }
+        },
+        "type": "n8n-nodes-base.github",
+        "typeVersion": 1.1,
+        "position": [
+          400,
+          -584
+        ],
+        "id": "pruefe-github-datei",
+        "name": "Prüfe GitHub Datei",
+        "webhookId": "694567e2-c3e8-4bfc-91af-aae5697aca36",
+        "credentials": {
+          "githubApi": {
+            "id": "uE78TkEY6lWLV4oP",
+            "name": "API GitHub"
+          }
+        },
+        "onError": "continueRegularOutput"
+      },
+      {
+        "parameters": {
+          "jsCode": "const r = $json; // Rucksack\nconst githubFile = $node[\"Prüfe GitHub Datei\"].json;\n\nlet action = 'skip';\nlet sha = null;\nlet alteDateiZuLoeschen = null;\nlet debugInfo = {};\n\n// Debug: Log GitHub File Status\ndebugInfo.githubFileExists = !!githubFile;\ndebugInfo.hasError = !!(githubFile && githubFile.error);\ndebugInfo.hasSha = !!(githubFile && githubFile.sha);\ndebugInfo.errorMessage = githubFile && githubFile.error ? (githubFile.error.message || JSON.stringify(githubFile.error)) : null;\n\n// Prüfe ob Datei auf GitHub existiert\nif (githubFile && !githubFile.error && githubFile.sha) {\n  sha = githubFile.sha;\n  \n  // Vergleich: Inhalt geändert?\n  const remoteContent = (githubFile.content || '').replace(/\\s/g, '');\n  const localContent = (r.workflowContent || '').replace(/\\s/g, '');\n  \n  debugInfo.contentMatch = remoteContent === localContent;\n  \n  if (remoteContent !== localContent) {\n    action = 'update';\n  }\n} else {\n  // Datei existiert nicht - könnte umbenannt worden sein\n  // Prüfe ob Ordner existiert und andere Dateien enthält\n  action = 'create';\n  debugInfo.reason = 'Datei existiert nicht in neuer Struktur';\n}\n\ndebugInfo.action = action;\ndebugInfo.dateipfad = r.dateipfad;\ndebugInfo.workflowId = r.workflowId;\ndebugInfo.workflowName = r.workflowName;\n\nreturn {\n  ...r,\n  action: action,\n  sha: sha,\n  alteDateiZuLoeschen: alteDateiZuLoeschen,\n  debugInfo: debugInfo\n};"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          624,
+          -584
+        ],
+        "id": "bestimme-handlung",
+        "name": "Bestimme Handlung"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "check-action",
+                "leftValue": "={{ $json.action }}",
+                "rightValue": "skip",
+                "operator": {
+                  "type": "string",
+                  "operation": "notEquals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          848,
+          -584
+        ],
+        "id": "pruefe-ob-sichern",
+        "name": "Prüfe ob Sichern"
+      },
+      {
+        "parameters": {
+          "method": "PUT",
+          "url": "=https://api.github.com/repos/peerendees/n8n-workflows/contents/{{ $json.dateipfad }}",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendBody": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "message",
+                "value": "=🤖 Auto-Backup: {{ $json.workflowName }} ({{ $json.action }})"
+              },
+              {
+                "name": "content",
+                "value": "={{ $json.workflowContent }}"
+              },
+              {
+                "name": "branch",
+                "value": "main"
+              },
+              {
+                "name": "sha",
+                "value": "={{ $json.sha || undefined }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1072,
+          -680
+        ],
+        "id": "sichere-auf-github",
+        "name": "Sichere auf GitHub",
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "aZMd0okvVFkvyGnj",
+            "name": "GitHub Token"
+          }
+        },
+        "onError": "continueRegularOutput"
+      },
+      {
+        "parameters": {
+          "mode": "runOnceForEachItem",
+          "jsCode": "// Prüfe ob erfolgreich gespeichert und ob alte Dateien gelöscht werden müssen\n// Hole Daten aus beiden vorherigen Nodes\nconst r = $node[\"Bestimme Handlung\"].json;\nconst githubResponse = $json;\n\n// Stelle sicher, dass alle benötigten Felder vorhanden sind\nif (!r.tabelle) r.tabelle = [];\nif (r.neu === undefined) r.neu = 0;\nif (r.updates === undefined) r.updates = 0;\nif (r.skip === undefined) r.skip = 0;\n\n// Nur wenn erfolgreich UND create-Action, müssen wir alte Dateien prüfen\nif (!githubResponse.error && r.action === 'create' && r.workflowId) {\n  // Bereite Ordner-Pfad vor\n  const ordnerPfad = `n8n/${r.workflowId}`;\n  const aktuelleDatei = r.dateipfad.split('/').pop();\n  \n  return {\n    ...r,\n    githubResponse: githubResponse,\n    ordnerPfad: ordnerPfad,\n    aktuelleDatei: aktuelleDatei,\n    mussPruefen: true,\n    alteDateien: r.alteDateien || []\n  };\n}\n\n// Keine Prüfung nötig - direkt zur Statistik\nreturn {\n  ...r,\n  githubResponse: githubResponse,\n  mussPruefen: false,\n  alteDateien: r.alteDateien || []\n};"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1296,
+          -680
+        ],
+        "id": "pruefe-alte-dateien",
+        "name": "Prüfe alte Dateien"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "check-muss-pruefen",
+                "leftValue": "={{ $json.mussPruefen }}",
+                "rightValue": true,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          1520,
+          -680
+        ],
+        "id": "pruefe-ob-ordner-pruefen",
+        "name": "Prüfe ob Ordner prüfen"
+      },
+      {
+        "parameters": {
+          "resource": "file",
+          "operation": "list",
+          "owner": {
+            "__rl": true,
+            "value": "peerendees",
+            "mode": "name"
+          },
+          "repository": {
+            "__rl": true,
+            "value": "n8n-workflows",
+            "mode": "list",
+            "cachedResultName": "n8n-workflows",
+            "cachedResultUrl": "https://github.com/peerendees/n8n-workflows"
+          },
+          "filePath": "={{ $json.ordnerPfad }}"
+        },
+        "type": "n8n-nodes-base.github",
+        "typeVersion": 1.1,
+        "position": [
+          1744,
+          -752
+        ],
+        "id": "liste-ordner",
+        "name": "Liste Ordner",
+        "webhookId": "694567e2-c3e8-4bfc-91af-aae5697aca36",
+        "credentials": {
+          "githubApi": {
+            "id": "uE78TkEY6lWLV4oP",
+            "name": "API GitHub"
+          }
+        },
+        "onError": "continueRegularOutput"
+      },
+      {
+        "parameters": {
+          "mode": "runOnceForEachItem",
+          "jsCode": "// Finde alte Dateien im Ordner und bereite sie zum Löschen vor\nconst r = $json;\nconst ordnerInhaltNode = $node[\"Liste Ordner\"];\n\n// Wenn Node nicht ausgeführt wurde oder Fehler, überspringe\nif (!ordnerInhaltNode || !ordnerInhaltNode.json) {\n  return {\n    ...r,\n    alteDateien: []\n  };\n}\n\nconst ordnerInhalt = ordnerInhaltNode.json;\n\n// GitHub API gibt bei Ordner-Liste ein Array zurück\n// Wenn Fehler oder kein Array, überspringe\nif (ordnerInhalt.error || !Array.isArray(ordnerInhalt)) {\n  return {\n    ...r,\n    alteDateien: []\n  };\n}\n\n// Finde alle JSON-Dateien außer der aktuellen\nconst alteDateien = ordnerInhalt\n  .filter(file => file.type === 'file' && file.name && file.name.endsWith('.json') && file.name !== r.aktuelleDatei)\n  .map(file => ({\n    path: file.path,\n    name: file.name,\n    sha: file.sha\n  }));\n\nreturn {\n  ...r,\n  alteDateien: alteDateien\n};"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1968,
+          -752
+        ],
+        "id": "finde-alte-dateien",
+        "name": "Finde alte Dateien"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "check-alte-dateien",
+                "leftValue": "={{ $json.alteDateien.length }}",
+                "rightValue": 0,
+                "operator": {
+                  "type": "number",
+                  "operation": "gt"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          2192,
+          -752
+        ],
+        "id": "pruefe-ob-loeschen",
+        "name": "Prüfe ob Löschen"
+      },
+      {
+        "parameters": {
+          "mode": "runOnceForEachItem",
+          "jsCode": "// Erstelle Lösch-Items für jede alte Datei\nconst r = $json;\nconst alteDateien = r.alteDateien || [];\n\nreturn alteDateien.map(datei => ({\n  ...r,\n  zuLoeschendeDatei: datei.path,\n  zuLoeschendeSha: datei.sha,\n  zuLoeschenderName: datei.name\n}));"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2416,
+          -800
+        ],
+        "id": "vorbereite-loeschen",
+        "name": "Vorbereite Löschen"
+      },
+      {
+        "parameters": {
+          "method": "DELETE",
+          "url": "=https://api.github.com/repos/peerendees/n8n-workflows/contents/{{ $json.zuLoeschendeDatei }}",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendBody": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "message",
+                "value": "=🗑️ Auto-Backup: Alte Datei gelöscht (Workflow umbenannt)"
+              },
+              {
+                "name": "sha",
+                "value": "={{ $json.zuLoeschendeSha }}"
+              },
+              {
+                "name": "branch",
+                "value": "main"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          2640,
+          -800
+        ],
+        "id": "loesche-alte-datei",
+        "name": "Lösche alte Datei",
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "aZMd0okvVFkvyGnj",
+            "name": "GitHub Token"
+          }
+        },
+        "onError": "continueRegularOutput"
+      },
+      {
+        "parameters": {
+          "mode": "runOnceForEachItem",
+          "jsCode": "// Aktualisiere Statistiken\n// Hole Rucksack von Prüfe alte Dateien\nlet r;\ntry {\n  r = $node[\"Prüfe alte Dateien\"].json;\n} catch (e) {\n  // Fallback: Hole von Bestimme Handlung\n  try {\n    r = $node[\"Bestimme Handlung\"].json;\n  } catch (e2) {\n    r = {};\n  }\n}\n\n// Stelle sicher, dass r ein Objekt ist\nif (!r || typeof r !== 'object') {\n  r = {};\n}\n\nconst githubResponse = r.githubResponse || {};\n\n// Stelle sicher, dass alle Felder vorhanden sind\nif (!Array.isArray(r.tabelle)) r.tabelle = [];\nif (typeof r.neu !== 'number') r.neu = 0;\nif (typeof r.updates !== 'number') r.updates = 0;\nif (typeof r.skip !== 'number') r.skip = 0;\nif (typeof r.index !== 'number') r.index = 0;\nif (!Array.isArray(r.alteDateien)) r.alteDateien = [];\n\nif (r.action === 'create') {\n  r.neu++;\n} else if (r.action === 'update') {\n  r.updates++;\n} else {\n  r.skip++;\n}\n\n// Füge zur Tabelle hinzu\nif (r.action !== 'skip') {\n  const status = githubResponse.error ? '❌ Fehler' : '✅ Erfolg';\n  const alteDateienInfo = r.alteDateien && r.alteDateien.length > 0 ? ` (${r.alteDateien.length} alte Datei${r.alteDateien.length > 1 ? 'en' : ''} gelöscht)` : '';\n  r.tabelle.push(`${status} ${r.action === 'create' ? 'NEU' : 'UPDATE'}: ${r.workflowName || 'Unbekannt'}${alteDateienInfo}`);\n}\n\n// Zähler erhöhen\nr.index++;\n\nreturn r;"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2864,
+          -656
+        ],
+        "id": "aktualisiere-statistik",
+        "name": "Aktualisiere Statistik"
+      },
+      {
+        "parameters": {
+          "mode": "runOnceForEachItem",
+          "jsCode": "// Wenn skip: Aktualisiere Statistik direkt\nlet r = $json || {};\n\n// Stelle sicher, dass alle Felder vorhanden sind\nif (typeof r.skip !== 'number') r.skip = 0;\nif (typeof r.index !== 'number') r.index = 0;\nif (!Array.isArray(r.tabelle)) r.tabelle = [];\nif (typeof r.neu !== 'number') r.neu = 0;\nif (typeof r.updates !== 'number') r.updates = 0;\n\nr.skip++;\nr.index++;\n\nreturn r;"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2864,
+          -416
+        ],
+        "id": "skip-statistik",
+        "name": "Skip Statistik"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "check-loop",
+                "leftValue": "={{ $json.index }}",
+                "rightValue": "={{ $json.anzahl }}",
+                "operator": {
+                  "type": "number",
+                  "operation": "lt"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          3088,
+          -416
+        ],
+        "id": "schleife-pruefen",
+        "name": "Schleife prüfen"
+      },
+      {
+        "parameters": {
+          "jsCode": "const r = $json;\nconst wort = r.anzahl === 1 ? 'Workflow' : 'Workflows';\n\nreturn {\n  hasChanges: (r.neu + r.updates) > 0,\n  text: `✅ Backup beendet: ${r.anzahl} ${wort} geprüft.\\n` +\n        `Ergebnis: ${r.neu} neu, ${r.updates} aktualisiert, ${r.skip} unverändert.\\n\\n` +\n        `${r.tabelle.join('\\n') || 'Keine Änderungen'}`\n};"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          3312,
+          -416
+        ],
+        "id": "backup-statistik",
+        "name": "Backup-Statistik"
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "threema-secret",
+                "name": "secret",
+                "value": "18DOvPKBV7ize3Nh",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          -496,
+          -512
+        ],
+        "id": "config",
+        "name": "Config"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "check-has-changes",
+                "leftValue": "={{ $json.hasChanges }}",
+                "rightValue": true,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          3536,
+          -416
+        ],
+        "id": "pruefe-aenderungen",
+        "name": "Prüfe Änderungen"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://msgapi.threema.ch/send_simple",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendBody": true,
+          "contentType": "form-urlencoded",
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "from",
+                "value": "*BERENT1"
+              },
+              {
+                "name": "to",
+                "value": "BUMFMZ39"
+              },
+              {
+                "name": "secret",
+                "value": "={{ $('Config').first().json.secret }}"
+              },
+              {
+                "name": "text",
+                "value": "={{ $json.text }}\n\n🔗 https://github.com/peerendees/n8n-workflows/n8n"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          3760,
+          -416
+        ],
+        "id": "threema-benachrichtigung",
+        "name": "Threema Benachrichtigung",
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "nSNvIRCSAnKXrLyH",
+            "name": "API Threema Work BERENT1"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Zeitplan: alle 15 Minuten": {
+        "main": [
+          [
+            {
+              "node": "Config",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Config": {
+        "main": [
+          [
+            {
+              "node": "Hole alle Workflows",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Hole alle Workflows": {
+        "main": [
+          [
+            {
+              "node": "Initialisierung",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Initialisierung": {
+        "main": [
+          [
+            {
+              "node": "Extrahiere Workflow",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Extrahiere Workflow": {
+        "main": [
+          [
+            {
+              "node": "Prüfe GitHub Datei",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Prüfe GitHub Datei": {
+        "main": [
+          [
+            {
+              "node": "Bestimme Handlung",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Bestimme Handlung": {
+        "main": [
+          [
+            {
+              "node": "Prüfe ob Sichern",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Prüfe ob Sichern": {
+        "main": [
+          [
+            {
+              "node": "Sichere auf GitHub",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Skip Statistik",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Skip Statistik": {
+        "main": [
+          [
+            {
+              "node": "Schleife prüfen",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Sichere auf GitHub": {
+        "main": [
+          [
+            {
+              "node": "Prüfe alte Dateien",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Prüfe alte Dateien": {
+        "main": [
+          [
+            {
+              "node": "Prüfe ob Ordner prüfen",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Prüfe ob Ordner prüfen": {
+        "main": [
+          [
+            {
+              "node": "Liste Ordner",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Aktualisiere Statistik",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Liste Ordner": {
+        "main": [
+          [
+            {
+              "node": "Finde alte Dateien",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Finde alte Dateien": {
+        "main": [
+          [
+            {
+              "node": "Prüfe ob Löschen",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Prüfe ob Löschen": {
+        "main": [
+          [
+            {
+              "node": "Vorbereite Löschen",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Aktualisiere Statistik",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Vorbereite Löschen": {
+        "main": [
+          [
+            {
+              "node": "Lösche alte Datei",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Lösche alte Datei": {
+        "main": [
+          [
+            {
+              "node": "Aktualisiere Statistik",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Aktualisiere Statistik": {
+        "main": [
+          [
+            {
+              "node": "Schleife prüfen",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Schleife prüfen": {
+        "main": [
+          [
+            {
+              "node": "Extrahiere Workflow",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Backup-Statistik",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Backup-Statistik": {
+        "main": [
+          [
+            {
+              "node": "Prüfe Änderungen",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Prüfe Änderungen": {
+        "main": [
+          [
+            {
+              "node": "Threema Benachrichtigung",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          []
+        ]
+      },
+      "Threema Benachrichtigung": {
+        "main": [
+          []
+        ]
+      }
+    },
+    "authors": "Marcus Kunkel",
+    "name": "Version 3345b319",
+    "description": "",
+    "autosaved": false
+  },
+  "tags": []
+}
