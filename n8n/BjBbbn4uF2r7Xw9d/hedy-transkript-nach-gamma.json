@@ -1,0 +1,285 @@
+{
+  "updatedAt": "2026-01-16T19:52:59.534Z",
+  "createdAt": "2026-01-16T16:15:02.023Z",
+  "id": "BjBbbn4uF2r7Xw9d",
+  "name": "Hedy Transkript nach Gamma",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "hedy-to-gamma-a2863007-e032-4ba6-b0ea-bea6eb1da57b",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        2976,
+        576
+      ],
+      "id": "7b85807b-2ffa-4f9a-8eac-e5f784aa3569",
+      "name": "Hedy Gamma API",
+      "webhookId": "a2863007-e032-4ba6-b0ea-bea6eb1da57b"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "claude-3-5-haiku-20241022",
+          "mode": "list",
+          "cachedResultName": "claude-3-5-haiku-20241022"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Rolle: Du bist ein Formatierungs-Assistent für Präsentationen in Gamma.\nAufgabe: Bereite den folgenden Text unverändert für den Import in Gamma auf.\n{{ $json.body.meeting_minutes }}\n\nRegeln (streng einhalten)\nDer Textinhalt darf in keiner Weise verändert werden\nnichts kürzen\nnichts umformulieren\nnichts hinzufügen\nnichts interpretieren\nStruktur & Trennung\n# kennzeichnet die Titelfolie. Füge auf der Titelfolie bitte das Datum im Format dd.mm.yyyy aus {{ $json.body.startTime }} ein\nJedes ## kennzeichnet den Beginn einer neuen Folie (Karte)\nVor jedem ## muss exakt folgende Trennsequenz eingefügt werden:\n---\n(also: Zeilenumbruch, drei Bindestriche, Zeilenumbruch → \\n---\\n)\nGamma-Konvention\nDie Trennzeichen --- sind die einzigen erlaubten Karten-Separatoren\nJede Trennung erzeugt exakt eine neue Karte in Gamma\nnumCards wird nicht verwendet\nMarkdown beibehalten\nÜberschriften (#, ##)\nBullet Points (-)\nAbsätze\nbleiben exakt wie im Original\nAusgabe\nGib nur den formatierten Text aus\nKeine Erklärungen\nKein zusätzlicher Kommentar\nKein Codeblock um den gesamten Text"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.anthropic",
+      "typeVersion": 1,
+      "position": [
+        3232,
+        576
+      ],
+      "id": "8707c10e-e7be-42d0-bfc9-6b495c4481c5",
+      "name": "Message a model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "z2co8mXBEBKkyhYu",
+          "name": "API Anthropic"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://public-api.gamma.app/v0.2/generations",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-KEY",
+              "value": "API-Key-aus-Gamma"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"inputText\": {{ $json.text }},\n  \"textMode\": \"preserve\",\n  \"format\": \"presentation\",\n  \"themeName\": \"2se08isfynkzu18\",\n  \"cardSplit\": \"inputTextBreaks\",\n  \"additionalInstructions\": \"Verändere den Text nicht, erfinde nichts hinzu.\",\n  \"exportAs\": \"pptx\",\n  \"textOptions\": {\n    \"amount\": \"detailed\",\n    \"tone\": \"professional, inspiring\",\n    \"audience\": \"C-level managememt\",\n    \"language\": \"de\"\n  },\n  \"imageOptions\": {\n    \"source\": \"noImages\"\n  },\n  \"cardOptions\": {\n    \"dimensions\": \"16x9\"\n  },\n  \"sharingOptions\": {\n    \"workspaceAccess\": \"view\",\n    \"externalAccess\": \"noAccess\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        3792,
+        576
+      ],
+      "id": "1bc0e890-bcbf-466a-a5ff-32267b063ac6",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Funktion zum „JSON-sicher“ machen eines Strings\nfunction sanitizeForJson(s) {\n  if (typeof s !== 'string') {\n    s = String(s ?? '');\n  }\n\n  // C0-Steuerzeichen entfernen, aber \\n und \\t erlauben\n  // (0x00–0x1F & 0x7F), außer \\n (0x0A) und \\t (0x09)\n  s = s.replace(/[\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F\\u007F]/g, '');\n\n  // Unicode Line/Paragraph Separator → normale Zeilenumbrüche\n  s = s.replace(/\\u2028|\\u2029/g, '\\n');\n\n  // Unpaare Surrogate ersetzen (können JSON/UTF-8 killen)\n  s = s.replace(/[\\uD800-\\uDBFF](?![\\uDC00-\\uDFFF])|(?<![\\uD800-\\uDBFF])[\\uDC00-\\uDFFF]/g, '�');\n\n  // Doppelte Leerzeichen rund um Zeilenumbrüche entschärfen\n  s = s.replace(/[ \\t]+\\n/g, '\\n');\n\n  return s;\n}\n\n// 1) Text aus vorherigem Node holen\nconst raw = $input.first().json;\n// kompletter JSON-Output des AI-Nodes\n\n// 2) Text extrahieren\nconst rawText = raw.content[0].text;\n\n// 3) Sanitizen\nconst inputText = sanitizeForJson(rawText);\n\n// 4) Ergebnis zurückgeben\nreturn [\n  {\n    json: {\n      text: JSON.stringify(inputText),\n    },\n  },\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3584,
+        576
+      ],
+      "id": "71e5534b-500e-4274-b4ce-c4c55a7e54b9",
+      "name": "Daten aufbereiten"
+    }
+  ],
+  "connections": {
+    "Hedy Gamma API": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Daten aufbereiten",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daten aufbereiten": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "Hedy Gamma API": [
+      {
+        "json": {
+          "headers": {
+            "host": "n8n.srv1098810.hstgr.cloud",
+            "user-agent": "Hedy-Webhooks/1.0",
+            "content-length": "41401",
+            "accept": "application/json, text/plain, */*",
+            "accept-encoding": "gzip, compress, deflate, br",
+            "baggage": "sentry-environment=production,sentry-public_key=636d898d03791e18e8254d0007e57a2f,sentry-trace_id=bd51181f1066004705f4df51c303e1ad,sentry-org_id=4507589434933248,sentry-transaction=POST%20%2F,sentry-sampled=true,sentry-sample_rand=0.04819736379786921,sentry-sample_rate=1",
+            "content-type": "application/json",
+            "sentry-trace": "bd51181f1066004705f4df51c303e1ad-655320699ce7dcfe-1",
+            "x-forwarded-for": "172.18.0.1",
+            "x-forwarded-host": "n8n.srv1098810.hstgr.cloud",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "8f35dc8382b6",
+            "x-hedy-event": "session.exported",
+            "x-hedy-signature": "2512986355bcf8b480ee4c12901c9b73d0f74827812f52726db332281145994c",
+            "x-real-ip": "172.18.0.1"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "event": "session.exported",
+            "conversations": "Q: \nA: Hey Marcus, der Workflow läuft – jetzt geht’s ans Verfeinern:\n\n• Überprüfe den Testlauf vom 10.12., besonders die UTC-Zeitumrechnung und den erfolgreichen Phonio-Call.\n• Bereite dich auf die Implementierung des Status-Trackings im Google Sheet vor – das war ein zentraler Punkt.\n• Lerne die Konfiguration von n8n Data Tables, um Doppelanrufe effizienter zu vermeiden.\n• Achte auf die Webhook-Integration für die Nachverarbeitung – das kommt als nächstes dran.\n\n\nQ: \nA: Schlag in der Runde vor, drei konkrete Personas für den Testanruf zu entwickeln – etwa einen verunsicherten, einen skeptischen und einen enthusiastischen Interessenten.\nDas gibt dem Testlauf eine klare Struktur und hilft, verschiedene Gesprächssituationen gezielt zu üben, anstatt zufällig zu improvisieren.\n\n\nQ: \nA: Schlag vor, die drei Personas – verunsichert, skeptisch, enthusiastisch – in einem kurzen Rollenspiel direkt zu testen, wobei einer aus dem Team den Interessenten spielt und Marie den Anruf führt.\n\n\nQ: \nA: Schlag in der Runde vor, drei konkrete Personas für den Testanruf zu entwickeln – etwa einen verunsicherten, einen skeptischen und einen enthusiastischen Interessenten. Das gibt dem Testlauf eine klare Struktur und hilft, verschiedene Gesprächssituationen gezielt zu üben, anstatt zufällig zu improvisieren.\n\n\nQ: \nA: Nimm den nächsten Testlauf auf, füge Zeitstempel und Kommentare hinzu, um die Qualität systematisch zu evaluieren.\n\n\nQ: \nA: Frage kurz ein, ob die namentliche Bewertung sich auf die aktuelle Testversion bezieht oder bereits auf die produktive Nutzung ankommt. Das klärt die Zielsetzung und verhindert, dass rechtliche Anforderungen zu früh oder zu spät berücksichtigt werden.\n\n\nQ: \nA: Frage im Team, welche konkreten Maßnahmen umgesetzt wurden, um DSGVO-konform zu sein, und identifiziert so potenzielle Handlungsbedarf und vermeidet spätere Compliance-Probleme.\n\n\nQ: \nA: Formuliere ein kurzes Bewertungsschema für die Telefonqualität (z.B. Verständlichkeit, Gesprächsfluss, Zielerreichung) und notiere die jeweiligen Punkte für jede Aufnahme. Damit hast du ein kurzes, das die jeweiligen Punkte für jede Aufnahme hast, um objektiv zu prüfen, ob das System noch Anpassungen an der iPhone‑Anpassung oder der Prompt‑Logik braucht.\n\n\nQ: \nA: Erstelle kurz ein Bewertungsschema für die Qualität der Telefonate, das mindestens die Punkte Verständlichkeit, Gesprächsfluss und Zielerreichung beinhaltet.\n\n\nQ: \nA: Stelle die nächste Runde einen 2-minütigen Check ein, in der jeder nach jedem Call ein Stichwort zur Qualität und die die Daten erfasst",
+            "duration": 35,
+            "exportedAt": "2026-01-16T16:32:51.769321Z",
+            "highlights": [],
+            "meeting_minutes": "\n\n# Automatisierung von Outbound-Telefonaten mit KI-Technologie – Detaillierte Sitzungsnotizen\n\n## Teilnehmer und Kontext\n\n- **Marcus Kunkel** ist Softwareentwickler, systemischer Coach und ehemaliger Gymnasiallehrer.\n- Sein **Kernservice VAaaS (Virtual Assistance as a Service)** zielt auf Entlastung für mittelständische Unternehmen durch KI-gestützte Telefonassistenz.\n- **Marie** ist offensichtlich die KI-Telefonistin, die Anrufe durchführt.\n- **Peter, Markus, Thorsten, Nicole, Gottfried, Harald, Hendrik, Claudia, Mike** nehmen an der Sitzung teil.\n- Besprochene Technologien: **n8n (Workflow-Automation), Calendly (Terminbuchung), Phonio (KI-Telefonie), Google Sheets (Datenhaltung), WhatsApp (Kommunikation)**.\n\n## Hauptthemen der Sitzung\n\n### 1. Testläufe mit verschiedenen Gesprächspersönlichkeiten (Personas)\n\n- Es wird vorgeschlagen, **drei konkrete Personas** für den Testanruf zu entwickeln:\n  - **Verunsicherter Interessent**\n  - **Skeptischer Interessent**\n  - **Enthusiastischer Interessent**\n- Ziel: Strukturierter Testlauf, um **unterschiedliche Gesprächssituationen gezielt zu üben**, statt zufällig zu improvisieren.\n- Es wird vorgeschlagen, ein **kurzes Rollenspiel direkt durchzuführen**, wobei ein Teammitglied den Interessenten spielt und Marie den Anruf führt.\n- **Frage gestellt:** Welche Maßnahmen wurden bereits umgesetzt, um DSGVO-konform zu sein?\n\n### 2. Bewertungsschema für Telefonqualität\n\n- Es wird vorgeschlagen, ein **Bewertungsschema für die Qualität der Telefonate** zu erstellen, das mindestens folgende Punkte enthält:\n  - **Verständlichkeit**\n  - **Gesprächsfluss**\n  - **Zielerreichung**\n- Idee: **Objektive Bewertung** durch Notieren der jeweiligen Punkte für jede Aufnahme.\n- Ziel: Prüfen, ob Anpassungen an der **iPhone-Anpassung oder der Prompt-Logik** erforderlich sind.\n- Es wird ein **2-minütiger Check nach jedem Call vorgeschlagen**, in dem jeder Teilnehmer ein Stichwort zur Qualität nennt.\n\n### 3. Dokumentation und Feedback\n\n- Es wird vorgeschlagen, die Ergebnisse in ein **Google Docs Dokument** einzutragen.\n- Ziel: **Strukturiertes Feedback** zur Wahrnehmung und Qualität der Gespräche.\n- Es wird diskutiert, ob die Ergebnisse in Form von **Screenshots (z.B. von n8n)** oder **Aufzeichnungen der Telefonate** präsentiert werden sollen.\n\n### 4. Technische Umsetzung und Workflow-Optimierung\n\n- Der aktuelle Workflow wird als **50-Prozent-Lösung** eingeschätzt.\n- Es wird angestrebt, bis **Ende Januar eine vollständige Lösung** zu präsentieren.\n- Es wird besprochen, ob der Workflow **vorab aufgezeichnet** und als Audiodrop präsentiert werden soll, da **Live-Demonstrationen zeitintensiv** sind.\n- Es wird angemerkt, dass die **Präsentation des Workflows beim Summit** geplant ist, aber noch unklar ist, ob eine **Live-Präsentation oder eine vorbereitete Grafik** verwendet wird.\n\n### 5. DSGVO-konforme Umsetzung\n\n- Es wird angemerkt, dass **DSGVO-konforme Umsetzung notwendig** ist, besonders da personenbezogene Daten (z.B. Telefonnummern) verarbeitet werden.\n- Es gibt Diskussionen darüber, wie man DSGVO-konform bleibt, wenn man beispielsweise **Telefonnummern oder Chat-Daten speichert**.\n- Es wird vorgeschlagen, bei der Anmeldung oder beim ersten Kontakt eine **klare Zustimmung (Double Opt-in)** einzuholen, um datenschutzkonform zu handeln.\n- Es wird erwähnt, dass es bereits **Vorqualifizierungen** gibt, bei denen Benutzer bereits einige Aktionen durchgeführt haben (z.B. Café-Besuche, Buchungen), was als **Profilierung** interpretiert werden könnte.\n\n### 6. Präsentation beim Summit\n\n- Es wird besprochen, wie die **Präsentation beim Summit** aussehen soll:\n  - **Live-Demonstration oder vorbereitete Aufzeichnung?**\n  - **Welche Technologien sollen präsentiert werden?** (z.B. n8n, Phonio, Calendly)\n  - Wie soll der **Tech-Stack visualisiert** werden?\n- Es wird angemerkt, dass **live telefonieren sehr schwierig** sein wird, da es **sehr zeitaufwendig** sei.\n- Es wird vorgeschlagen, eine **Aufzeichnung eines Telefonats abzuspielen** und diese mit der Live-Demonstration zu kombinieren.\n- Es wird diskutiert, wer von den **Teilnehmern vor Ort sein wird**, um die Präsentation zu unterstützen.\n\n### 7. Nächste Schritte und Aktionen\n\n- Es wird vorgeschlagen, bis **nächste Woche Mittwoch** mehrere Testanrufe durchzuführen und das **Feedback in der Gruppe zu teilen**.\n- Es wird vorgeschlagen, eine **Präsentation mit Screenshots von n8n** zu erstellen.\n- Es wird besprochen, einen **Platzhalter in der Präsentation** zu lassen, bis der Workflow vollständig ist.\n- Es wird besprochen, wie man **DSGVO-konform mit dem System umgehen** kann.\n- Es wird besprochen, wie man **Personas für den Testlauf** erstellen und verwenden kann.\n\n### 8. Technische Details und Tools\n\n- Es wird erwähnt, dass der Workflow auf **n8n** umgeschoben wurde.\n- Es wird diskutiert, ob **n8n oder Make (ehemals Integromat)** verwendet wird.\n- Es wird erwähnt, dass der Workflow **mit Calendly verbunden** ist.\n- Es wird besprochen, dass der Workflow **Telefonate mit Phonio** auslöst.\n- Es wird erwähnt, dass die **Aufzeichnungen der Telefonate** in einem Google Sheet oder über einen **Webhook in n8n** gespeichert werden können.\n\n### 9. Organisatorisches und Kommunikation\n\n- Es wird besprochen, wie man **intern mit WhatsApp** kommuniziert.\n- Es wird besprochen, wie man **Termine mit Calendly** plant.\n- Es wird erwähnt, dass es eine **Masterclass** gibt und dass man sich um die **Anmeldung** kümmern muss.\n- Es wird erwähnt, dass es **verschiedene Termine und Uhrzeiten** gibt, um die man sich abstimmen muss.\n\n### 10. Zusammenfassung und Ausblick\n\n- Die Sitzung fokussierte auf die **weitere Entwicklung und Optimierung des automatisierten Outbound-Call-Workflows**.\n- Es wurden **Testläufe mit verschiedenen Personas** vorgeschlagen, um die **Qualität der Gespräche zu verbessern**.\n- Es wurde ein **Bewertungsschema für die Telefonqualität** erstellt.\n- Es wurden **DSGVO-konforme Maßnahmen diskutiert**.\n- Es wurde die **Präsentation beim Summit** vorbereitet.\n- Es wurden **nächste Schritte** definiert, darunter **mehrere Testanrufe bis nächste Woche Mittwoch** und die **Erstellung einer Präsentation mit Screenshots von n8n**.\n\n## Study Tips und Memory Aids\n\n### Analogy\n\n- **Workflow = Telefonzentrale**:\n  - Der Workflow ist wie eine automatische Telefonzentrale, die Anrufe entgegennimmt, weiterleitet und verarbeitet.\n  - Ähnlich wie bei einer klassischen Telefonzentrale gibt es verschiedene Stationen (z.B. Call Center, Leitungen, Gesprächsführung), die alle zusammenarbeiten müssen.\n\n### Mnemonik\n\n- **3 Personas = 3 Persönlichkeiten**:\n  - Verunsicherter Interessent\n  - Skeptischer Interessent\n  - Enthusiastischer Interessent\n  - Merke: **VSE** (Verunsichert, Skeptisch, Enthusiastisch)\n\n### Gruppierung\n\n- **3 Phasen eines Anrufs**:\n  1. **Terminabholung** – aus Calendly.\n  2. **Anrufsteuerung** – im n8n-Workflow.\n  3. **Nachverarbeitung** – Rückmeldung vom Telefonat.\n\n### Beziehung\n\n- **Testanruf ↔ Bewertungsschema**:\n  - Mit einem klaren Bewertungsschema kann man **objektiv prüfen**, ob der Anruf gut ist oder ob noch Verbesserungen notwendig sind.\n  - Der Testanruf gibt **konkrete Daten**, die man dann mit dem Bewertungsschema vergleichen kann.\n\n### Checkliste\n\n- **Personas für den Testlauf**:\n  - Verunsicherter Interessent\n  - Skeptischer Interessent\n  - Enthusiastischer Interessent\n\n- **Bewertungsschema**:\n  - Verständlichkeit\n  - Gesprächsfluss\n  - Zielerreichung\n\n- **Nächste Schritte**:\n  - Testanrufe bis nächste Woche Mittwoch\n  - Feedback in der Gruppe teilen\n  - Präsentation mit Screenshots von n8n erstellen\n  - DSGVO-konforme Maßnahmen umsetzen\n\n\n",
+            "recap": "In dieser 35-minütigen Sitzung wurde ein automatisierter Outbound-Call-Workflow auf Basis von n8n, Calendly und Phonio weiterentwickelt und getestet. Der Fokus lag auf der Validierung des Testlaufs, der Implementierung von Personas für realistische Testanrufe sowie der Klärung von DSGVO-relevanten Aspekten. Es wurden konkrete Vorschläge zur Verbesserung der Testmethodik gemacht, darunter die Entwicklung von drei Personas (verunsichert, skeptisch, enthusiastisch) und die Erstellung eines Bewertungsschemas für die Telefonqualität. Ebenfalls besprochen wurden die Integration von Status-Tracking im Google Sheet, die Nachverarbeitung über Webhooks und die Verwendung interner n8n Data Tables zur Vermeidung von Doppelanrufen.\n\nKernpunkte:\n• Der Workflow startet durch einen gebuchten Termin in Calendly und verarbeitet die UTC-konvertierte Zeit, um zeitzonenbedingte Fehler zu vermeiden.\n• Es wurde ein JavaScript-Node implementiert, der prüft, ob sich die aktuelle Zeit innerhalb eines definierten Zeitfensters befindet, und setzt ein Flag (z. B. 'anrufen: true').\n• Die Vermeidung von Doppelanrufen erfolgt durch Status-Tracking im Google Sheet (z. B. 'Anruf läuft') oder Nutzung interner n8n Data Tables.\n• Über einen Webhook-Call an die Phonio-API wird ein Anruf ausgelöst; der JSON-Body enthält Telefonnummer, Absender und Kontextdaten wie Vor- und Nachname.\n• Die Qualität der Anrufe soll anhand eines Bewertungsschemas analysiert werden, das Verständlichkeit, Gesprächsfluss und Zielerreichung abdeckt.\n• Als Testmethodik wurde vorgeschlagen, drei konkrete Personas (verunsichert, skeptisch, enthusiastisch) zu entwickeln und diese in Rollenspielen zu testen, um verschiedene Gesprächssituationen gezielt zu üben.\n• Zur DSGVO-Konformität wurde diskutiert, wie personenbezogene Daten behandelt werden und welche Maßnahmen zur Einhaltung notwendig sind, z. B. Double Opt-in oder Einwilligungsvorbelegung.\n• Es wurde empfohlen, vor jedem Testlauf ein Bewertungsschema zu erstellen und die Ergebnisse systematisch zu erfassen, um Verbesserungen am Prompt oder der iPhone-Anpassung nachvollziehen zu können.\n• Die nächsten Schritte umfassen die Implementierung des Status-Trackings im Google Sheet, die Einrichtung eines Webhooks für die Nachverarbeitung und den Test mit n8n Data Tables.\n• Für die Präsentation beim Summit wurde vorgeschlagen, den Workflow zu skizzieren, ein Audiobeispiel abzuspielen und den Tech-Stack sowie Schnittstellen klar darzustellen.\n\nAktionspunkte:\n• Erstellung eines Bewertungsschemas für die Qualität der Telefonate mit den Kriterien Verständlichkeit, Gesprächsfluss und Zielerreichung.\n• Test der drei Personas (verunsichert, skeptisch, enthusiastisch) in Rollenspielen, um verschiedene Gesprächssituationen zu üben.\n• Implementierung des Status-Trackings im Google Sheet, um Doppelanrufe zu vermeiden.\n• Einrichtung eines Webhooks in n8n zur Nachverarbeitung des Gesprächsergebnisses von Phonio.\n• Test der n8n-Data-Tables-Alternative zur Vermeidung von Doppelanrufen und zur Optimierung der Performance.\n• Klärung der DSGVO-Konformität des Workflows und Implementierung notwendiger Maßnahmen wie Double Opt-in oder Einwilligungsvorbelegung.\n• Erstellung einer grafischen Übersicht des gesamten Workflows zur Präsentation beim Summit.",
+            "sessionId": "W6YZ15Vz9RHpXVf7JNGV",
+            "startTime": "2026-01-14T13:06:37.497036Z",
+            "structured_conversations": [
+              {
+                "answer": "Hey Marcus, der Workflow läuft – jetzt geht’s ans Verfeinern:\n\n• Überprüfe den Testlauf vom 10.12., besonders die UTC-Zeitumrechnung und den erfolgreichen Phonio-Call.\n• Bereite dich auf die Implementierung des Status-Trackings im Google Sheet vor – das war ein zentraler Punkt.\n• Lerne die Konfiguration von n8n Data Tables, um Doppelanrufe effizienter zu vermeiden.\n• Achte auf die Webhook-Integration für die Nachverarbeitung – das kommt als nächstes dran.",
+                "question": null,
+                "timestamp": 1768396002940,
+                "type": "suggestion"
+              },
+              {
+                "answer": "Schlag in der Runde vor, drei konkrete Personas für den Testanruf zu entwickeln – etwa einen verunsicherten, einen skeptischen und einen enthusiastischen Interessenten.\nDas gibt dem Testlauf eine klare Struktur und hilft, verschiedene Gesprächssituationen gezielt zu üben, anstatt zufällig zu improvisieren.",
+                "question": null,
+                "timestamp": 1768396197000,
+                "type": "suggestion"
+              },
+              {
+                "answer": "Schlag vor, die drei Personas – verunsichert, skeptisch, enthusiastisch – in einem kurzen Rollenspiel direkt zu testen, wobei einer aus dem Team den Interessenten spielt und Marie den Anruf führt.",
+                "question": null,
+                "timestamp": 1768396440100,
+                "type": "suggestion"
+              },
+              {
+                "answer": "Schlag in der Runde vor, drei konkrete Personas für den Testanruf zu entwickeln – etwa einen verunsicherten, einen skeptischen und einen enthusiastischen Interessenten. Das gibt dem Testlauf eine klare Struktur und hilft, verschiedene Gesprächssituationen gezielt zu üben, anstatt zufällig zu improvisieren.",
+                "question": null,
+                "timestamp": 1768396743937,
+                "type": "suggestion"
+              },
+              {
+                "answer": "Nimm den nächsten Testlauf auf, füge Zeitstempel und Kommentare hinzu, um die Qualität systematisch zu evaluieren.",
+                "question": null,
+                "timestamp": 1768396916277,
+                "type": "suggestion"
+              },
+              {
+                "answer": "Frage kurz ein, ob die namentliche Bewertung sich auf die aktuelle Testversion bezieht oder bereits auf die produktive Nutzung ankommt. Das klärt die Zielsetzung und verhindert, dass rechtliche Anforderungen zu früh oder zu spät berücksichtigt werden.",
+                "question": null,
+                "timestamp": 1768397098710,
+                "type": "suggestion"
+              },
+              {
+                "answer": "Frage im Team, welche konkreten Maßnahmen umgesetzt wurden, um DSGVO-konform zu sein, und identifiziert so potenzielle Handlungsbedarf und vermeidet spätere Compliance-Probleme.",
+                "question": null,
+                "timestamp": 1768397339285,
+                "type": "suggestion"
+              },
+              {
+                "answer": "Formuliere ein kurzes Bewertungsschema für die Telefonqualität (z.B. Verständlichkeit, Gesprächsfluss, Zielerreichung) und notiere die jeweiligen Punkte für jede Aufnahme. Damit hast du ein kurzes, das die jeweiligen Punkte für jede Aufnahme hast, um objektiv zu prüfen, ob das System noch Anpassungen an der iPhone‑Anpassung oder der Prompt‑Logik braucht.",
+                "question": null,
+                "timestamp": 1768397521650,
+                "type": "suggestion"
+              },
+              {
+                "answer": "Erstelle kurz ein Bewertungsschema für die Qualität der Telefonate, das mindestens die Punkte Verständlichkeit, Gesprächsfluss und Zielerreichung beinhaltet.",
+                "question": null,
+                "timestamp": 1768397761817,
+                "type": "suggestion"
+              },
+              {
+                "answer": "Stelle die nächste Runde einen 2-minütigen Check ein, in der jeder nach jedem Call ein Stichwort zur Qualität und die die Daten erfasst",
+                "question": null,
+                "timestamp": 1768397936959,
+                "type": "suggestion"
+              }
+            ],
+            "title": "Automatisierter Outbound-Call-Workflow mit n8n, Calendly & Phonio",
+            "transcript": "Ja, okay, gut, das kennen wir ja auch bilateral oder wie heißt das?\n\nOffline selber wieder für sich machen, ne?\n\nAsynchron, danke.\n\nIch glaube, das haben wir noch nicht, wir haben noch gar nicht mit dir telefoniert, oder?\n\nIch glaube einmal, kann das sein.\n\nAber noch ohne Futter, wenn überhaupt.\n\nJa, ich meine dann eben halt wirklich so dieses Ding durchspielen, dass da mal ein potenzieller Interessent der entweder sich dappig anstellt oder wie auch immer er sich anstellt.\n\nDass man vielleicht noch mal kurz drei Personas kreiert.\n\nIhr habt doch schon beim Prompting dafür auch schon Personas gehabt.\n\nDass man da mal in die Persona reinschlüpft und mit der dann anruft, das muss ja gar nicht outbound sein.\n\nEs geht vor allen Dingen darum, wie schlägt sich Marie, ist die total nervig oder ist das gut?\n\nGenau, ich habe die Telefonnummer gerade noch mal in die WhatsApp-Gruppe gepostet.\n\nIhr könnt hier 114 Euro Guthaben haben wir noch gefragt.\n\nSo geht los.\n\nGenau.\n\nIch weiß immer noch nicht, ob wir das auf dem Summit vorstellen dürfen oder nicht.\n\nDas wird aber auch noch geklärt.\n\nAlso ich glaube, Peter, aktuell, so wie es jetzt aussieht, haben wir so eine 50-Prozent-Lösung, oder?\n\nOder sind wir schon darüber hinaus?\n\nDie kriegen wir, glaube ich, schon bis Ende Januar.\n\nAlso jetzt haben wir noch zwei Wochen Ende Januar.\n\nAktuell braucht es dann irgendwie nochmal eine weitere Session direkt davor oder so.\n\nDas wird nochmal abrunden.\n\nAber ich glaube, jetzt wird es jetzt noch nicht in die Produktion übergeben, aber als Showcase bzw.\n\nals Showcase-Prototyp.\n\nDas ist natürlich das Nächste.\n\nEs wird sehr, sehr schwierig sein, dort, glaube ich, das telefonmäßig live zu zeigen.\n\nAlso das ist, wenn man sich das vorstellt, Das wird schwierig.\n\nDas wäre dann eher die Frage, wie man es grafisch darstellt, dass man diese Lösung skizziert, keine Ahnung, vielleicht irgendwo ein Audiodrop noch laufend, ich weiß es nicht, aber so machen wir es ja auch mit der Lösung mit der Christiane Weber und der Krips.\n\nInfotelefon – dass wir das tatsächlich nicht live zeigen.\n\nEs braucht doch zu viel Zeit.\n\nTelefonierst du mit dem erst mal fünf Minuten oder vier und bis du dann erklärt hast, was du gemacht hast, ist schon längst die Zeit rum.\n\nJa, gut, wir können ja, wenn ein Telefonat geführt ist, ist die WCE aufgezeichnet und dann können wir diese Aufzeichnung einfach abspielen und dann zeigen, was passiert am Wer ist denn vor Ort überhaupt von uns?\n\nWeil Peter ist ja dabei dich beschäftigt.\n\nDer Markus ist vor Ort.\n\nGut.\n\nGottfried, du bist auch da, oder?\n\nNein.\n\nEs ist stumm geschaltet, Gotti.\n\nJa, ich bin leider nicht vor Ort.\n\nIch schaff's nicht, weil meine Frau hat einen Tag vorher Geburtstag und dann Schwieger, Vater ist im Krankenhaus und Klassiker.\n\nWas ist denn das für ein Argument?\n\nIch verstehe es nicht.\n\nIch habe auch einen Tag vorher Geburtstag.\n\nJa.\n\nIch werde an meinem Geburtstag Stühle aufbauen und Bösen auf Tische legen.\n\nAlso, so.\n\nIch sage jetzt mal zunächst, Prioritäten, Priorität ist jetzt meine Frau dieses Mal.\n\nSo viel zum Thema Autonomie.\n\nJa, genau.\n\nEmanzipation heißt das.\n\nIhr seid ja alle vogelfrei, deswegen ist das eine ganz andere Basis.\n\nNicole ist auch nicht da.\n\nDer Peter hat einen anderen Solution-Fall, den er vorstellt.\n\nJa, Markus, dann wuppen wir die schon.\n\nAuf jeden Fall.\n\nEs sei denn, Nicole möchte ihren Geburtstag noch im Körnig-Institut feiern.\n\nNee, immer noch nicht.\n\nWas muss ich denn tun dafür?\n\nPräsidenten-Sweet im Steigenberger wird mir zu teuer, leider.\n\nSie hätte ja das Ticket sogar schon gewonnen.\n\nIch muss ja noch was zahlen, aber.\n\nJa, das ist so.\n\nViel Erfolg.\n\nViel Erfolg.\n\nAlles klar, Peter.\n\nDanke dir.\n\nDanke euch.\n\nCiao, ciao.\n\nJa, soll man das aufteilen?\n\nWir haben ja ganz am Anfang schon verschiedene Personen besprochen, beziehungsweise da bin ich in die Runde geschickt, dass es so unterschiedliche Typen gäbe, dass man sagt, jeder nimmt halt dann so zwei, drei Situationen, probiert das mal durch und schreibt es dann vielleicht in ein Google Docs Dokument rein oder so, was so das Feedback ist oder wie er es angenommen oder wahrgenommen Ich glaube, das müssen wir jetzt nicht zu viert machen, gleichzeitig, oder?\n\nIch wollte gerade sagen, wir haben doch eh das Ergebnis, gibt es ja wahrscheinlich, auch wie bei sonst.\n\nDu nimmst auf … Ja, aber es geht ja darum, wie man es wahrgenommen hat.\n\nUnd die persönliche Wahrnehmung, dass wir jetzt so… Das ist ganz krib, klar, das hast du, aber die Frage ist ja, wie kommt es bei dir an, wenn du sagst, du schlüpst jetzt in die Rolle rein, völlig überhaupt noch keine Ahnung zu haben und dann auf einmal redest du dann mit dem Bot und wie kommt das an bei dir?\n\nOder du hast schon so viele Informationen, hast es auch mitgeteilt und trotzdem fängt er jedes Mal wieder von vorne an.\n\nJa, habe ich gestern mit einem Quälder.\n\nIch frage die ja immer aus, die tollen Bots, und der fängt fünfmal hintereinander wieder mit dem genau gleichen Zahn, wie ich in der Wortach habe.\n\nAber läuft denn das Ding?\n\nHabt ihr Peter und du dann noch weiter gemacht?\n\nVor Weihnachten lief ja noch nicht viel, so wie mein letzter Kenntnisstand ist.\n\nWie stand vor Weihnachten?\n\nsind wir.\n\nAlso wir haben noch keinen Kalender angebunden.\n\nTatsächlich.\n\nIch glaube, wir können jetzt erstmal nur rein weg die Qualität des Telefonats bewerten.\n\nDas heißt, wir können jetzt erstmal nur Telefonat führen, Qualität bewerten und gucken, ob wir den System vom iPhone noch anpassen müssen.\n\nIch bin ja direkt Freitag, letzte Arbeitstag, Samstag krank, Grippallerinfekt, zwei Wochen Ja, das ist ja auch so, dass man am 30.\n\nAntibiotika geholt, was man so braucht, ne?\n\nDeshalb die Milch.\n\nGenau.\n\nWenn Alkohol allein nicht mehr wirkt.\n\nIch weiß nicht, was ich da trinken muss, damit auch desinfiziert, keine Ahnung.\n\nLeckeres Essen gab es doch auch mal nur zwischendurch.\n\nJa, das ist ja auch.\n\nJa, klar, das gab es auch noch zwischendurch, wobei ich glaube, meine Geschmacksnerven, meine Nase war eh ein bisschen betäubt.\n\nJa, das war ein interessanter Austausch mit dem Koch, der nur Französisch spricht und der Kellner hat immer doll Matcher gespielt, das war lustig.\n\nDer Chefkoch ist tatsächlich nur an den Tisch gekommen und hat gefragt, warum und wieso was halt.\n\nJa, war spannend.\n\nImmerhin.\n\nIch hätte nichts anderes erwartet, eindrigerweise in einem guten Restaurant.\n\nWenn du so zweideutige, eindeutige Hinweise dem, ich weiß nicht, sagt man Kellner?\n\nWas sagt man denn da jetzt mittlerweile?\n\nIch weiß das gar nicht.\n\nServicekraft, keine Ahnung.\n\nServicekraft, ja.\n\nOkay, also würde ich sagen, testen wir ein bisschen.\n\ndie Qualität, gucken an, was wir dem System überhaupt noch mitgeben dürfen und ich spreche den Peter nochmal an wegen der Terminlogik, Kalender, Geschichte, dass wir das noch irgendwie implementieren.\n\nGenau.\n\nWeil jetzt so meine Idee, passt das für euch oder habt ihr noch irgendwie eine Idee oder?\n\nKann man denn für den 31.\n\noder für den 30.\n\nschon was vorbereiten, Stand jetzt?\n\nVielleicht eine Gamma-Präsidentat.\n\nWas mag ich da rein?\n\nDas ist eine gute Frage.\n\nBeziehungsweise andersrum gefragt.\n\nSo wie Thorsten mal erzählt hat, das sind so einzelne Ständchen, so was weiß ich, ich steht hier und zwei Leute und vielleicht noch ein Laptop.\n\nJa.\n\nUnd da stehen dann sieben Leute drum rum und ihr verklickert denen, was mit Macht haben.\n\nSo habe ich es verstanden, ja.\n\nOkay.\n\nDer eine oder andere bekommt einen großen Fernseher, wenn er was live vorführen möchte.\n\nJa, aber der Case ist ja relativ einfach oder klar strukturiert, aber man kann es ja einen einzigen machen.\n\nmit der Aufgabenstellung, dann machst du im Prinzip, wie du vorgegangen bist, dann schreibst du die Grundstruktur von prompt rein, was so die Gesprächsführung, die Zielsetzung war, dann vielleicht die unterschiedlichen Use Cases noch und was rausgekommen ist.\n\nAlso ich glaube, das ist relativ simpel vom Aufbau her.\n\nJa, einmal den Prozess aufzeigen, welche Technologie, welchen Tech-Stack wir da verwendet haben.\n\nKeine Ahnung, ob wir NNN dann irgendwie diesen Flow oder ist es auf NNN oder ist Ich glaube, ich habe ihn auf NNN umgeschoben müssen.\n\nDer ist auf NNN.\n\nDa gibt es vielleicht einen oder anderen, der sich für einen Sinfonio kommt, interessiert oder eben auch für einen Outflow und dann die Schnittstellen, mit welchen Systemen man da arbeitet oder was?\n\n– Was ihr da aktuell einsetzt.\n\nWobei das immer ganz lustig ist, weil das, was das Squirting-Institut in der Vergangenheit immer eingesetzt hat, hat ja dann sehr oft nichts mit GDPR-Themen zu tun gehabt.\n\nDas setzt aktuell gerade alles um, oder?\n\nWobei jetzt von Make auf NIT1 zum Beispiel oder auch das Calendly – Ist das mittlerweile GDPR-konform?\n\nIch weiß es gar nicht.\n\nWenn du Calendly fragst, ja.\n\nOkay.\n\nJa, es gibt sicherlich, ich meine, wenn wir jetzt der GPT anpingen, ist das sicherlich nicht GPI-konform.\n\nNaja, weil da ja doch der eine oder andere immer wieder ein bisschen murzt.\n\nNaja, es kommt drauf an.\n\nAlso die reine Anfrage ist ja wurscht, geht ja nur um die personenbezogenen Daten.\n\nJa, ja, aber speziell wenn es um die Schnittstellen geht und wenn du natürlich ein Telefoncall oder ähnliches hast, dann bist du sehr, sehr schnell oder bei E-Mails bist du natürlich bei Personenbezogenen Daten unterwegs.\n\nEs sind da noch Stimme dazu gegebenenfalls, die dann bewertet und auswertet, wie sich der Mensch, wobei das haben wir ja nicht drin, Also du darfst dir keine Person herstellen, indem du sagst, das ist rot-grün-blau.\n\nDas darfst du ja nicht wirklich.\n\nDas wäre das Profiling, was nicht stattfindet, stattfindet.\n\nJa, genau.\n\nJa, also von daher ist die Lösung sicherlich semi-DSGVO-konform.\n\nAber man kann sie ja DSGVO-konform machen.\n\nJa, das ist ja immer eine Frage, wie… Muss ich trotzdem noch überzeugen, dass wir das machen wollen?\n\nJa, das ist halt nur die Frage, wie korrekt jetzt quasi das Curtin-Institut sein möchte oder sich präsentiert.\n\nEnde des Tages, glaube ich, gerät da keine Hand danach.\n\nDas ist, glaube ich, mehr so ein Positionierungsthema, wie man sich da darstellt.\n\nJa, absolut.\n\nWenn du das alles wasserdicht in Tüchern und DSGVO-konform machen möchtest, dann müssen wir wahrscheinlich den Tech-Stack etwas modifizieren, würde ich es mal nennen.\n\nWas natürlich schon Sinn macht, oder grundsätzlich, wenn du schon eine Vorqualifizierung hast, also wenn du schon weißt, okay, der hat schon mal ein paar Mal einen Café besucht oder der hat schon mal das eine oder andere gemacht oder vielleicht sogar schon mal gebucht, dann ist das ja im weitesten Sinne auch schon eine Profilierung oder Profiling, was du im Vorfeld machst.\n\nSobald du ihm einen Tag gibst und sagst, er hat das Buch und das und das und das gekauft, klar, sobald du ihn tagst, ist es ja… Ja, ja, deswegen meine ich eben.\n\nAlso da kannst du jetzt natürlich… Aber dann darfst du ja gar nichts machen, ne?\n\nJa, eh.\n\nDann darf ich mir auch nichts aufschreiben auf dem Zettel.\n\nVor allen Dingen schon allein der Chat zum Beispiel heute Morgen vom KI-Café, wer war schon, weiß ich, wie oft da oder 01234?\n\nWenn ihr das tut, oder ordnet ihr das zu?\n\nJetzt kommt raus.\n\nIch wette den nicht aus.\n\nIch weiß auch gar nicht mal, ob wir den Chat immer speichern tatsächlich.\n\nWäre wahrscheinlich sinnvoll und da gibt es sicherlich für den Sales so für mich das eine oder andere Signal, was da nachverfolgt werden dürfte.\n\nJa, gut, klar kann man alles machen, aber das Das wäre ja dann schon, der hat mit dem kommentiert im Chat.\n\nPenne ich jetzt komisch?\n\nDeswegen schreibe ich ja im Chat direkt eine Direktnachricht.\n\nGuck mal, ach guck, du hast was gesagt.\n\nBlau.\n\nJa, also von daher ist … Also das wäre ein Thema für Carsten Wittmann.\n\nNur wenn wir den da ranlassen, Das ist schon ein bisschen Aufwand, das ganze DSGVO-konform zu machen.\n\nEs geht ja mit dieser simplen Google-Tabelle schon mal los.\n\nIch glaube, du kriegst das genug.\n\nDoch, es geht schon.\n\n100% DSGVO-Konform, ja?\n\nOkay.\n\nNaja, was sind 100%? 100% bedeutet ja auch, dass du darauf hinweist, wie die Daten verarbeitet werden.\n\nDas geht ja schon in Richtung DSGVO-konform.\n\nIch hoffe, glaube ich, dass es geht.\n\nMan muss ja halt an bestimmten Stellen, muss man sich ein bisschen strecken.\n\nJa, oder du müsstest im Vorfeld, müsstest du ganz klar machen, dass diese Daten eben für Marketingzwecke oder ähnliches verwendet werden.\n\nAlso quasi beim allerersten Eintritt, wo jemand mit dem Hörting-Institut in Kontakt tritt, dass du das einfach nochmal klar machst und das müsste eigentlich so eine Art Commitment und Kontakten.\n\nDas ist halt die Frage, ich meine, jeder der sich beim KI-Café anmeldet, der Double Opt-in, Bestätigung, so.\n\nDie Frage ist, was du bestätigst, du bestätigst ja quasi den Termin, aber man könnte natürlich dann auch noch was dazu packen.\n\nNein, du bestätigst schon, dass wir dir marketingmäßig unter die Arme greifen dürfen.\n\nJa, dann wäre es ja safe.\n\nOh, nennt man das.\n\nWeiß nicht, wie mir das so spontan ein...\n\nAber wenn der Mensch die Datenschützerklärung liest, dann meldet er sich doch eh nirgends mehr an oder lädt nichts mehr runter.\n\nAlso wenn er da irgendwo sauber und sonst was oder Angst hat, dann darf ich mich aber auch nicht auf Facebook oder sonst wo rumtreiben.\n\nSobald du im Metakosmos unterwegs bist, hast du dein Leben abgegeben.\n\nUnd die, die dann jedes Essen irgendwo posten und sich nachher auf der anderen Seite aufregen mit DSGVO und sonst was?\n\nJa, ja, ja.\n\nDas sind eh zwei Maßstäbe dann.\n\nDas ist nochmal ein ganz anderes Thema, ja.\n\nDas stimmt, ja.\n\nDas stimmt, ja.\n\nDa war es natürlich ein guter Hinweis, Gottfried, dass wir vielleicht das DSGVO-Thema … Ich würde einfach nur, dass man vorbereitet ist, was einfach die Sprache … Das ist ja auch richtig, ne?\n\nDas man einfach weiß, okay, wie sind wir damit umgegangen, was haben wir ganz bewusst, das mal aus dem Feuer lassen oder man nimmt gleich den Wind aus den Segeln und zackt von vornherein, okay, jeder, der quasi dabei ist, hat ja quasi sein Hacking gegeben, ist dementsprechend, dem ist auch bewusst, dass wir das verwenden und somit hast du da keine Diskussionen.\n\nOftmals vergisst man es dann halt, ne?\n\nDann stehst du da und denkst, okay, was antworte ich jetzt oder wie, wie machen wir das?\n\nUnd wenn das von vornherein Wenn ich das richtig im Kopf habe, wenn du bei jedem Zoom-Call kommst, auf diese Startseite zu, in wenigen Minuten geht es los, da steht genau drin, was wir alles mit den Daten machen, irgendwo relativ weit unten.\n\nUnd damit akzeptierst du im Prinzip, dass dein Leben auch Ja, ich habe es auch nicht genau, ich habe es ehrlich gesagt noch nie gelesen.\n\nGut, er kommt unten Daten schutziglär, aber Jetzt noch mal zur Nummer zurück.\n\nHeißt das, die funktioniert bis zu dem Punkt, wo man quasi die eigentliche Terminkoordination macht, oder?\n\nJa, genau.\n\nEs ist zwar ein Outbound-Bot, aber es ist eine Telefonnummer, die du ganz normal anrufen kannst.\n\nDas heißt, wenn du jetzt draufklickst, sagt er sich wahrscheinlich, spreche ich mit?\n\nWeiß er natürlich nicht, weil du ja angerufen und dann geht das ganz normal los.\n\nOkay, wollen wir uns da ein Timing vornehmen, wer bis wann es schafft, da ein, zwei Mal anzurufen und dann das Feedback in der Gruppe zu teilen?\n\nIch würde tatsächlich bis nächste Woche Mittwoch sagen, oder?\n\nWieder eine Woche, bis sie da so zwei, drei Calls macht.\n\nNicole, darf ich dich mit der Präsentation beaufbringen?\n\nIch würde da halt Screenshots, also weiß ich jetzt auch noch nicht, überlege ich mir noch, aber aber ich würde halt Screenshots reinpacken von der N8N-Strecke sozusagen.\n\nIch melde mich.\n\nIch melde mich.\n\nMachen wir erstmal einen Platzhalter rein, weil wenn die Strecke fertig ist, kann ich dann ja… Aber tendenziell jetzt nicht morgen und nicht übermorgen, weil ich glaube, wir sehen uns die nächsten drei Tage immer irgendwie.\n\nBloß weil morgen Hedy ist, bloß weil Freitag Hedy ist, bloß Samstag KI-För-Strategie ist, weiß nicht.\n\nDie Änderungen vorgenommen, die wir das letzte Mal besprochen hatten mit den Blocken der Nummer bzw.\n\nBeziehungsweise, dass die Automatisierung prüft, ob die Nummer noch im Gespräch ist.\n\nUnd das andere war ja, dass die Nummer, die drinsteht, im Falle, dass die Automatisierung aus irgendeinem Grund abbricht, dann drüber geht und die nach zwei Stunden oder größer als zwei Stunden bereinigt.\n\nIch vermute fast...\n\nIch habe mir heute fast nicht, sieht mir nicht so aus.\n\nAber wie gesagt, diese Geschichte gucke ich mir mit einem Peter auch nochmal durch.\n\nMarkus, du hast, glaube ich, irgendwas in die Gruppe gestellt, ne, irgendwie einen Jason, oder?\n\nJa, oder?\n\nJa.\n\nDas kann ich ja auch nochmal hochladen und mir anschauen.\n\nIch weiß noch nicht genau, wie ich das alles machen soll, weil ich habe schon wieder das ein… Nachdem, wann du mit dem Peter da durchgehst… Ja, ja, machen wir mal ein dritter, ein dreier, ein dreier, ein dreier, oder irgendwas, ne?\n\nJa, ich kann mal gucken, dass ich die, dass ich die zwei Elemente mal rein einfüge.\n\nDas ist ja eigentlich relativ schnell gemacht, das Testen.\n\nIst nochmal eine andere Nummer, ne?\n\nGenau.\n\nGenau, das wäre dann ja auch nochmal der zweite Schritt, dann wenn die Automatisierung läuft, dass das getestet wird, ob das das tut, was es soll.\n\nJa, ich habe jetzt gerade nochmal geguckt, weil ganz am Anfang habe ich ja mal so diese Profiles oder Personas gebastelt.\n\nSoll ich die Typen nochmal in den Chat reinstellen?\n\nJa, wäre super.\n\nOrdne einfach Wildnamen zu.\n\nSiehst du hier 19 Menschen?\n\nNein, ich Ich glaube, wir waren immer zu sechst, oder?\n\nAlso Peter noch, Claudia noch und dann verließen sie uns doch, oder?\n\nVor Weihnachten war noch ein neuer, ein neuer Kollege.\n\nAh, hier der Dingens, stimmt.\n\nMike hörte zu.\n\nSpannend.\n\nMike?\n\nIch glaube, der ist einfach in jede Gruppe.\n\nIch kenne da manche – Hörb, ich hab grad halt guckt wieviel Menschen, aber aus 19 zu verteilen, wenns jetzt 8 gewesen wären oder 7, ist ja was anderes, aber die 19, die von Thun und Vasen keine Ahnung haben, ist eh witzlos dann.\n\n– Naja, der Harald hat ja heute keine Zeit, der Harald war ja auch noch, glaub ich.\n\nHendrik war letztes Mal dabei, genau.\n\nDas ist glaube ich zu großes Angebot.\n\nVon Obsidian bis, wie sagte Peter vorhin in dem Call, ich habe so viele Meetings, ich muss auch zwischendurch mal Geld verdienen.\n\nJa, es wird aber langsam schon wieder so, ja.\n\nDas waren es vor Weihnachten ganz sechs, also jetzt nicht nur wegen hier, aber ich bin auf einem guten Weg dazu wieder, irgendwie.\n\nPrioritäten, Frau Burg, Prioritäten.\n\nIch habe was für dich gesehen letztens.\n\nFür mich?\n\nPantone Möbel.\n\nDie waren von Pantone, das waren so Blechschränke für Büro und in einem Pantone Farben.\n\nDann machen wir bis nächste Woche wieder so ein paar Calls.\n\nUnd danach treffen wir uns wieder um zwei.\n\nGleich Uhrzeit, gleicher Link.\n\nDann ziehen wir es jetzt auch nicht künstlich in die Länge.\n\nAlso jetzt habe ich ja um 15 Uhr schon wieder einen Call, glaube ich.\n\nAlso nach so einem KI-Café da bucht sich ja der eine oder andere gerne mal ein Gespräch.\n\nKurze Frage, habt ihr da intern den WhatsApp schon rumgeschickt für den Samstag?\n\nDa ist ja normalerweise immer eine Gruppenleiter auf WhatsApp.\n\nLesen hilft.\n\nHabe ich es übersehen?\n\nJa.\n\nEcht?\n\nWann kam das?\n\nVorgestern kam der Mail.\n\nAh, okay.\n\nDa muss ich nochmal rein.\n\nE-Mail.\n\nEs sind immer so viele Mails, die zwischendurch kommen.\n\nNee, du Christoph, Markus kriegt noch die Mail, weil er noch in der Master-Serie drin ist.\n\nAch so, okay.\n\nDas habe ich noch nicht rausgenommen.\n\nDer ist wieder so eine Sonderlocke.\n\nWir müssen sowieso noch telefonieren wegen der Masterclass, ne?\n\nDenkst du dran, ne?\n\nOder soll ich oder soll ich dir den Link einfach zuschicken, mir ist wurscht.\n\nDann müssen wir nicht telefonieren, dann ist es einfacher.\n\nJa, wenn ihr euch einig seid… Hast du, Markus, hast du übrigens die Karten schon gekriegt?\n\nNein, lass mich kurz auf Torsten antworten.\n\nWenn ihr euch entschieden habt, mich zu behalten, dann müsst ihr damit leben, ja.\n\nIch frage mal die anderen beiden.\n\nIch frage mal die Ich würde mal spontan sagen ja und lieber ein paar andere raus.\n\nIch meine, Torsten, du bist derjenige, den ich immer penetriere mit Fragen.\n\nIch weiß, ich weiß. Du bist mein primäres Ziel.\n\nAch so, man muss Torsten mit Fragen Wird es dann billiger oder was ist der Grund, Markus?\n\nBei mir steht das Thema Ende Januar an.\n\nDas ist eine Abwandlung des Helsinki-Syndroms.\n\nOkay.\n\nSo schlimm.\n\nWann fand das Kidnapping statt?\n\nSobald er Ich habe die Karten noch nicht bekommen, Gottfried, Birgit hatte doch eine Nachricht darum geschickt, dass da erst mal gesammelt wird.\n\nAch, eure Trendtrigger-Bumms-Karten-Dinger.\n\nJa, ja, sowohl die Trendkarten als auch die 33a-Karten.\n\nGuck mal, wer sie hat.\n\nJa, klar, die Ja, auch ohne Strategieberaterausbildung kann man da dran kommen.\n\nIch weiß nicht, es sind ja irgendwie 40 Karten weggekommen.\n\nDie sind nicht auffindbar.\n\nJa, die sind nicht mehr auffindbar.\n\nPäckchen oder Nummern?\n\nNein, 40 Päckchen.\n\nDie sind irgendwie zwischen Druckerei und Lager 1000 Euro.\n\nWir brauchen mehr Platz.\n\nWer nicht?\n\nGut, okay.\n\nGibt es denn schon eine Uhrzeit für die neue Masterclass?\n\nIch weiß nichts, ich weiß, ich weiß, ich habe die Umfrage nicht, ich habe das Ergebnis der Umfrage nicht gesehen tatsächlich.\n\nJa, sein können das jetzt, ihn dann schon.\n\nIch dachte, es wird vorverlegt auf 18 Uhr, glaube ich, oder?\n\nDas war die Abfrage, ne?\n\nJa, ja.\n\nIch kann sagen, dass das von 18 Uhr ist.\n\n18, 30.\n\n18, 30.\n\n18, 30.\n\nUnd ich weiß noch nichts.\n\nLassen wir uns überraschen.\n\nIch finde früher scheiße.\n\nIst so.\n\nSex ist so mitten im Tag noch.\n\nDann kannst du davor und danach… Sagen wir es mal so, es ist essenstechnisch 19:30 Uhr besser, weil dann kann ich um 6 Uhr kochen, alle versorgen und Wohl genährt und gesättigt mit einem dicken Bäuchlein um 19:30 starten.\n\nZum Beispiel.\n\nUnd sonst macht man das um halb fünf oder so.\n\nNee, sonst meist danach um zehn.\n\nDas arme Kind.\n\nDas Kind ist, das Kind kommt von der Schwule um drei und ist und hat dann nicht um halb fünf, halb sechs schon wieder Hunger.\n\nJa, okay, das ist richtig.\n\nSo.\n\n19 Uhr schon kritisch.\n\nJa.\n\nJa, wenn nachher jeder um halb acht sein Kind ins Bett bringen muss und dann um halb neun wieder reinkommt, können wir nochmal wiederholen, weil so Menschen gibt es dann in der Zwischenzeit auch, finde ich, wo später kommen und dann können wir das nochmal geschwindet, bitte und so.\n\nIch hoffe, dass Ich habe das im April, ich kann mir das noch für Lehrer angucken, dann entscheiden.\n\nIch bin nur gespannt, ob wir dann genauso lang machen.\n\nDas wäre dann ein Fauxpas.\n\nHabt ihr sonst noch Fragen?\n\nDa habe ich ein WhatsApp Ja, Peter hat noch so ein paar Kundenprojekte hier noch abgestücken darf, das stimmt, ja.\n\nGut, gut, dann bis nächste Woche.\n\nBis morgen, Samstag.\n\nDanke euch!\n\n"
+          },
+          "webhookUrl": "https://n8n.srv1098810.hstgr.cloud/webhook-test/hedy-to-gamma-a2863007-e032-4ba6-b0ea-bea6eb1da57b",
+          "executionMode": "test"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Message a model": [
+      {
+        "json": {
+          "content": [
+            {
+              "type": "text",
+              "text": "# Automatisierung von Outbound-Telefonaten mit KI-Technologie – Detaillierte Sitzungsnotizen (14.01.2026)\n\n---\n\n## Teilnehmer und Kontext\n\n- **Marcus Kunkel** ist Softwareentwickler, systemischer Coach und ehemaliger Gymnasiallehrer.\n- Sein **Kernservice VAaaS (Virtual Assistance as a Service)** zielt auf Entlastung für mittelständische Unternehmen durch KI-gestützte Telefonassistenz.\n- **Marie** ist offensichtlich die KI-Telefonistin, die Anrufe durchführt.\n- **Peter, Markus, Thorsten, Nicole, Gottfried, Harald, Hendrik, Claudia, Mike** nehmen an der Sitzung teil.\n- Besprochene Technologien: **n8n (Workflow-Automation), Calendly (Terminbuchung), Phonio (KI-Telefonie), Google Sheets (Datenhaltung), WhatsApp (Kommunikation)**.\n\n---\n\n## Hauptthemen: Testläufe mit Gesprächspersönlichkeiten\n\n- Es wird vorgeschlagen, **drei konkrete Personas** für den Testanruf zu entwickeln:\n  - **Verunsicherter Interessent**\n  - **Skeptischer Interessent**\n  - **Enthusiastischer Interessent**\n- Ziel: Strukturierter Testlauf, um **unterschiedliche Gesprächssituationen gezielt zu üben**, statt zufällig zu improvisieren.\n- Es wird vorgeschlagen, ein **kurzes Rollenspiel direkt durchzuführen**, wobei ein Teammitglied den Interessenten spielt und Marie den Anruf führt.\n- **Frage gestellt:** Welche Maßnahmen wurden bereits umgesetzt, um DSGVO-konform zu sein?\n\n---\n\n## Bewertungsschema für Telefonqualität\n\n- Es wird vorgeschlagen, ein **Bewertungsschema für die Qualität der Telefonate** zu erstellen, das mindestens folgende Punkte enthält:\n  - **Verständlichkeit**\n  - **Gesprächsfluss**\n  - **Zielerreichung**\n- Idee: **Objektive Bewertung** durch Notieren der jeweiligen Punkte für jede Aufnahme.\n- Ziel: Prüfen, ob Anpassungen an der **iPhone-Anpassung oder der Prompt-Logik** erforderlich sind.\n- Es wird ein **2-minütiger Check nach jedem Call vorgeschlagen**, in dem jeder Teilnehmer ein Stichwort zur Qualität nennt.\n\n---\n\n## Dokumentation und Feedback\n\n- Es wird vorgeschlagen, die Ergebnisse in ein **Google Docs Dokument** einzutragen.\n- Ziel: **Strukturiertes Feedback** zur Wahrnehmung und Qualität der Gespräche.\n- Es wird diskutiert, ob die Ergebnisse in Form von **Screenshots (z.B. von n8n)** oder **Aufzeichnungen der Telefonate** präsentiert werden sollen.\n\n---\n\n## Technische Umsetzung und Workflow-Optimierung\n\n- Der aktuelle Workflow wird als **50-Prozent-Lösung** eingeschätzt.\n- Es wird angestrebt, bis **Ende Januar eine vollständige Lösung** zu präsentieren.\n- Es wird besprochen, ob der Workflow **vorab aufgezeichnet** und als Audiodrop präsentiert werden soll, da **Live-Demonstrationen zeitintensiv** sind.\n- Es wird angemerkt, dass die **Präsentation des Workflows beim Summit** geplant ist, aber noch unklar ist, ob eine **Live-Präsentation oder eine vorbereitete Grafik** verwendet wird.\n\n---\n\n## DSGVO-konforme Umsetzung\n\n- Es wird angemerkt, dass **DSGVO-konforme Umsetzung notwendig"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "versionId": "43305c98-5502-4300-96fc-97158b00b953",
+  "activeVersionId": null,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-01-16T16:15:02.030Z",
+      "createdAt": "2026-01-16T16:15:02.030Z",
+      "role": "workflow:owner",
+      "workflowId": "BjBbbn4uF2r7Xw9d",
+      "projectId": "yr4Hj71ou1NOsi2p"
+    }
+  ],
+  "activeVersion": null,
+  "tags": [
+    {
+      "updatedAt": "2025-12-23T09:34:51.833Z",
+      "createdAt": "2025-12-23T09:34:51.833Z",
+      "id": "jj3XLdaKjqa8OQ2V",
+      "name": "BERENT"
+    }
+  ]
+}
