@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-16T19:52:59.534Z",
+  "updatedAt": "2026-01-20T12:44:04.559Z",
   "createdAt": "2026-01-16T16:15:02.023Z",
   "id": "BjBbbn4uF2r7Xw9d",
   "name": "Hedy Transkript nach Gamma",
@@ -132,7 +132,8 @@
   },
   "settings": {
     "executionOrder": "v1",
-    "availableInMCP": false
+    "availableInMCP": false,
+    "callerPolicy": "workflowsFromSameOwner"
   },
   "staticData": null,
   "meta": {
