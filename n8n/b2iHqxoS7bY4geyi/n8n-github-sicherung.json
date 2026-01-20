@@ -69,6 +69,21 @@
     },
     {
       "parameters": {
+        "content": "## Version v3.1\n- Archiv-Bereinigung Aktiv\n- Rekursiver Link Fix",
+        "height": 113,
+        "width": 234
+      },
+      "id": "version-marker",
+      "name": "Version Marker (v3.1)",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        -700
+      ]
+    },
+    {
+      "parameters": {
         "conditions": {
           "options": {
             "caseSensitive": true,
@@ -1080,6 +1095,21 @@
         ],
         "id": "initialisierung",
         "name": "Initialisierung"
+      },
+      {
+        "parameters": {
+          "content": "## Version v3.1\n- Archiv-Bereinigung Aktiv\n- Rekursiver Link Fix",
+          "height": 113,
+          "width": 234
+        },
+        "id": "version-marker",
+        "name": "Version Marker (v3.1)",
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1,
+        "position": [
+          -48,
+          -700
+        ]
       },
       {
         "parameters": {
