@@ -69,7 +69,7 @@
     },
     {
       "parameters": {
-        "content": "## Version v3.2\n- Archiv-Bereinigung Aktiv\n- Rucksack-Flow Fix",
+        "content": "## Version v3.3\n- Archiv-Bereinigung Aktiv\n- Sync-Activation Fix",
         "height": 113,
         "width": 234
       },
@@ -1098,7 +1098,7 @@
       },
       {
         "parameters": {
-          "content": "## Version v3.2\n- Archiv-Bereinigung Aktiv\n- Rucksack-Flow Fix",
+          "content": "## Version v3.3\n- Archiv-Bereinigung Aktiv\n- Sync-Activation Fix",
           "height": 113,
           "width": 234
         },
