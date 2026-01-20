@@ -638,40 +638,40 @@
         ]
       ]
     },
-    "initialisierung": {
+    "Initialisierung": {
       "main": [
         [
           {
-            "node": "extrahiere-workflow",
+            "node": "Extrahiere Workflow",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "extrahiere-workflow": {
+    "Extrahiere Workflow": {
       "main": [
         [
           {
-            "node": "check-skip",
+            "node": "Check Skip",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "check-skip": {
+    "Check Skip": {
       "main": [
         [
           {
-            "node": "pruefe-github-datei",
+            "node": "Prüfe GitHub Datei",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "skip-statistik",
+            "node": "Skip Statistik",
             "type": "main",
             "index": 0
           }
