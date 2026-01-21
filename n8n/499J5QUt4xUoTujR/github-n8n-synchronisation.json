@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-20T19:40:49.011Z",
+  "updatedAt": "2026-01-21T20:58:44.348Z",
   "createdAt": "2026-01-02T14:58:17.255Z",
   "id": "499J5QUt4xUoTujR",
   "name": "GitHub → n8n Synchronisation",
@@ -12,13 +12,13 @@
         "path": "github-sync-webhook",
         "options": {}
       },
-      "id": "2c4ca88b-77eb-42a6-9219-30c3069873a6",
+      "id": "9d0bb2c6-01f8-4a69-bf92-31f12979ae4a",
       "name": "GitHub Webhook Trigger",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1,
       "position": [
-        -3376,
-        -128
+        -2720,
+        688
       ],
       "webhookId": "github-sync-webhook"
     },
@@ -49,10 +49,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        -3152,
-        -128
+        -2496,
+        688
       ],
-      "id": "6f1df35d-d7b7-41b1-99a2-3d072b808f5b",
+      "id": "e14f02c1-200a-4d93-851f-341d97424cd4",
       "name": "Prüfe Push Event"
     },
     {
@@ -62,10 +62,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -2928,
-        -128
+        -2272,
+        688
       ],
-      "id": "e2352771-a6d9-46ce-813e-cc1b6c34303f",
+      "id": "bf2f9c9b-9f96-42eb-9026-3b26fe579aa8",
       "name": "Extrahiere geänderte Dateien"
     },
     {
@@ -76,10 +76,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -2704,
-        -128
+        -2048,
+        688
       ],
-      "id": "cd08f4b0-4bc6-408f-9d8a-0a9b7165b50f",
+      "id": "00db9765-d022-4b5a-9503-5be078479d37",
       "name": "Vorbereiten Datei"
     },
     {
@@ -107,15 +107,15 @@
       "type": "n8n-nodes-base.github",
       "typeVersion": 1.1,
       "position": [
-        -2480,
-        -128
+        -1824,
+        688
       ],
-      "id": "bf03e49c-df0c-425a-81eb-ae3eba30e58b",
+      "id": "1943173d-86d2-4e2c-8132-776fe3eda1d4",
       "name": "Hole Datei von GitHub",
       "webhookId": "694567e2-c3e8-4bfc-91af-aae5697aca36",
       "credentials": {
         "githubApi": {
-          "id": "aZMd0okvVFkvyGnj",
+          "id": "uE78TkEY6lWLV4oP",
           "name": "API GitHub"
         }
       },
@@ -128,10 +128,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -2256,
-        -128
+        -1600,
+        688
       ],
-      "id": "34b3959c-f849-4de8-9a3a-c436f1277491",
+      "id": "e7596d93-605d-4c32-9fb8-ed4592962565",
       "name": "Parse Workflow"
     },
     {
@@ -161,10 +161,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        -2032,
-        -128
+        -1376,
+        688
       ],
-      "id": "1a454130-ce82-44f5-93b0-f98c4c1cd941",
+      "id": "99be91e6-2c94-4ce3-a66d-ec79b3e7c94b",
       "name": "Prüfe Workflow"
     },
     {
@@ -194,10 +194,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        -1808,
-        -224
+        -1152,
+        592
       ],
-      "id": "3b244f92-81da-4ddb-bdc0-f3a0d6c1fa03",
+      "id": "56c8bdae-cba7-4e46-840e-4bd29f17c3c8",
       "name": "Prüfe ob ID vorhanden"
     },
     {
@@ -216,10 +216,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        -1584,
-        -320
+        -928,
+        496
       ],
-      "id": "28b00135-f2b3-4fa2-84c0-08c11d34d7cc",
+      "id": "da472c9b-b31d-4960-b431-999a46fe5fd0",
       "name": "Prüfe ob Workflow existiert",
       "credentials": {
         "httpHeaderAuth": {
@@ -236,10 +236,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1360,
-        -320
+        -704,
+        496
       ],
-      "id": "325f1d37-93fa-4ef5-9f88-81f811dd2599",
+      "id": "16a8fcda-31a9-4fe6-b53f-43f0c2be9fbb",
       "name": "Analysiere Response"
     },
     {
@@ -269,10 +269,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        -1136,
-        -320
+        -480,
+        496
       ],
-      "id": "4be36ec5-b6ec-4593-b331-6de7e37903c9",
+      "id": "3aab51e2-da75-4900-b690-bc3f12c07539",
       "name": "Workflow existiert?"
     },
     {
@@ -282,10 +282,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -912,
-        -368
+        -256,
+        448
       ],
-      "id": "84c944af-1ee1-4f1d-bb2c-b57218548701",
+      "id": "60c8c6d6-6720-43a6-a6c4-a828ca2bf09b",
       "name": "Vorbereite Update"
     },
     {
@@ -302,10 +302,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        -688,
-        -368
+        -32,
+        448
       ],
-      "id": "972d918f-41fd-485a-8c0a-be3b2ff29176",
+      "id": "89181963-90ac-4483-afce-3a6b0af60bd2",
       "name": "Update Workflow",
       "credentials": {
         "httpHeaderAuth": {
@@ -329,10 +329,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        -912,
-        -128
+        -256,
+        688
       ],
-      "id": "fccff4e5-062b-4407-95ae-2ba129e015a8",
+      "id": "74775b00-ff4a-4e7b-af43-4b9a0027710b",
       "name": "Erstelle Workflow",
       "credentials": {
         "httpHeaderAuth": {
@@ -349,10 +349,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1136,
-        -80
+        -480,
+        736
       ],
-      "id": "a88abf43-e438-4c1e-b243-abbb6aec6581",
+      "id": "918fa1fb-54ef-452e-9572-a3014e0009fd",
       "name": "Debug: Vor Erstellen"
     },
     {
@@ -362,10 +362,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -464,
-        -224
+        192,
+        592
       ],
-      "id": "31c42dcc-a781-47c8-8f30-b4e91edf4ab9",
+      "id": "15093b4c-3748-442c-93c3-dec16b2fcc2c",
       "name": "Debug: Ergebnis"
     },
     {
@@ -375,10 +375,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1808,
-        -32
+        -1152,
+        784
       ],
-      "id": "fbf0026b-4e02-4b68-adca-d452b42959a8",
+      "id": "4cf0220b-66d9-4e52-9ee7-286a7cc400f2",
       "name": "Überspringe Workflow"
     }
   ],
@@ -578,8 +578,8 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "4d7b0bec-6154-4e57-a29a-0c3e8f65ab43",
-  "activeVersionId": "4d7b0bec-6154-4e57-a29a-0c3e8f65ab43",
+  "versionId": "a69eda26-b635-4b22-98af-f347454fc8dd",
+  "activeVersionId": "a69eda26-b635-4b22-98af-f347454fc8dd",
   "triggerCount": 1,
   "shared": [
     {
@@ -591,9 +591,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-01-21T09:52:04.000Z",
-    "createdAt": "2026-01-20T19:40:49.013Z",
-    "versionId": "4d7b0bec-6154-4e57-a29a-0c3e8f65ab43",
+    "updatedAt": "2026-01-21T20:58:48.000Z",
+    "createdAt": "2026-01-21T20:58:44.349Z",
+    "versionId": "a69eda26-b635-4b22-98af-f347454fc8dd",
     "workflowId": "499J5QUt4xUoTujR",
     "nodes": [
       {
@@ -602,13 +602,13 @@
           "path": "github-sync-webhook",
           "options": {}
         },
-        "id": "2c4ca88b-77eb-42a6-9219-30c3069873a6",
+        "id": "9d0bb2c6-01f8-4a69-bf92-31f12979ae4a",
         "name": "GitHub Webhook Trigger",
         "type": "n8n-nodes-base.webhook",
         "typeVersion": 1,
         "position": [
-          -3376,
-          -128
+          -2720,
+          688
         ],
         "webhookId": "github-sync-webhook"
       },
@@ -639,10 +639,10 @@
         "type": "n8n-nodes-base.if",
         "typeVersion": 2.3,
         "position": [
-          -3152,
-          -128
+          -2496,
+          688
         ],
-        "id": "6f1df35d-d7b7-41b1-99a2-3d072b808f5b",
+        "id": "e14f02c1-200a-4d93-851f-341d97424cd4",
         "name": "Prüfe Push Event"
       },
       {
@@ -652,10 +652,10 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          -2928,
-          -128
+          -2272,
+          688
         ],
-        "id": "e2352771-a6d9-46ce-813e-cc1b6c34303f",
+        "id": "bf2f9c9b-9f96-42eb-9026-3b26fe579aa8",
         "name": "Extrahiere geänderte Dateien"
       },
       {
@@ -666,10 +666,10 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          -2704,
-          -128
+          -2048,
+          688
         ],
-        "id": "cd08f4b0-4bc6-408f-9d8a-0a9b7165b50f",
+        "id": "00db9765-d022-4b5a-9503-5be078479d37",
         "name": "Vorbereiten Datei"
       },
       {
@@ -697,15 +697,15 @@
         "type": "n8n-nodes-base.github",
         "typeVersion": 1.1,
         "position": [
-          -2480,
-          -128
+          -1824,
+          688
         ],
-        "id": "bf03e49c-df0c-425a-81eb-ae3eba30e58b",
+        "id": "1943173d-86d2-4e2c-8132-776fe3eda1d4",
         "name": "Hole Datei von GitHub",
         "webhookId": "694567e2-c3e8-4bfc-91af-aae5697aca36",
         "credentials": {
           "githubApi": {
-            "id": "aZMd0okvVFkvyGnj",
+            "id": "uE78TkEY6lWLV4oP",
             "name": "API GitHub"
           }
         },
@@ -718,10 +718,10 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          -2256,
-          -128
+          -1600,
+          688
         ],
-        "id": "34b3959c-f849-4de8-9a3a-c436f1277491",
+        "id": "e7596d93-605d-4c32-9fb8-ed4592962565",
         "name": "Parse Workflow"
       },
       {
@@ -751,10 +751,10 @@
         "type": "n8n-nodes-base.if",
         "typeVersion": 2.3,
         "position": [
-          -2032,
-          -128
+          -1376,
+          688
         ],
-        "id": "1a454130-ce82-44f5-93b0-f98c4c1cd941",
+        "id": "99be91e6-2c94-4ce3-a66d-ec79b3e7c94b",
         "name": "Prüfe Workflow"
       },
       {
@@ -784,10 +784,10 @@
         "type": "n8n-nodes-base.if",
         "typeVersion": 2.3,
         "position": [
-          -1808,
-          -224
+          -1152,
+          592
         ],
-        "id": "3b244f92-81da-4ddb-bdc0-f3a0d6c1fa03",
+        "id": "56c8bdae-cba7-4e46-840e-4bd29f17c3c8",
         "name": "Prüfe ob ID vorhanden"
       },
       {
@@ -806,10 +806,10 @@
         "type": "n8n-nodes-base.httpRequest",
         "typeVersion": 4.2,
         "position": [
-          -1584,
-          -320
+          -928,
+          496
         ],
-        "id": "28b00135-f2b3-4fa2-84c0-08c11d34d7cc",
+        "id": "da472c9b-b31d-4960-b431-999a46fe5fd0",
         "name": "Prüfe ob Workflow existiert",
         "credentials": {
           "httpHeaderAuth": {
@@ -826,10 +826,10 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          -1360,
-          -320
+          -704,
+          496
         ],
-        "id": "325f1d37-93fa-4ef5-9f88-81f811dd2599",
+        "id": "16a8fcda-31a9-4fe6-b53f-43f0c2be9fbb",
         "name": "Analysiere Response"
       },
       {
@@ -859,10 +859,10 @@
         "type": "n8n-nodes-base.if",
         "typeVersion": 2.3,
         "position": [
-          -1136,
-          -320
+          -480,
+          496
         ],
-        "id": "4be36ec5-b6ec-4593-b331-6de7e37903c9",
+        "id": "3aab51e2-da75-4900-b690-bc3f12c07539",
         "name": "Workflow existiert?"
       },
       {
@@ -872,10 +872,10 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          -912,
-          -368
+          -256,
+          448
         ],
-        "id": "84c944af-1ee1-4f1d-bb2c-b57218548701",
+        "id": "60c8c6d6-6720-43a6-a6c4-a828ca2bf09b",
         "name": "Vorbereite Update"
       },
       {
@@ -892,10 +892,10 @@
         "type": "n8n-nodes-base.httpRequest",
         "typeVersion": 4.2,
         "position": [
-          -688,
-          -368
+          -32,
+          448
         ],
-        "id": "972d918f-41fd-485a-8c0a-be3b2ff29176",
+        "id": "89181963-90ac-4483-afce-3a6b0af60bd2",
         "name": "Update Workflow",
         "credentials": {
           "httpHeaderAuth": {
@@ -919,10 +919,10 @@
         "type": "n8n-nodes-base.httpRequest",
         "typeVersion": 4.2,
         "position": [
-          -912,
-          -128
+          -256,
+          688
         ],
-        "id": "fccff4e5-062b-4407-95ae-2ba129e015a8",
+        "id": "74775b00-ff4a-4e7b-af43-4b9a0027710b",
         "name": "Erstelle Workflow",
         "credentials": {
           "httpHeaderAuth": {
@@ -939,10 +939,10 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          -1136,
-          -80
+          -480,
+          736
         ],
-        "id": "a88abf43-e438-4c1e-b243-abbb6aec6581",
+        "id": "918fa1fb-54ef-452e-9572-a3014e0009fd",
         "name": "Debug: Vor Erstellen"
       },
       {
@@ -952,10 +952,10 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          -464,
-          -224
+          192,
+          592
         ],
-        "id": "31c42dcc-a781-47c8-8f30-b4e91edf4ab9",
+        "id": "15093b4c-3748-442c-93c3-dec16b2fcc2c",
         "name": "Debug: Ergebnis"
       },
       {
@@ -965,10 +965,10 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          -1808,
-          -32
+          -1152,
+          784
         ],
-        "id": "fbf0026b-4e02-4b68-adca-d452b42959a8",
+        "id": "4cf0220b-66d9-4e52-9ee7-286a7cc400f2",
         "name": "Überspringe Workflow"
       }
     ],
@@ -1161,9 +1161,9 @@
       }
     },
     "authors": "Marcus Kunkel",
-    "name": "Version 4d7b0bec",
+    "name": "Version a69eda26",
     "description": "",
-    "autosaved": false
+    "autosaved": true
   },
   "tags": []
 }
