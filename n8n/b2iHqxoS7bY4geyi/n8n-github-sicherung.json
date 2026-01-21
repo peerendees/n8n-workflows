@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-21T09:07:32.000Z",
+  "updatedAt": "2026-01-21T09:51:40.525Z",
   "createdAt": "2026-01-02T15:51:21.900Z",
   "id": "b2iHqxoS7bY4geyi",
   "name": "n8n → GitHub Sicherung",
@@ -17,13 +17,13 @@
           ]
         }
       },
-      "id": "schedule-trigger",
+      "id": "6bd670ed-6311-4d3a-9c77-7391df79e599",
       "name": "Zeitplan: alle 15 Minuten",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [
-        -720,
-        -288
+        -4592,
+        3984
       ]
     },
     {
@@ -42,10 +42,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        -272,
-        -288
+        -4144,
+        3984
       ],
-      "id": "hole-alle-workflows",
+      "id": "a71ba47f-4a69-4a08-9af1-63afd1b7870c",
       "name": "Hole alle Workflows",
       "credentials": {
         "httpHeaderAuth": {
@@ -61,25 +61,25 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -48,
-        -288
+        -3920,
+        3984
       ],
-      "id": "initialisierung",
+      "id": "6d085bd7-9848-40a6-8a8c-328e88152d8f",
       "name": "Initialisierung"
     },
     {
       "parameters": {
-        "content": "## Version v3.4\n- Archiv-Bereinigung Aktiv\n- Force Trigger Refresh",
+        "content": "## Version v4.0\n- RECOVERY VERSION\n- Backup-Struktur wiederhergestellt",
         "height": 113,
         "width": 234
       },
-      "id": "version-marker",
+      "id": "772f4858-7bac-463d-b1e8-ebe431fe901e",
       "name": "Version Marker (v3.1)",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -829,
-        -417
+        -4704,
+        3856
       ]
     },
     {
@@ -106,13 +106,13 @@
         },
         "options": {}
       },
-      "id": "check-skip",
+      "id": "4637d073-d2ba-4a3e-a8fc-5f77a09e90a0",
       "name": "Check Skip",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
       "position": [
-        400,
-        -360
+        -3472,
+        3920
       ]
     },
     {
@@ -123,10 +123,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        176,
-        -288
+        -3696,
+        3984
       ],
-      "id": "extrahiere-workflow",
+      "id": "0220ff56-ce20-4014-a8b9-0dafb7de485a",
       "name": "Extrahiere Workflow"
     },
     {
@@ -154,15 +154,15 @@
       "type": "n8n-nodes-base.github",
       "typeVersion": 1.1,
       "position": [
-        624,
-        -432
+        -3248,
+        3840
       ],
-      "id": "pruefe-github-datei",
+      "id": "e71710fa-73db-49d6-9ce5-e2f1bffb6be2",
       "name": "Prüfe GitHub Datei",
       "webhookId": "694567e2-c3e8-4bfc-91af-aae5697aca36",
       "credentials": {
         "githubApi": {
-          "id": "aZMd0okvVFkvyGnj",
+          "id": "uE78TkEY6lWLV4oP",
           "name": "API GitHub"
         }
       },
@@ -175,10 +175,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        848,
-        -432
+        -3024,
+        3840
       ],
-      "id": "bestimme-handlung",
+      "id": "081a55e9-f184-4e56-92d6-37341a3af127",
       "name": "Bestimme Handlung"
     },
     {
@@ -205,13 +205,13 @@
         },
         "options": {}
       },
-      "id": "pruefe-ob-sichern",
+      "id": "22139b9b-cb21-4df6-a3f8-52d505f5994b",
       "name": "Prüfe ob Sichern/Löschen",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
       "position": [
-        1072,
-        -432
+        -2800,
+        3840
       ]
     },
     {
@@ -238,13 +238,13 @@
         },
         "options": {}
       },
-      "id": "entscheide-löschen",
+      "id": "064f6d59-ffd8-4dfa-9a66-867b3a323c90",
       "name": "Entscheide Löschen",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
       "position": [
-        1296,
-        -480
+        -2576,
+        3792
       ]
     },
     {
@@ -272,13 +272,13 @@
         },
         "options": {}
       },
-      "id": "Lösche Archivdatei",
+      "id": "cdcae58f-d54f-4c7d-bda0-889fd6547362",
       "name": "Lösche Archivdatei",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
       "position": [
-        3088,
-        -720
+        -784,
+        3552
       ],
       "credentials": {
         "httpHeaderAuth": {
@@ -320,10 +320,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1520,
-        -384
+        -2352,
+        3888
       ],
-      "id": "sichere-auf-github",
+      "id": "21c64265-d3e3-4608-b74d-2eef0297ca75",
       "name": "Sichere auf GitHub",
       "credentials": {
         "httpHeaderAuth": {
@@ -341,10 +341,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1744,
-        -384
+        -2128,
+        3888
       ],
-      "id": "pruefe-alte-dateien",
+      "id": "07b95b39-4e9a-4134-8125-3208e236e627",
       "name": "Prüfe alte Dateien"
     },
     {
@@ -374,10 +374,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        1968,
-        -384
+        -1904,
+        3888
       ],
-      "id": "pruefe-ob-ordner-pruefen",
+      "id": "8b5fccae-19ce-42eb-8de0-2ed802a9f49f",
       "name": "Prüfe ob Ordner prüfen"
     },
     {
@@ -401,15 +401,15 @@
       "type": "n8n-nodes-base.github",
       "typeVersion": 1.1,
       "position": [
-        2192,
-        -456
+        -1680,
+        3824
       ],
-      "id": "liste-ordner",
+      "id": "d4547397-0a48-40a4-83d4-63628dd8a895",
       "name": "Liste Ordner",
       "webhookId": "694567e2-c3e8-4bfc-91af-aae5697aca36",
       "credentials": {
         "githubApi": {
-          "id": "aZMd0okvVFkvyGnj",
+          "id": "uE78TkEY6lWLV4oP",
           "name": "API GitHub"
         }
       },
@@ -423,10 +423,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2416,
-        -456
+        -1456,
+        3824
       ],
-      "id": "finde-alte-dateien",
+      "id": "628df81c-c155-46de-892d-7abe7a1dfae2",
       "name": "Finde alte Dateien"
     },
     {
@@ -456,10 +456,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        2640,
-        -456
+        -1232,
+        3824
       ],
-      "id": "pruefe-ob-loeschen",
+      "id": "18395c76-b4cf-49ac-9e1f-dc954b8b4126",
       "name": "Prüfe ob Löschen"
     },
     {
@@ -470,10 +470,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2864,
-        -528
+        -1008,
+        3744
       ],
-      "id": "vorbereite-loeschen",
+      "id": "d5b76a4c-1331-4cda-b16c-001cec240e70",
       "name": "Vorbereite Löschen"
     },
     {
@@ -504,10 +504,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        3088,
-        -528
+        -784,
+        3744
       ],
-      "id": "loesche-alte-datei",
+      "id": "8213906d-4476-41c9-ad21-a51499e3a3f0",
       "name": "Lösche alte Datei",
       "credentials": {
         "httpHeaderAuth": {
@@ -525,10 +525,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3296,
-        -240
+        -576,
+        4032
       ],
-      "id": "aktualisiere-statistik",
+      "id": "cb577ba6-1b6e-4777-bc00-c2b8b7694a79",
       "name": "Aktualisiere Statistik"
     },
     {
@@ -539,10 +539,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1296,
-        -96
+        -2576,
+        4176
       ],
-      "id": "skip-statistik",
+      "id": "29bbcb56-0122-45d2-9ae6-e171d9a11ad7",
       "name": "Skip Statistik"
     },
     {
@@ -572,10 +572,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        3536,
-        -96
+        -336,
+        4176
       ],
-      "id": "schleife-pruefen",
+      "id": "9a5c34be-c8f3-4e39-a66e-e3df3d4407fb",
       "name": "Schleife prüfen"
     },
     {
@@ -585,10 +585,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3760,
-        -96
+        -112,
+        4176
       ],
-      "id": "backup-statistik",
+      "id": "5d47b9b8-bd17-4367-964f-1db63127a561",
       "name": "Backup-Statistik"
     },
     {
@@ -608,10 +608,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -496,
-        -288
+        -4368,
+        3984
       ],
-      "id": "config",
+      "id": "01d6c49d-d1cc-4056-b80f-221450eb3d1f",
       "name": "Config"
     },
     {
@@ -641,10 +641,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        3984,
-        -96
+        112,
+        4176
       ],
-      "id": "pruefe-aenderungen",
+      "id": "f270d590-c2fb-496a-9786-743f513b01da",
       "name": "Prüfe Änderungen"
     },
     {
@@ -680,10 +680,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        4208,
-        -96
+        336,
+        4176
       ],
-      "id": "threema-benachrichtigung",
+      "id": "553e79e2-6e96-4bd2-821e-a961128cf24e",
       "name": "Threema Benachrichtigung",
       "credentials": {
         "httpHeaderAuth": {
@@ -997,13 +997,7 @@
             "type": "main",
             "index": 0
           }
-        ],
-        []
-      ]
-    },
-    "Threema Benachrichtigung": {
-      "main": [
-        []
+        ]
       ]
     }
   },
@@ -1019,8 +1013,8 @@
   },
   "meta": null,
   "pinData": {},
-  "versionId": "ced9b8dc-b378-481c-94ba-d965302f467a",
-  "activeVersionId": "ced9b8dc-b378-481c-94ba-d965302f467a",
+  "versionId": "41c4c2e3-7568-4114-9ad7-6249532d7128",
+  "activeVersionId": "41c4c2e3-7568-4114-9ad7-6249532d7128",
   "triggerCount": 1,
   "shared": [
     {
@@ -1032,9 +1026,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-01-20T19:47:30.000Z",
-    "createdAt": "2026-01-20T19:47:23.179Z",
-    "versionId": "ced9b8dc-b378-481c-94ba-d965302f467a",
+    "updatedAt": "2026-01-21T09:51:52.000Z",
+    "createdAt": "2026-01-21T09:51:40.526Z",
+    "versionId": "41c4c2e3-7568-4114-9ad7-6249532d7128",
     "workflowId": "b2iHqxoS7bY4geyi",
     "nodes": [
       {
@@ -1048,13 +1042,13 @@
             ]
           }
         },
-        "id": "schedule-trigger",
+        "id": "6bd670ed-6311-4d3a-9c77-7391df79e599",
         "name": "Zeitplan: alle 15 Minuten",
         "type": "n8n-nodes-base.scheduleTrigger",
         "typeVersion": 1.2,
         "position": [
-          -720,
-          -288
+          -4592,
+          3984
         ]
       },
       {
@@ -1073,10 +1067,10 @@
         "type": "n8n-nodes-base.httpRequest",
         "typeVersion": 4.2,
         "position": [
-          -272,
-          -288
+          -4144,
+          3984
         ],
-        "id": "hole-alle-workflows",
+        "id": "a71ba47f-4a69-4a08-9af1-63afd1b7870c",
         "name": "Hole alle Workflows",
         "credentials": {
           "httpHeaderAuth": {
@@ -1092,25 +1086,25 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          -48,
-          -288
+          -3920,
+          3984
         ],
-        "id": "initialisierung",
+        "id": "6d085bd7-9848-40a6-8a8c-328e88152d8f",
         "name": "Initialisierung"
       },
       {
         "parameters": {
-          "content": "## Version v3.2\n- Archiv-Bereinigung Aktiv\n- Rucksack-Flow Fix",
-          "height": 289,
-          "width": 314
+          "content": "## Version v4.0\n- RECOVERY VERSION\n- Backup-Struktur wiederhergestellt",
+          "height": 113,
+          "width": 234
         },
-        "id": "version-marker",
+        "id": "772f4858-7bac-463d-b1e8-ebe431fe901e",
         "name": "Version Marker (v3.1)",
         "type": "n8n-nodes-base.stickyNote",
         "typeVersion": 1,
         "position": [
-          -829,
-          -417
+          -4704,
+          3856
         ]
       },
       {
@@ -1137,13 +1131,13 @@
           },
           "options": {}
         },
-        "id": "check-skip",
+        "id": "4637d073-d2ba-4a3e-a8fc-5f77a09e90a0",
         "name": "Check Skip",
         "type": "n8n-nodes-base.if",
         "typeVersion": 2,
         "position": [
-          400,
-          -360
+          -3472,
+          3920
         ]
       },
       {
@@ -1154,10 +1148,10 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          176,
-          -288
+          -3696,
+          3984
         ],
-        "id": "extrahiere-workflow",
+        "id": "0220ff56-ce20-4014-a8b9-0dafb7de485a",
         "name": "Extrahiere Workflow"
       },
       {
@@ -1185,15 +1179,15 @@
         "type": "n8n-nodes-base.github",
         "typeVersion": 1.1,
         "position": [
-          624,
-          -432
+          -3248,
+          3840
         ],
-        "id": "pruefe-github-datei",
+        "id": "e71710fa-73db-49d6-9ce5-e2f1bffb6be2",
         "name": "Prüfe GitHub Datei",
         "webhookId": "694567e2-c3e8-4bfc-91af-aae5697aca36",
         "credentials": {
           "githubApi": {
-            "id": "aZMd0okvVFkvyGnj",
+            "id": "uE78TkEY6lWLV4oP",
             "name": "API GitHub"
           }
         },
@@ -1206,10 +1200,10 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          848,
-          -432
+          -3024,
+          3840
         ],
-        "id": "bestimme-handlung",
+        "id": "081a55e9-f184-4e56-92d6-37341a3af127",
         "name": "Bestimme Handlung"
       },
       {
@@ -1236,13 +1230,13 @@
           },
           "options": {}
         },
-        "id": "pruefe-ob-sichern",
+        "id": "22139b9b-cb21-4df6-a3f8-52d505f5994b",
         "name": "Prüfe ob Sichern/Löschen",
         "type": "n8n-nodes-base.if",
         "typeVersion": 2,
         "position": [
-          1072,
-          -432
+          -2800,
+          3840
         ]
       },
       {
@@ -1269,13 +1263,13 @@
           },
           "options": {}
         },
-        "id": "entscheide-löschen",
+        "id": "064f6d59-ffd8-4dfa-9a66-867b3a323c90",
         "name": "Entscheide Löschen",
         "type": "n8n-nodes-base.if",
         "typeVersion": 2,
         "position": [
-          1296,
-          -480
+          -2576,
+          3792
         ]
       },
       {
@@ -1303,13 +1297,13 @@
           },
           "options": {}
         },
-        "id": "Lösche Archivdatei",
+        "id": "cdcae58f-d54f-4c7d-bda0-889fd6547362",
         "name": "Lösche Archivdatei",
         "type": "n8n-nodes-base.httpRequest",
         "typeVersion": 4.1,
         "position": [
-          3088,
-          -720
+          -784,
+          3552
         ],
         "credentials": {
           "httpHeaderAuth": {
@@ -1351,10 +1345,10 @@
         "type": "n8n-nodes-base.httpRequest",
         "typeVersion": 4.2,
         "position": [
-          1520,
-          -384
+          -2352,
+          3888
         ],
-        "id": "sichere-auf-github",
+        "id": "21c64265-d3e3-4608-b74d-2eef0297ca75",
         "name": "Sichere auf GitHub",
         "credentials": {
           "httpHeaderAuth": {
@@ -1372,10 +1366,10 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          1744,
-          -384
+          -2128,
+          3888
         ],
-        "id": "pruefe-alte-dateien",
+        "id": "07b95b39-4e9a-4134-8125-3208e236e627",
         "name": "Prüfe alte Dateien"
       },
       {
@@ -1405,10 +1399,10 @@
         "type": "n8n-nodes-base.if",
         "typeVersion": 2.3,
         "position": [
-          1968,
-          -384
+          -1904,
+          3888
         ],
-        "id": "pruefe-ob-ordner-pruefen",
+        "id": "8b5fccae-19ce-42eb-8de0-2ed802a9f49f",
         "name": "Prüfe ob Ordner prüfen"
       },
       {
@@ -1432,15 +1426,15 @@
         "type": "n8n-nodes-base.github",
         "typeVersion": 1.1,
         "position": [
-          2192,
-          -456
+          -1680,
+          3824
         ],
-        "id": "liste-ordner",
+        "id": "d4547397-0a48-40a4-83d4-63628dd8a895",
         "name": "Liste Ordner",
         "webhookId": "694567e2-c3e8-4bfc-91af-aae5697aca36",
         "credentials": {
           "githubApi": {
-            "id": "aZMd0okvVFkvyGnj",
+            "id": "uE78TkEY6lWLV4oP",
             "name": "API GitHub"
           }
         },
@@ -1454,10 +1448,10 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          2416,
-          -456
+          -1456,
+          3824
         ],
-        "id": "finde-alte-dateien",
+        "id": "628df81c-c155-46de-892d-7abe7a1dfae2",
         "name": "Finde alte Dateien"
       },
       {
@@ -1487,10 +1481,10 @@
         "type": "n8n-nodes-base.if",
         "typeVersion": 2.3,
         "position": [
-          2640,
-          -456
+          -1232,
+          3824
         ],
-        "id": "pruefe-ob-loeschen",
+        "id": "18395c76-b4cf-49ac-9e1f-dc954b8b4126",
         "name": "Prüfe ob Löschen"
       },
       {
@@ -1501,10 +1495,10 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          2864,
-          -528
+          -1008,
+          3744
         ],
-        "id": "vorbereite-loeschen",
+        "id": "d5b76a4c-1331-4cda-b16c-001cec240e70",
         "name": "Vorbereite Löschen"
       },
       {
@@ -1535,10 +1529,10 @@
         "type": "n8n-nodes-base.httpRequest",
         "typeVersion": 4.2,
         "position": [
-          3088,
-          -528
+          -784,
+          3744
         ],
-        "id": "loesche-alte-datei",
+        "id": "8213906d-4476-41c9-ad21-a51499e3a3f0",
         "name": "Lösche alte Datei",
         "credentials": {
           "httpHeaderAuth": {
@@ -1556,10 +1550,10 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          3296,
-          -240
+          -576,
+          4032
         ],
-        "id": "aktualisiere-statistik",
+        "id": "cb577ba6-1b6e-4777-bc00-c2b8b7694a79",
         "name": "Aktualisiere Statistik"
       },
       {
@@ -1570,10 +1564,10 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          1296,
-          -96
+          -2576,
+          4176
         ],
-        "id": "skip-statistik",
+        "id": "29bbcb56-0122-45d2-9ae6-e171d9a11ad7",
         "name": "Skip Statistik"
       },
       {
@@ -1603,10 +1597,10 @@
         "type": "n8n-nodes-base.if",
         "typeVersion": 2.3,
         "position": [
-          3536,
-          -96
+          -336,
+          4176
         ],
-        "id": "schleife-pruefen",
+        "id": "9a5c34be-c8f3-4e39-a66e-e3df3d4407fb",
         "name": "Schleife prüfen"
       },
       {
@@ -1616,10 +1610,10 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          3760,
-          -96
+          -112,
+          4176
         ],
-        "id": "backup-statistik",
+        "id": "5d47b9b8-bd17-4367-964f-1db63127a561",
         "name": "Backup-Statistik"
       },
       {
@@ -1639,10 +1633,10 @@
         "type": "n8n-nodes-base.set",
         "typeVersion": 3.4,
         "position": [
-          -496,
-          -288
+          -4368,
+          3984
         ],
-        "id": "config",
+        "id": "01d6c49d-d1cc-4056-b80f-221450eb3d1f",
         "name": "Config"
       },
       {
@@ -1672,10 +1666,10 @@
         "type": "n8n-nodes-base.if",
         "typeVersion": 2.3,
         "position": [
-          3984,
-          -96
+          112,
+          4176
         ],
-        "id": "pruefe-aenderungen",
+        "id": "f270d590-c2fb-496a-9786-743f513b01da",
         "name": "Prüfe Änderungen"
       },
       {
@@ -1711,10 +1705,10 @@
         "type": "n8n-nodes-base.httpRequest",
         "typeVersion": 4.2,
         "position": [
-          4208,
-          -96
+          336,
+          4176
         ],
-        "id": "threema-benachrichtigung",
+        "id": "553e79e2-6e96-4bd2-821e-a961128cf24e",
         "name": "Threema Benachrichtigung",
         "credentials": {
           "httpHeaderAuth": {
@@ -2028,18 +2022,12 @@
               "type": "main",
               "index": 0
             }
-          ],
-          []
-        ]
-      },
-      "Threema Benachrichtigung": {
-        "main": [
-          []
+          ]
         ]
       }
     },
     "authors": "Marcus Kunkel",
-    "name": "Version ced9b8dc",
+    "name": "Version 41c4c2e3",
     "description": "",
     "autosaved": true
   },
