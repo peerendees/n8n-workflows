@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-21T09:51:40.525Z",
+  "updatedAt": "2026-01-21T14:42:00.000Z",
   "createdAt": "2026-01-02T15:51:21.900Z",
   "id": "b2iHqxoS7bY4geyi",
   "name": "n8n → GitHub Sicherung",
@@ -69,7 +69,7 @@
     },
     {
       "parameters": {
-        "content": "## Version v4.0\n- RECOVERY VERSION\n- Backup-Struktur wiederhergestellt",
+        "content": "## Version v4.1\n- RECOVERY VERSION & PUSH FIX\n- Backup-Struktur wiederhergestellt",
         "height": 113,
         "width": 234
       },
@@ -580,7 +580,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const r = $json;\nconst wort = r.anzahl === 1 ? 'Workflow' : 'Workflows';\n\nreturn {\n  hasChanges: (r.neu + r.updates) > 0,\n  text: `✅ Backup beendet: ${r.anzahl} ${wort} geprüft.\\n` +\n        `Ergebnis: ${r.neu} neu, ${r.updates} aktualisiert, ${r.skip} unverändert.\\n\\n` +\n        `${r.tabelle.join('\\n') || 'Keine Änderungen'}`\n};"
+        "jsCode": "const r = $json;\nconst wort = r.anzahl === 1 ? 'Workflow' : 'Workflows';\n\nreturn {\n  hasChanges: true,\n  text: `✅ Backup beendet: ${r.anzahl} ${wort} geprüft.\\n` +\n        `Ergebnis: ${r.neu} neu, ${r.updates} aktualisiert, ${r.skip} unverändert.\\n\\n` +\n        `${r.tabelle.join('\\n') || 'Keine Änderungen'}`\n};"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -1027,7 +1027,7 @@
   ],
   "activeVersion": {
     "updatedAt": "2026-01-21T09:51:52.000Z",
-    "createdAt": "2026-01-21T09:51:40.526Z",
+    "createdAt": "2026-01-21T14:42:00.000Z",
     "versionId": "41c4c2e3-7568-4114-9ad7-6249532d7128",
     "workflowId": "b2iHqxoS7bY4geyi",
     "nodes": [
@@ -1094,7 +1094,7 @@
       },
       {
         "parameters": {
-          "content": "## Version v4.0\n- RECOVERY VERSION\n- Backup-Struktur wiederhergestellt",
+          "content": "## Version v4.1\n- RECOVERY VERSION & PUSH FIX\n- Backup-Struktur wiederhergestellt",
           "height": 113,
           "width": 234
         },
@@ -1605,7 +1605,7 @@
       },
       {
         "parameters": {
-          "jsCode": "const r = $json;\nconst wort = r.anzahl === 1 ? 'Workflow' : 'Workflows';\n\nreturn {\n  hasChanges: (r.neu + r.updates) > 0,\n  text: `✅ Backup beendet: ${r.anzahl} ${wort} geprüft.\\n` +\n        `Ergebnis: ${r.neu} neu, ${r.updates} aktualisiert, ${r.skip} unverändert.\\n\\n` +\n        `${r.tabelle.join('\\n') || 'Keine Änderungen'}`\n};"
+          "jsCode": "const r = $json;\nconst wort = r.anzahl === 1 ? 'Workflow' : 'Workflows';\n\nreturn {\n  hasChanges: true,\n  text: `✅ Backup beendet: ${r.anzahl} ${wort} geprüft.\\n` +\n        `Ergebnis: ${r.neu} neu, ${r.updates} aktualisiert, ${r.skip} unverändert.\\n\\n` +\n        `${r.tabelle.join('\\n') || 'Keine Änderungen'}`\n};"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
