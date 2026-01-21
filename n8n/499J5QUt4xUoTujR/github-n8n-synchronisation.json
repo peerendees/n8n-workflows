@@ -277,7 +277,6 @@
     },
     {
       "parameters": {
-        "jsCode": "// Vorbereite workflowData für Update\nconst analysiereData = $json;\nconst parseData = $node[\"Parse Workflow\"].json;\nconst workflowData = parseData.workflowData || {};\nconst workflowName = parseData.workflowName || 'Unnamed Workflow';\n\n// Pflichtfelder + active status\nconst finalWorkflowData = {\n  name: workflowName,\n  nodes: workflowData.nodes || [],\n  connections: workflowData.connections || {},\n  active: workflowData.active === true,\n  settings: workflowData.settings || {\n    executionOrder: 'v1'\n  }\n};\n\nreturn {\n  workflowId: analysiereData.workflowId,\n  workflowName: analysiereData.workflowName,\n  filePath: analysiereData.filePath,\n  exists: analysiereData.exists,\n  workflowData: finalWorkflowData\n};"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -344,7 +343,6 @@
     },
     {
       "parameters": {
-        "jsCode": "// Vorbereite workflowData für Erstellen\nconst parseData = $node[\"Parse Workflow\"].json;\nconst workflowData = parseData.workflowData || {};\nconst workflowName = parseData.workflowName || 'Unnamed Workflow';\n\n// Pflichtfelder + active status\nconst finalWorkflowData = {\n  name: workflowName,\n  nodes: workflowData.nodes || [],\n  connections: workflowData.connections || {},\n  active: workflowData.active === true,\n  settings: workflowData.settings || {\n    executionOrder: 'v1'\n  }\n};\n\nreturn {\n  ...parseData,\n  workflowData: finalWorkflowData\n};"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -867,7 +865,6 @@
       },
       {
         "parameters": {
-          "jsCode": "// Vorbereite workflowData für Update\nconst analysiereData = $json;\nconst parseData = $node[\"Parse Workflow\"].json;\nconst workflowData = parseData.workflowData || {};\nconst workflowName = parseData.workflowName || 'Unnamed Workflow';\n\n// Pflichtfelder + active status\nconst finalWorkflowData = {\n  name: workflowName,\n  nodes: workflowData.nodes || [],\n  connections: workflowData.connections || {},\n  active: workflowData.active === true,\n  settings: workflowData.settings || {\n    executionOrder: 'v1'\n  }\n};\n\nreturn {\n  workflowId: analysiereData.workflowId,\n  workflowName: analysiereData.workflowName,\n  filePath: analysiereData.filePath,\n  exists: analysiereData.exists,\n  workflowData: finalWorkflowData\n};"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
@@ -934,7 +931,6 @@
       },
       {
         "parameters": {
-          "jsCode": "// Vorbereite workflowData für Erstellen\nconst parseData = $node[\"Parse Workflow\"].json;\nconst workflowData = parseData.workflowData || {};\nconst workflowName = parseData.workflowName || 'Unnamed Workflow';\n\n// Pflichtfelder + active status\nconst finalWorkflowData = {\n  name: workflowName,\n  nodes: workflowData.nodes || [],\n  connections: workflowData.connections || {},\n  active: workflowData.active === true,\n  settings: workflowData.settings || {\n    executionOrder: 'v1'\n  }\n};\n\nreturn {\n  ...parseData,\n  workflowData: finalWorkflowData\n};"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
