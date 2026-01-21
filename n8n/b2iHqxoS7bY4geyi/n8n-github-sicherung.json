@@ -9,10 +9,13 @@
     {
       "parameters": {
         "rule": {
-          "interval": [
+          "interval": [],
+          "cron": [
             {
-              "field": "minutes",
-              "minutesInterval": 15
+              "cronExpression": "0,15,30,45 7-20 * * *"
+            },
+            {
+              "cronExpression": "0 21 * * *"
             }
           ]
         }
@@ -1034,10 +1037,13 @@
       {
         "parameters": {
           "rule": {
-            "interval": [
+            "interval": [],
+            "cron": [
               {
-                "field": "minutes",
-                "minutesInterval": 15
+                "cronExpression": "0,15,30,45 7-20 * * *"
+              },
+              {
+                "cronExpression": "0 21 * * *"
               }
             ]
           }
