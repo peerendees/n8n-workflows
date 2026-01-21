@@ -69,7 +69,7 @@
     },
     {
       "parameters": {
-        "content": "## Version v4.2\n- PUSH FIX & STATS STANDARDIZED\n- Benachrichtigung garantiert",
+        "content": "## Version v4.3\\n- SCHEDULE WINDOW FIX (07:00-21:00)\\n- Logic baseline stable",
         "height": 113,
         "width": 234
       },
@@ -1094,7 +1094,7 @@
       },
       {
         "parameters": {
-          "content": "## Version v4.2\n- PUSH FIX & STATS STANDARDIZED\n- Benachrichtigung garantiert",
+          "content": "## Version v4.3\\n- SCHEDULE WINDOW FIX (07:00-21:00)\\n- Logic baseline stable",
           "height": 113,
           "width": 234
         },
