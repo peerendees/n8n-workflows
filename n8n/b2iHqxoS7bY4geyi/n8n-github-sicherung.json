@@ -162,7 +162,7 @@
       "webhookId": "694567e2-c3e8-4bfc-91af-aae5697aca36",
       "credentials": {
         "githubApi": {
-          "id": "uE78TkEY6lWLV4oP",
+          "id": "aZMd0okvVFkvyGnj",
           "name": "API GitHub"
         }
       },
@@ -409,7 +409,7 @@
       "webhookId": "694567e2-c3e8-4bfc-91af-aae5697aca36",
       "credentials": {
         "githubApi": {
-          "id": "uE78TkEY6lWLV4oP",
+          "id": "aZMd0okvVFkvyGnj",
           "name": "API GitHub"
         }
       },
@@ -1193,7 +1193,7 @@
         "webhookId": "694567e2-c3e8-4bfc-91af-aae5697aca36",
         "credentials": {
           "githubApi": {
-            "id": "uE78TkEY6lWLV4oP",
+            "id": "aZMd0okvVFkvyGnj",
             "name": "API GitHub"
           }
         },
@@ -1440,7 +1440,7 @@
         "webhookId": "694567e2-c3e8-4bfc-91af-aae5697aca36",
         "credentials": {
           "githubApi": {
-            "id": "uE78TkEY6lWLV4oP",
+            "id": "aZMd0okvVFkvyGnj",
             "name": "API GitHub"
           }
         },
