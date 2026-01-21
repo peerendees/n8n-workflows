@@ -69,7 +69,7 @@
     },
     {
       "parameters": {
-        "content": "## Version v4.2\n- PUSH FIX & STATS STANDARDIZED\n- Benachrichtigung garantiert",
+        "content": "## Version v4.6\n- PUSH FIX & STATS STANDARDIZED\n- Benachrichtigung garantiert",
         "height": 113,
         "width": 234
       },
@@ -162,7 +162,7 @@
       "webhookId": "694567e2-c3e8-4bfc-91af-aae5697aca36",
       "credentials": {
         "githubApi": {
-          "id": "uE78TkEY6lWLV4oP",
+          "id": "aZMd0okvVFkvyGnj",
           "name": "API GitHub"
         }
       },
@@ -409,7 +409,7 @@
       "webhookId": "694567e2-c3e8-4bfc-91af-aae5697aca36",
       "credentials": {
         "githubApi": {
-          "id": "uE78TkEY6lWLV4oP",
+          "id": "aZMd0okvVFkvyGnj",
           "name": "API GitHub"
         }
       },
@@ -1094,7 +1094,7 @@
       },
       {
         "parameters": {
-          "content": "## Version v4.2\n- PUSH FIX & STATS STANDARDIZED\n- Benachrichtigung garantiert",
+          "content": "## Version v4.6\n- PUSH FIX & STATS STANDARDIZED\n- Benachrichtigung garantiert",
           "height": 113,
           "width": 234
         },
@@ -1187,7 +1187,7 @@
         "webhookId": "694567e2-c3e8-4bfc-91af-aae5697aca36",
         "credentials": {
           "githubApi": {
-            "id": "uE78TkEY6lWLV4oP",
+            "id": "aZMd0okvVFkvyGnj",
             "name": "API GitHub"
           }
         },
@@ -1434,7 +1434,7 @@
         "webhookId": "694567e2-c3e8-4bfc-91af-aae5697aca36",
         "credentials": {
           "githubApi": {
-            "id": "uE78TkEY6lWLV4oP",
+            "id": "aZMd0okvVFkvyGnj",
             "name": "API GitHub"
           }
         },
