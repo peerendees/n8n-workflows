@@ -115,7 +115,7 @@
       "webhookId": "694567e2-c3e8-4bfc-91af-aae5697aca36",
       "credentials": {
         "githubApi": {
-          "id": "aZMd0okvVFkvyGnj",
+          "id": "uE78TkEY6lWLV4oP",
           "name": "API GitHub"
         }
       },
@@ -591,7 +591,7 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-01-20T19:40:49.013Z",
+    "updatedAt": "2026-01-21T09:52:04.000Z",
     "createdAt": "2026-01-20T19:40:49.013Z",
     "versionId": "4d7b0bec-6154-4e57-a29a-0c3e8f65ab43",
     "workflowId": "499J5QUt4xUoTujR",
@@ -705,7 +705,7 @@
         "webhookId": "694567e2-c3e8-4bfc-91af-aae5697aca36",
         "credentials": {
           "githubApi": {
-            "id": "aZMd0okvVFkvyGnj",
+            "id": "uE78TkEY6lWLV4oP",
             "name": "API GitHub"
           }
         },
@@ -1161,8 +1161,8 @@
       }
     },
     "authors": "Marcus Kunkel",
-    "name": null,
-    "description": null,
+    "name": "Version 4d7b0bec",
+    "description": "",
     "autosaved": false
   },
   "tags": []
