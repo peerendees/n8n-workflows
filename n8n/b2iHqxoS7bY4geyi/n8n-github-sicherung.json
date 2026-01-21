@@ -56,7 +56,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const workflows = $json.data || [];\nreturn {\n  workflows: workflows,\n  index: 0,\n  anzahl: workflows.length,\n  neu: 0,\n  updates: 0,\n  skip: 0,\n  tabelle: []\n};"
+        "jsCode": "const workflows = $json.data || [];\nreturn {\n  workflows: workflows,\n  index: 0,\n  anzahl: workflows.length,\n  neu: 0,\n  updates: 0,\n  geloescht: 0,\n  skip: 0,\n  tabelle: []\n};"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -520,7 +520,7 @@
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "// Aktualisiere Statistiken\n// Hole Rucksack von Prüfe alte Dateien\nlet r;\ntry {\n  r = $node[\"Prüfe alte Dateien\"].json;\n} catch (e) {\n  // Fallback: Hole von Bestimme Handlung\n  try {\n    r = $node[\"Bestimme Handlung\"].json;\n  } catch (e2) {\n    r = {};\n  }\n}\n\n// Stelle sicher, dass r ein Objekt ist\nif (!r || typeof r !== 'object') {\n  r = {};\n}\n\nconst githubResponse = r.githubResponse || {};\n\n// Stelle sicher, dass alle Felder vorhanden sind\nif (!Array.isArray(r.tabelle)) r.tabelle = [];\nif (typeof r.neu !== 'number') r.neu = 0;\nif (typeof r.updates !== 'number') r.updates = 0;\nif (typeof r.skip !== 'number') r.skip = 0;\nif (typeof r.index !== 'number') r.index = 0;\nif (!Array.isArray(r.alteDateien)) r.alteDateien = [];\n\nif (r.action === 'create') {\n  r.neu++;\n} else if (r.action === 'update') {\n  r.updates++;\n} else {\n  r.skip++;\n}\n\n// Füge zur Tabelle hinzu\nif (r.action !== 'skip') {\n  const status = githubResponse.error ? '❌ Fehler' : '✅ Erfolg';\n  const alteDateienInfo = r.alteDateien && r.alteDateien.length > 0 ? ` (${r.alteDateien.length} alte Datei${r.alteDateien.length > 1 ? 'en' : ''} gelöscht)` : '';\n  r.tabelle.push(`${status} ${r.action === 'create' ? 'NEU' : 'UPDATE'}: ${r.workflowName || 'Unbekannt'}${alteDateienInfo}`);\n}\n\n// Zähler erhöhen\nr.index++;\n\nreturn r;"
+        "jsCode": "// Aktualisiere Statistiken\n// Hole Rucksack von Prüfe alte Dateien\nlet r;\ntry {\n  r = $node[\"Prüfe alte Dateien\"].json;\n} catch (e) {\n  // Fallback: Hole von Bestimme Handlung\n  try {\n    r = $node[\"Bestimme Handlung\"].json;\n  } catch (e2) {\n    r = {};\n  }\n}\n\n// Stelle sicher, dass r ein Objekt ist\nif (!r || typeof r !== 'object') {\n  r = {};\n}\n\nconst githubResponse = r.githubResponse || {};\n\n// Stelle sicher, dass alle Felder vorhanden sind\nif (!Array.isArray(r.tabelle)) r.tabelle = [];\nif (typeof r.neu !== 'number') r.neu = 0;\nif (typeof r.updates !== 'number') r.updates = 0;\nif (typeof r.skip !== 'number') r.skip = 0;\nif (typeof r.index !== 'number') r.index = 0;\nif (!Array.isArray(r.alteDateien)) r.alteDateien = [];\n\nif (r.action === 'create') {\n  r.neu++;\n} else if (r.action === 'update') {\n  r.updates++;\n} else if (r.action === 'delete') {\n  r.geloescht++;\n} else {\n  r.skip++;\n}\n\n// Füge zur Tabelle hinzu\nif (r.action !== 'skip') {\n  const statusLookup = {\n    'create': '🆕 NEU',\n    'update': '🆙 UPDATE',\n    'delete': '🗑️ GELÖSCHT'\n  };\n  const statusLabel = statusLookup[r.action] || '❓ Unbekannt';\n  const statusSymbol = githubResponse.error ? '❌ Fehler' : '✅ Erfolg';\n  const alteDateienInfo = r.alteDateien && r.alteDateien.length > 0 ? ` (${r.alteDateien.length} alte Datei${r.alteDateien.length > 1 ? 'en' : ''} gelöscht)` : '';\n  r.tabelle.push(`${statusSymbol} ${statusLabel}: ${r.workflowName || 'Unbekannt'}${alteDateienInfo}`);\n}\n\n// Zähler erhöhen\nr.index++;\n\nreturn r;"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -580,7 +580,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const r = $json;\nconst wort = r.anzahl === 1 ? 'Workflow' : 'Workflows';\n\nreturn {\n  hasChanges: (r.neu + r.updates) > 0,\n  text: `✅ Backup beendet: ${r.anzahl} ${wort} geprüft.\\n` +\n        `Ergebnis: ${r.neu} neu, ${r.updates} aktualisiert, ${r.skip} unverändert.\\n\\n` +\n        `${r.tabelle.join('\\n') || 'Keine Änderungen'}`\n};"
+        "jsCode": "const r = $json;\nconst wort = r.anzahl === 1 ? 'Workflow' : 'Workflows';\n\nreturn {\n  hasChanges: (r.neu + r.updates + (r.geloescht || 0)) > 0,\n  text: `✅ Backup beendet: ${r.anzahl} ${wort} geprüft.\\n` +\n        `Ergebnis: ${r.neu} neu, ${r.updates} aktualisiert, ${r.geloescht || 0} gelöscht, ${r.skip} unverändert.\\n\\n` +\n        `${r.tabelle.join('\\n') || 'Keine Änderungen'}`\n};"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
