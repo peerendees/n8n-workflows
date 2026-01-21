@@ -72,7 +72,7 @@
     },
     {
       "parameters": {
-        "content": "## Version v4.3\\n- SCHEDULE WINDOW FIX (07:00-21:00)\\n- Logic baseline stable",
+        "content": "## Version v4.4\\n- SCHEDULE WINDOW FIX (07:00-21:00)\\n- Logic baseline stable",
         "height": 113,
         "width": 234
       },
@@ -165,7 +165,7 @@
       "webhookId": "694567e2-c3e8-4bfc-91af-aae5697aca36",
       "credentials": {
         "githubApi": {
-          "id": "uE78TkEY6lWLV4oP",
+          "id": "aZMd0okvVFkvyGnj",
           "name": "API GitHub"
         }
       },
@@ -412,7 +412,7 @@
       "webhookId": "694567e2-c3e8-4bfc-91af-aae5697aca36",
       "credentials": {
         "githubApi": {
-          "id": "uE78TkEY6lWLV4oP",
+          "id": "aZMd0okvVFkvyGnj",
           "name": "API GitHub"
         }
       },
@@ -1100,7 +1100,7 @@
       },
       {
         "parameters": {
-          "content": "## Version v4.3\\n- SCHEDULE WINDOW FIX (07:00-21:00)\\n- Logic baseline stable",
+          "content": "## Version v4.4\\n- SCHEDULE WINDOW FIX (07:00-21:00)\\n- Logic baseline stable",
           "height": 113,
           "width": 234
         },
@@ -1193,7 +1193,7 @@
         "webhookId": "694567e2-c3e8-4bfc-91af-aae5697aca36",
         "credentials": {
           "githubApi": {
-            "id": "uE78TkEY6lWLV4oP",
+            "id": "aZMd0okvVFkvyGnj",
             "name": "API GitHub"
           }
         },
@@ -1440,7 +1440,7 @@
         "webhookId": "694567e2-c3e8-4bfc-91af-aae5697aca36",
         "credentials": {
           "githubApi": {
-            "id": "uE78TkEY6lWLV4oP",
+            "id": "aZMd0okvVFkvyGnj",
             "name": "API GitHub"
           }
         },
