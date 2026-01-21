@@ -276,7 +276,9 @@
       "name": "Workflow existiert?"
     },
     {
-      "parameters": {},
+      "parameters": {
+        "jsCode": "// Vorbereite workflowData für Update\nconst analysiereData = $json;\nconst parseData = $node[\"Parse Workflow\"].json;\nconst workflowData = parseData.workflowData || {};\n\n// Pflichtfelder OHNE 'active' (read-only) und OHNE 'id' (in URL)\nconst finalWorkflowData = {\n  name: parseData.workflowName || workflowData.name || 'Unnamed Workflow',\n  nodes: workflowData.nodes || [],\n  connections: workflowData.connections || {},\n  settings: workflowData.settings || {}\n};\n\nreturn {\n  workflowId: analysiereData.workflowId,\n  workflowData: finalWorkflowData\n};"
+      },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -341,7 +343,9 @@
       "onError": "continueRegularOutput"
     },
     {
-      "parameters": {},
+      "parameters": {
+        "jsCode": "// Vorbereite workflowData für Erstellen\nconst parseData = $node[\"Parse Workflow\"].json;\nconst workflowData = parseData.workflowData || {};\n\n// Pflichtfelder (+ active status erlaubt bei Erstellung)\nconst finalWorkflowData = {\n  name: parseData.workflowName || workflowData.name || 'Unnamed Workflow',\n  nodes: workflowData.nodes || [],\n  connections: workflowData.connections || {},\n  active: workflowData.active === true,\n  settings: workflowData.settings || {}\n};\n\nreturn {\n  ...parseData,\n  workflowData: finalWorkflowData\n};"
+      },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
