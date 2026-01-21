@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-20T19:47:23.178Z",
+  "updatedAt": "2026-01-21T09:07:32.000Z",
   "createdAt": "2026-01-02T15:51:21.900Z",
   "id": "b2iHqxoS7bY4geyi",
   "name": "n8n → GitHub Sicherung",
@@ -11,8 +11,8 @@
         "rule": {
           "interval": [
             {
-              "field": "cronExpression",
-              "expression": "0 */15 * * *"
+              "field": "minutes",
+              "minutesInterval": 15
             }
           ]
         }
@@ -69,9 +69,9 @@
     },
     {
       "parameters": {
-        "content": "## Version v3.2\n- Archiv-Bereinigung Aktiv\n- Rucksack-Flow Fix",
-        "height": 289,
-        "width": 314
+        "content": "## Version v3.4\n- Archiv-Bereinigung Aktiv\n- Force Trigger Refresh",
+        "height": 113,
+        "width": 234
       },
       "id": "version-marker",
       "name": "Version Marker (v3.1)",
@@ -1042,8 +1042,8 @@
           "rule": {
             "interval": [
               {
-                "field": "cronExpression",
-                "expression": "0 */15 * * *"
+                "field": "minutes",
+                "minutesInterval": 15
               }
             ]
           }
