@@ -2,3 +2,4 @@
 // Fix at Wed Jan 21 23:18:45 CET 2026
 // Sync fix at Wed Jan 21 23:22:41 CET 2026
 // definitive v4.7 push
+// restore heartbeat
