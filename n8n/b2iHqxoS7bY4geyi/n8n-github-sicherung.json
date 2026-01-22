@@ -42,9 +42,7 @@
         "genericAuthType": "httpHeaderAuth",
         "options": {
           "response": {
-            "response": {
-              "responseFormat": "json"
-            }
+            "responseFormat": "json"
           }
         }
       },
@@ -1076,9 +1074,7 @@
           "genericAuthType": "httpHeaderAuth",
           "options": {
             "response": {
-              "response": {
-                "responseFormat": "json"
-              }
+              "responseFormat": "json"
             }
           }
         },
