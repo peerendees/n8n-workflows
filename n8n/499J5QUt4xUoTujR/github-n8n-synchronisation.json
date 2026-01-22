@@ -202,6 +202,7 @@
     },
     {
       "parameters": {
+        "method": "GET",
         "url": "=https://n8n.srv1098810.hstgr.cloud/api/v1/workflows/{{ $json.workflowId }}",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
@@ -792,6 +793,7 @@
       },
       {
         "parameters": {
+          "method": "GET",
           "url": "=https://n8n.srv1098810.hstgr.cloud/api/v1/workflows/{{ $json.workflowId }}",
           "authentication": "genericCredentialType",
           "genericAuthType": "httpHeaderAuth",

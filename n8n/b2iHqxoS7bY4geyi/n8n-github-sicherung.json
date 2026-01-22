@@ -36,6 +36,7 @@
     },
     {
       "parameters": {
+        "method": "GET",
         "url": "=https://n8n.srv1098810.hstgr.cloud/api/v1/workflows",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
@@ -77,7 +78,7 @@
     },
     {
       "parameters": {
-        "content": "## Version v4.7\n- PUSH FIX & STATS STANDARDIZED\n- Benachrichtigung garantiert",
+        "content": "## Version v4.8\n- PUSH FIX & STATS STANDARDIZED\n- Benachrichtigung garantiert",
         "height": 113,
         "width": 234
       },
@@ -170,8 +171,8 @@
       "webhookId": "694567e2-c3e8-4bfc-91af-aae5697aca36",
       "credentials": {
         "githubApi": {
-          "id": "aZMd0okvVFkvyGnj",
-          "name": "GitHub Token"
+          "id": "uE78TkEY6lWLV4oP",
+          "name": "API GitHub"
         }
       },
       "onError": "continueRegularOutput"
@@ -291,7 +292,7 @@
       "credentials": {
         "httpHeaderAuth": {
           "id": "aZMd0okvVFkvyGnj",
-          "name": "GitHub Token"
+          "name": "API GitHub"
         }
       },
       "onError": "continueRegularOutput"
@@ -336,7 +337,7 @@
       "credentials": {
         "httpHeaderAuth": {
           "id": "aZMd0okvVFkvyGnj",
-          "name": "GitHub Token"
+          "name": "API GitHub"
         }
       },
       "onError": "continueRegularOutput"
@@ -417,8 +418,8 @@
       "webhookId": "694567e2-c3e8-4bfc-91af-aae5697aca36",
       "credentials": {
         "githubApi": {
-          "id": "aZMd0okvVFkvyGnj",
-          "name": "GitHub Token"
+          "id": "uE78TkEY6lWLV4oP",
+          "name": "API GitHub"
         }
       },
       "onError": "continueRegularOutput"
@@ -520,7 +521,7 @@
       "credentials": {
         "httpHeaderAuth": {
           "id": "aZMd0okvVFkvyGnj",
-          "name": "GitHub Token"
+          "name": "API GitHub"
         }
       },
       "onError": "continueRegularOutput"
@@ -1069,6 +1070,7 @@
       },
       {
         "parameters": {
+          "method": "GET",
           "url": "=https://n8n.srv1098810.hstgr.cloud/api/v1/workflows",
           "authentication": "genericCredentialType",
           "genericAuthType": "httpHeaderAuth",
@@ -1110,7 +1112,7 @@
       },
       {
         "parameters": {
-          "content": "## Version v4.7\n- PUSH FIX & STATS STANDARDIZED\n- Benachrichtigung garantiert",
+          "content": "## Version v4.8\n- PUSH FIX & STATS STANDARDIZED\n- Benachrichtigung garantiert",
           "height": 113,
           "width": 234
         },
@@ -1203,7 +1205,7 @@
         "webhookId": "694567e2-c3e8-4bfc-91af-aae5697aca36",
         "credentials": {
           "githubApi": {
-            "id": "aZMd0okvVFkvyGnj",
+            "id": "uE78TkEY6lWLV4oP",
             "name": "API GitHub"
           }
         },
@@ -1323,8 +1325,8 @@
         ],
         "credentials": {
           "httpHeaderAuth": {
-            "id": "aZMd0okvVFkvyGnj",
-            "name": "GitHub Token"
+            "id": "uE78TkEY6lWLV4oP",
+            "name": "API GitHub"
           }
         },
         "onError": "continueRegularOutput"
@@ -1368,8 +1370,8 @@
         "name": "Sichere auf GitHub",
         "credentials": {
           "httpHeaderAuth": {
-            "id": "aZMd0okvVFkvyGnj",
-            "name": "GitHub Token"
+            "id": "uE78TkEY6lWLV4oP",
+            "name": "API GitHub"
           }
         },
         "onError": "continueRegularOutput"
@@ -1450,7 +1452,7 @@
         "webhookId": "694567e2-c3e8-4bfc-91af-aae5697aca36",
         "credentials": {
           "githubApi": {
-            "id": "aZMd0okvVFkvyGnj",
+            "id": "uE78TkEY6lWLV4oP",
             "name": "API GitHub"
           }
         },
@@ -1552,8 +1554,8 @@
         "name": "Lösche alte Datei",
         "credentials": {
           "httpHeaderAuth": {
-            "id": "aZMd0okvVFkvyGnj",
-            "name": "GitHub Token"
+            "id": "uE78TkEY6lWLV4oP",
+            "name": "API GitHub"
           }
         },
         "onError": "continueRegularOutput"
