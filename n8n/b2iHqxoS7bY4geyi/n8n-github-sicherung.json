@@ -36,13 +36,14 @@
     },
     {
       "parameters": {
-        "method": "GET",
         "url": "=https://n8n.srv1098810.hstgr.cloud/api/v1/workflows",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "options": {
           "response": {
-            "responseFormat": "json"
+            "response": {
+              "responseFormat": "json"
+            }
           }
         }
       },
@@ -76,7 +77,7 @@
     },
     {
       "parameters": {
-        "content": "## Version v4.8\n- PUSH FIX & STATS STANDARDIZED\n- Benachrichtigung garantiert",
+        "content": "## Version v4.2 (Restricted)\n- RESTRICTED WINDOW (07:00-21:00)\n- Recovered stable logic",
         "height": 113,
         "width": 234
       },
@@ -290,7 +291,7 @@
       "credentials": {
         "httpHeaderAuth": {
           "id": "aZMd0okvVFkvyGnj",
-          "name": "API GitHub"
+          "name": "GitHub Token"
         }
       },
       "onError": "continueRegularOutput"
@@ -335,7 +336,7 @@
       "credentials": {
         "httpHeaderAuth": {
           "id": "aZMd0okvVFkvyGnj",
-          "name": "API GitHub"
+          "name": "GitHub Token"
         }
       },
       "onError": "continueRegularOutput"
@@ -519,7 +520,7 @@
       "credentials": {
         "httpHeaderAuth": {
           "id": "aZMd0okvVFkvyGnj",
-          "name": "API GitHub"
+          "name": "GitHub Token"
         }
       },
       "onError": "continueRegularOutput"
@@ -1068,13 +1069,14 @@
       },
       {
         "parameters": {
-          "method": "GET",
           "url": "=https://n8n.srv1098810.hstgr.cloud/api/v1/workflows",
           "authentication": "genericCredentialType",
           "genericAuthType": "httpHeaderAuth",
           "options": {
             "response": {
-              "responseFormat": "json"
+              "response": {
+                "responseFormat": "json"
+              }
             }
           }
         },
@@ -1108,7 +1110,7 @@
       },
       {
         "parameters": {
-          "content": "## Version v4.8\n- PUSH FIX & STATS STANDARDIZED\n- Benachrichtigung garantiert",
+          "content": "## Version v4.2 (Restricted)\n- RESTRICTED WINDOW (07:00-21:00)\n- Recovered stable logic",
           "height": 113,
           "width": 234
         },
@@ -1321,8 +1323,8 @@
         ],
         "credentials": {
           "httpHeaderAuth": {
-            "id": "uE78TkEY6lWLV4oP",
-            "name": "API GitHub"
+            "id": "aZMd0okvVFkvyGnj",
+            "name": "GitHub Token"
           }
         },
         "onError": "continueRegularOutput"
@@ -1366,8 +1368,8 @@
         "name": "Sichere auf GitHub",
         "credentials": {
           "httpHeaderAuth": {
-            "id": "uE78TkEY6lWLV4oP",
-            "name": "API GitHub"
+            "id": "aZMd0okvVFkvyGnj",
+            "name": "GitHub Token"
           }
         },
         "onError": "continueRegularOutput"
@@ -1550,8 +1552,8 @@
         "name": "Lösche alte Datei",
         "credentials": {
           "httpHeaderAuth": {
-            "id": "uE78TkEY6lWLV4oP",
-            "name": "API GitHub"
+            "id": "aZMd0okvVFkvyGnj",
+            "name": "GitHub Token"
           }
         },
         "onError": "continueRegularOutput"
