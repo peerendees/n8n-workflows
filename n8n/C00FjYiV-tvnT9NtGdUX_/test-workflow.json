@@ -1,6 +1,4 @@
 {
-  "updatedAt": "2026-01-28T12:30:19.110Z",
-  "createdAt": "2026-01-22T12:39:02.593Z",
   "id": "C00FjYiV-tvnT9NtGdUX_",
   "name": "Test Workflow",
   "active": false,
@@ -52,7 +50,6 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "bd1fee46-11da-4766-b287-69a4e3846673",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -64,6 +61,5 @@
       "projectId": "yr4Hj71ou1NOsi2p"
     }
   ],
-  "activeVersion": null,
-  "tags": []
+  "activeVersion": null
 }
