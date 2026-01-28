@@ -1,6 +1,4 @@
 {
-  "updatedAt": "2026-01-28T12:31:30.728Z",
-  "createdAt": "2025-11-24T19:30:01.014Z",
   "id": "p4WBXmtWQqToEtLw",
   "name": "Hedy to Webhook to Notion 0.9",
   "active": true,
@@ -139,7 +137,6 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "11006de3-5f18-4b61-96ef-660493b6047a",
   "activeVersionId": "11006de3-5f18-4b61-96ef-660493b6047a",
   "triggerCount": 1,
   "shared": [
@@ -284,6 +281,5 @@
     "name": null,
     "description": null,
     "autosaved": false
-  },
-  "tags": []
+  }
 }
