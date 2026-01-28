@@ -1,6 +1,4 @@
 {
-  "updatedAt": "2026-01-28T12:30:35.457Z",
-  "createdAt": "2026-01-02T13:01:57.771Z",
   "id": "O9NAfMeQnUDKhZjC",
   "name": "n8n Workflow Migration - Alte zu Neue Struktur (v4)",
   "active": false,
@@ -582,7 +580,6 @@
       }
     ]
   },
-  "versionId": "2ceaf62a-5558-4375-8449-96cb84ceb121",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -594,6 +591,5 @@
       "projectId": "yr4Hj71ou1NOsi2p"
     }
   ],
-  "activeVersion": null,
-  "tags": []
+  "activeVersion": null
 }
