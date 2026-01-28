@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-22T12:39:35.230Z",
+  "updatedAt": "2026-01-28T11:47:01.921Z",
   "createdAt": "2026-01-22T12:39:02.593Z",
   "id": "C00FjYiV-tvnT9NtGdUX_",
   "name": "Test Workflow",
@@ -46,7 +46,8 @@
   },
   "settings": {
     "executionOrder": "v1",
-    "availableInMCP": false
+    "availableInMCP": false,
+    "callerPolicy": "workflowsFromSameOwner"
   },
   "staticData": null,
   "meta": null,
