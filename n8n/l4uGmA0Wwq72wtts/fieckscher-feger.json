@@ -1,6 +1,4 @@
 {
-  "updatedAt": "2026-01-20T19:17:03.100Z",
-  "createdAt": "2025-11-10T13:45:58.896Z",
   "id": "l4uGmA0Wwq72wtts",
   "name": "Fieckscher Feger",
   "active": false,
@@ -526,7 +524,6 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "a35a464d-0183-4775-b76b-de7ef1a511ee",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -538,6 +535,5 @@
       "projectId": "yr4Hj71ou1NOsi2p"
     }
   ],
-  "activeVersion": null,
-  "tags": []
+  "activeVersion": null
 }
