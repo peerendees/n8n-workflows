@@ -1,6 +1,4 @@
 {
-  "updatedAt": "2026-01-28T12:31:05.014Z",
-  "createdAt": "2026-01-27T08:37:35.510Z",
   "id": "jjFFDQ1dFnpbz1XSnZq24",
   "name": "n8n GitHub Backup v6 (Loop-Based)",
   "active": false,
@@ -533,7 +531,6 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "9e7654f2-3aa5-4374-94cb-a77b7c93652f",
   "activeVersionId": null,
   "triggerCount": 1,
   "shared": [
@@ -545,6 +542,5 @@
       "projectId": "yr4Hj71ou1NOsi2p"
     }
   ],
-  "activeVersion": null,
-  "tags": []
+  "activeVersion": null
 }
