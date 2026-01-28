@@ -1,6 +1,4 @@
 {
-  "updatedAt": "2026-01-28T12:31:25.254Z",
-  "createdAt": "2026-01-27T07:39:04.415Z",
   "id": "lcGaB_uCQ0rhck3yJ1biW",
   "name": "Hedy nach Notion Meeting - Optimiert",
   "active": false,
@@ -632,7 +630,6 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "166cd27a-42f5-447c-81aa-4b2f344e5e10",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -644,6 +641,5 @@
       "projectId": "yr4Hj71ou1NOsi2p"
     }
   ],
-  "activeVersion": null,
-  "tags": []
+  "activeVersion": null
 }
