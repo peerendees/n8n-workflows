@@ -1,6 +1,4 @@
 {
-  "updatedAt": "2026-01-20T19:14:41.016Z",
-  "createdAt": "2025-11-11T19:56:45.940Z",
   "id": "ZzyUNBLHABev3X7Q",
   "name": "Telegram Trigger Template",
   "active": false,
@@ -214,7 +212,6 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "78f6b4df-e0a5-4a39-bf73-cde9cab367e2",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -226,6 +223,5 @@
       "projectId": "yr4Hj71ou1NOsi2p"
     }
   ],
-  "activeVersion": null,
-  "tags": []
+  "activeVersion": null
 }
