@@ -1,0 +1,1012 @@
+{
+  "updatedAt": "2026-01-28T11:46:29.167Z",
+  "createdAt": "2026-01-27T10:15:57.086Z",
+  "id": "49W0_QAnGHo78Vzt0XBfx",
+  "name": "n8n GitHub Backup v6",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "threema-from",
+              "name": "threemaFrom",
+              "value": "*BERENT1",
+              "type": "string"
+            },
+            {
+              "id": "threema-to",
+              "name": "threemaTo",
+              "value": "BUMFMZ39",
+              "type": "string"
+            },
+            {
+              "id": "threema-secret",
+              "name": "secret",
+              "value": "18DOvPKBV7ize3Nh",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1568,
+        176
+      ],
+      "id": "06ee2269-a63d-4ef4-931a-10d0bf3b2d9f"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst config = $('Config').first().json;\nconst workflows = $input.first().json.data || [];\n\nreturn {\n  json: {\n    workflows: workflows,\n    anzahl: workflows.length,\n    index: 0,\n    stats: { success: 0, skipped: 0, errors: 0 },\n    threemaSecret: config.secret,\n    threemaFrom: config.threemaFrom,\n    threemaTo: config.threemaTo\n  }\n};\n"
+      },
+      "name": "Initialisierung",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1120,
+        176
+      ],
+      "id": "1ac7e770-3c64-4429-90ea-72f91c339ac8"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst data = $input.first().json;\nconst workflows = data.workflows;\nconst currentIndex = data.index;\n\nif (currentIndex >= workflows.length) {\n  return { json: { ...data, shouldContinue: false } };\n}\n\nconst wf = workflows[currentIndex];\nconst workflowId = wf.id;\nconst workflowName = wf.name || 'Unnamed';\nconst cleanName = workflowName.replace(/[^a-zA-Z0-9-_]/g, '-').toLowerCase();\n\nconst content = btoa(unescape(encodeURIComponent(JSON.stringify(wf, null, 2))));\n\nreturn {\n  json: {\n    ...data,\n    currentWorkflow: {\n      id: workflowId,\n      name: workflowName,\n      filepath: `n8n/${workflowId}/${cleanName}.json`,\n      content: content,\n      message: `🤖 Auto-Backup: ${workflowName}`\n    },\n    shouldContinue: true\n  }\n};\n"
+      },
+      "name": "Extrahiere Workflow",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -896,
+        176
+      ],
+      "id": "abae59ad-b5d7-4a12-bb79-f400f074c771"
+    },
+    {
+      "parameters": {
+        "url": "https://n8n.srv1098810.hstgr.cloud/api/v1/workflows",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "name": "Alle Workflows holen",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1344,
+        176
+      ],
+      "id": "7b125df3-6daa-4bef-a16c-6e1f3fedc45c",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "oaJkHRuARNWjW2UA",
+          "name": "API n8n für n8n"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 15
+            }
+          ]
+        }
+      },
+      "name": "Zeitplan: alle 15 Min",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1792,
+        80
+      ],
+      "id": "1521e8bf-853f-4cab-a2c1-c7f5eecc0b84"
+    },
+    {
+      "parameters": {},
+      "name": "Bei Klick ausführen",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1792,
+        272
+      ],
+      "id": "850a258d-5474-4a7d-9dc9-07bbaf916d3f"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "get",
+        "owner": {
+          "__rl": true,
+          "value": "peerendees",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "n8n-workflows",
+          "mode": "name"
+        },
+        "filePath": "={{ $json.currentWorkflow.filepath }}",
+        "asBinaryProperty": false,
+        "additionalParameters": {}
+      },
+      "name": "GitHub prüfen",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        -672,
+        96
+      ],
+      "id": "2dda8f29-da5a-43ee-9e17-e2793a820f33",
+      "webhookId": "3883c216-b507-43d2-88f5-2c463c838b99",
+      "credentials": {
+        "githubApi": {
+          "id": "uE78TkEY6lWLV4oP",
+          "name": "API GitHub"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "id": "check-action",
+              "leftValue": "={{ $json.currentWorkflow.action }}",
+              "rightValue": "skip",
+              "operator": {
+                "type": "string",
+                "operation": "notEqual"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Gibt es Änderungen?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -224,
+        96
+      ],
+      "id": "81a95e48-599c-4f86-80f5-7ea185df8552"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://api.github.com/repos/peerendees/n8n-workflows/contents/{{ $json.currentWorkflow.filepath }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n{\n  \"message\": $json.currentWorkflow.message,\n  \"content\": $json.currentWorkflow.content,\n  \"branch\": \"main\",\n  \"sha\": $json.currentWorkflow.sha || undefined\n}\n}}",
+        "options": {}
+      },
+      "name": "Nach GitHub schieben",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "8ad5faa3-d267-41e1-99f5-909cfd5df91b",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "aZMd0okvVFkvyGnj",
+          "name": "GitHub Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Wir holen uns die Daten vom Stand VOR dem Upload\nconst data = $node[\"Handlung bestimmen\"].json;\nconst action = data.currentWorkflow.action;\n\n// Wir holen uns das Ergebnis vom Upload (vom direkten Vorgänger)\nconst githubResult = $input.first().json;\n\nconst newStats = { ...data.stats };\n\n// Wenn der Upload erfolgreich war (GitHub liefert 'commit' oder 'content' zurück)\nif (githubResult.commit || githubResult.content) {\n  newStats.success += 1;\n} else {\n  newStats.errors += 1;\n}\n\nreturn {\n  json: { \n    ...data, \n    stats: newStats, \n    index: data.index + 1 \n  }\n};"
+      },
+      "name": "Statistik aktualisieren",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ],
+      "id": "1b005dff-b4e0-448d-9c70-e7276defde1c"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Wir holen uns die Daten direkt vom \"Handlung bestimmen\"-Node\nconst data = $node[\"Handlung bestimmen\"].json;\n\nconst newStats = { ...data.stats };\nnewStats.skipped += 1;\n\nreturn {\n  json: { \n    ...data, \n    stats: newStats, \n    index: data.index + 1 \n  }\n};"
+      },
+      "name": "Statistiken überspringen",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        192
+      ],
+      "id": "a6101195-3c60-4cc6-a20d-2e7e8b55325c"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "id": "check-loop",
+              "leftValue": "={{ $json.index }}",
+              "rightValue": "={{ $json.anzahl }}",
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Schleife prüfen",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        448,
+        192
+      ],
+      "id": "db725df4-6d8b-412e-a6c4-c8f5c55b6c36"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst data = $input.first().json;\nreturn {\n  json: {\n    total: data.anzahl,\n    success: data.stats.success,\n    errors: data.stats.errors,\n    skipped: data.stats.skipped,\n    timestamp: new Date().toLocaleString('de-DE'),\n    threemaSecret: data.threemaSecret,\n    threemaFrom: data.threemaFrom,\n    threemaTo: data.threemaTo\n  }\n};\n"
+      },
+      "name": "Statistik abschließen",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        192
+      ],
+      "id": "5b148c05-0e3e-44a2-a24f-ab499c2ce411"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://msgapi.threema.ch/send_simple",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "secret",
+              "value": "={{ $('Config').first().json.secret }}"
+            },
+            {
+              "name": "from",
+              "value": "={{ $json.threemaFrom }}"
+            },
+            {
+              "name": "to",
+              "value": "={{ $json.threemaTo }}"
+            },
+            {
+              "name": "text",
+              "value": "=✅ n8n GitHub Backup\\n\\n📊 Statistik:\\n✓ Erfolgreich: {{ $json.success }}\\n⊘ Übersprungen: {{ $json.skipped }}\\n✗ Fehler: {{ $json.errors }}\\n━━━━━━━━━━━━━━\\nΣ Gesamt: {{ $json.total }}\\n\\n🕐 {{ $json.timestamp }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Info per Threema",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        896,
+        192
+      ],
+      "id": "1e56fc4f-c65b-45eb-91fe-ae780b4fde25"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Holen wir uns die lokalen Daten vom Extraktions-Node\nconst local = $node[\"Extrahiere Workflow\"].json.currentWorkflow;\n\n// 2. Holen wir uns die Antwort von GitHub\nconst github = $node[\"GitHub prüfen\"].json;\n\n// 3. Holen wir uns den gesamten \"Rucksack\" (für index, stats, etc.), \n// damit die Schleife weiterlaufen kann\nconst fullContext = $node[\"Extrahiere Workflow\"].json;\n\nlet action = 'skip';\nlet sha = null;\n\n// Prüfung: Wenn GitHub einen SHA liefert, existiert die Datei bereits\nif (github && github.sha) {\n  sha = github.sha;\n  \n  // Inhaltsvergleich (Leerzeichen/Umbrüche entfernen)\n  const remoteContent = (github.content || '').replace(/\\s/g, '');\n  const localContent = (local.content || '').replace(/\\s/g, '');\n  \n  if (remoteContent !== localContent) {\n    action = 'update';\n  } else {\n    action = 'skip';\n  }\n} \n// Wenn kein SHA da ist (Datei neu)\nelse {\n  action = 'create';\n  sha = null;\n}\n\n// WICHTIG: Wir geben das gesamte Objekt zurück, damit index & anzahl erhalten bleiben!\nreturn {\n  json: { \n    ...fullContext, \n    currentWorkflow: { \n      ...local, \n      action: action, \n      sha: sha \n    } \n  }\n};"
+      },
+      "name": "Handlung bestimmen",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -448,
+        96
+      ],
+      "id": "a0ca82ae-270e-4aa5-a974-dae01ac84d8b"
+    }
+  ],
+  "connections": {
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Alle Workflows holen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Initialisierung": {
+      "main": [
+        [
+          {
+            "node": "Extrahiere Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extrahiere Workflow": {
+      "main": [
+        [
+          {
+            "node": "GitHub prüfen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alle Workflows holen": {
+      "main": [
+        [
+          {
+            "node": "Initialisierung",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Zeitplan: alle 15 Min": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bei Klick ausführen": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GitHub prüfen": {
+      "main": [
+        [
+          {
+            "node": "Handlung bestimmen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gibt es Änderungen?": {
+      "main": [
+        [
+          {
+            "node": "Nach GitHub schieben",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Statistiken überspringen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nach GitHub schieben": {
+      "main": [
+        [
+          {
+            "node": "Statistik aktualisieren",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Statistik aktualisieren": {
+      "main": [
+        [
+          {
+            "node": "Schleife prüfen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Statistiken überspringen": {
+      "main": [
+        [
+          {
+            "node": "Schleife prüfen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schleife prüfen": {
+      "main": [
+        [
+          {
+            "node": "Extrahiere Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Statistik abschließen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Statistik abschließen": {
+      "main": [
+        [
+          {
+            "node": "Info per Threema",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Handlung bestimmen": {
+      "main": [
+        [
+          {
+            "node": "Gibt es Änderungen?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "f5f94a0f-67c5-4dfd-97bb-bb52566c3497",
+  "activeVersionId": "e099dc2b-77a4-46dc-85ae-4d736d843ea2",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-01-27T10:15:57.089Z",
+      "createdAt": "2026-01-27T10:15:57.089Z",
+      "role": "workflow:owner",
+      "workflowId": "49W0_QAnGHo78Vzt0XBfx",
+      "projectId": "yr4Hj71ou1NOsi2p"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-01-27T12:24:02.000Z",
+    "createdAt": "2026-01-27T12:23:57.984Z",
+    "versionId": "e099dc2b-77a4-46dc-85ae-4d736d843ea2",
+    "workflowId": "49W0_QAnGHo78Vzt0XBfx",
+    "nodes": [
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "threema-from",
+                "name": "threemaFrom",
+                "value": "*BERENT1",
+                "type": "string"
+              },
+              {
+                "id": "threema-to",
+                "name": "threemaTo",
+                "value": "BUMFMZ39",
+                "type": "string"
+              },
+              {
+                "id": "threema-secret",
+                "name": "secret",
+                "value": "18DOvPKBV7ize3Nh",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "name": "Config",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          -1568,
+          176
+        ],
+        "id": "06ee2269-a63d-4ef4-931a-10d0bf3b2d9f"
+      },
+      {
+        "parameters": {
+          "jsCode": "\nconst config = $('Config').first().json;\nconst workflows = $input.first().json.data || [];\n\nreturn {\n  json: {\n    workflows: workflows,\n    anzahl: workflows.length,\n    index: 0,\n    stats: { success: 0, skipped: 0, errors: 0 },\n    threemaSecret: config.secret,\n    threemaFrom: config.threemaFrom,\n    threemaTo: config.threemaTo\n  }\n};\n"
+        },
+        "name": "Initialisierung",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -1120,
+          176
+        ],
+        "id": "1ac7e770-3c64-4429-90ea-72f91c339ac8"
+      },
+      {
+        "parameters": {
+          "jsCode": "\nconst data = $input.first().json;\nconst workflows = data.workflows;\nconst currentIndex = data.index;\n\nif (currentIndex >= workflows.length) {\n  return { json: { ...data, shouldContinue: false } };\n}\n\nconst wf = workflows[currentIndex];\nconst workflowId = wf.id;\nconst workflowName = wf.name || 'Unnamed';\nconst cleanName = workflowName.replace(/[^a-zA-Z0-9-_]/g, '-').toLowerCase();\n\nconst content = btoa(unescape(encodeURIComponent(JSON.stringify(wf, null, 2))));\n\nreturn {\n  json: {\n    ...data,\n    currentWorkflow: {\n      id: workflowId,\n      name: workflowName,\n      filepath: `n8n/${workflowId}/${cleanName}.json`,\n      content: content,\n      message: `🤖 Auto-Backup: ${workflowName}`\n    },\n    shouldContinue: true\n  }\n};\n"
+        },
+        "name": "Extrahiere Workflow",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -896,
+          176
+        ],
+        "id": "abae59ad-b5d7-4a12-bb79-f400f074c771"
+      },
+      {
+        "parameters": {
+          "url": "https://n8n.srv1098810.hstgr.cloud/api/v1/workflows",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "options": {}
+        },
+        "name": "Alle Workflows holen",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          -1344,
+          176
+        ],
+        "id": "7b125df3-6daa-4bef-a16c-6e1f3fedc45c",
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "oaJkHRuARNWjW2UA",
+            "name": "API n8n für n8n"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "minutes",
+                "minutesInterval": 15
+              }
+            ]
+          }
+        },
+        "name": "Zeitplan: alle 15 Min",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          -1792,
+          80
+        ],
+        "id": "1521e8bf-853f-4cab-a2c1-c7f5eecc0b84"
+      },
+      {
+        "parameters": {},
+        "name": "Bei Klick ausführen",
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          -1792,
+          272
+        ],
+        "id": "850a258d-5474-4a7d-9dc9-07bbaf916d3f"
+      },
+      {
+        "parameters": {
+          "resource": "file",
+          "operation": "get",
+          "owner": {
+            "__rl": true,
+            "value": "peerendees",
+            "mode": "name"
+          },
+          "repository": {
+            "__rl": true,
+            "value": "n8n-workflows",
+            "mode": "name"
+          },
+          "filePath": "={{ $json.currentWorkflow.filepath }}",
+          "additionalParameters": {}
+        },
+        "name": "GitHub prüfen",
+        "type": "n8n-nodes-base.github",
+        "typeVersion": 1.1,
+        "position": [
+          -672,
+          96
+        ],
+        "id": "2dda8f29-da5a-43ee-9e17-e2793a820f33",
+        "webhookId": "3883c216-b507-43d2-88f5-2c463c838b99",
+        "credentials": {
+          "githubApi": {
+            "id": "uE78TkEY6lWLV4oP",
+            "name": "API GitHub"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "conditions": [
+              {
+                "id": "check-action",
+                "leftValue": "={{ $json.currentWorkflow.action }}",
+                "rightValue": "skip",
+                "operator": {
+                  "type": "string",
+                  "operation": "notEqual"
+                }
+              }
+            ]
+          },
+          "options": {}
+        },
+        "name": "Gibt es Änderungen?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          -224,
+          96
+        ],
+        "id": "81a95e48-599c-4f86-80f5-7ea185df8552"
+      },
+      {
+        "parameters": {
+          "method": "PUT",
+          "url": "=https://api.github.com/repos/peerendees/n8n-workflows/contents/{{ $json.currentWorkflow.filepath }}",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{\n{\n  \"message\": $json.currentWorkflow.message,\n  \"content\": $json.currentWorkflow.content,\n  \"branch\": \"main\",\n  \"sha\": $json.currentWorkflow.sha || undefined\n}\n}}",
+          "options": {}
+        },
+        "name": "Nach GitHub schieben",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          0,
+          0
+        ],
+        "id": "8ad5faa3-d267-41e1-99f5-909cfd5df91b",
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "aZMd0okvVFkvyGnj",
+            "name": "GitHub Token"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "\nconst data = $input.first().json;\nconst action = data.currentWorkflow.action;\nconst newStats = { ...data.stats };\nif (action === 'skip') {\n  newStats.skipped += 1;\n} else if ($json.commit && $json.commit.sha) {\n  newStats.success += 1;\n} else {\n  newStats.errors += 1;\n}\nreturn { json: { ...data, stats: newStats, index: data.index + 1 } };\n"
+        },
+        "name": "Statistik aktualisieren",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          224,
+          0
+        ],
+        "id": "1b005dff-b4e0-448d-9c70-e7276defde1c"
+      },
+      {
+        "parameters": {
+          "jsCode": "\nconst data = $input.first().json;\nconst newStats = { ...data.stats };\nnewStats.skipped += 1;\nreturn { json: { ...data, stats: newStats, index: data.index + 1 } };\n"
+        },
+        "name": "Statistiken überspringen",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          224,
+          192
+        ],
+        "id": "a6101195-3c60-4cc6-a20d-2e7e8b55325c"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "conditions": [
+              {
+                "id": "check-loop",
+                "leftValue": "={{ $json.index }}",
+                "rightValue": "={{ $json.anzahl }}",
+                "operator": {
+                  "type": "number",
+                  "operation": "lt"
+                }
+              }
+            ]
+          },
+          "options": {}
+        },
+        "name": "Schleife prüfen",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          448,
+          192
+        ],
+        "id": "db725df4-6d8b-412e-a6c4-c8f5c55b6c36"
+      },
+      {
+        "parameters": {
+          "jsCode": "\nconst data = $input.first().json;\nreturn {\n  json: {\n    total: data.anzahl,\n    success: data.stats.success,\n    errors: data.stats.errors,\n    skipped: data.stats.skipped,\n    timestamp: new Date().toLocaleString('de-DE'),\n    threemaSecret: data.threemaSecret,\n    threemaFrom: data.threemaFrom,\n    threemaTo: data.threemaTo\n  }\n};\n"
+        },
+        "name": "Statistik abschließen",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          672,
+          192
+        ],
+        "id": "5b148c05-0e3e-44a2-a24f-ab499c2ce411"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://msgapi.threema.ch/send_simple",
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "secret",
+                "value": "={{ $('Config').first().json.secret }}"
+              },
+              {
+                "name": "from",
+                "value": "={{ $json.threemaFrom }}"
+              },
+              {
+                "name": "to",
+                "value": "={{ $json.threemaTo }}"
+              },
+              {
+                "name": "text",
+                "value": "=✅ n8n GitHub Backup\\n\\n📊 Statistik:\\n✓ Erfolgreich: {{ $json.success }}\\n⊘ Übersprungen: {{ $json.skipped }}\\n✗ Fehler: {{ $json.errors }}\\n━━━━━━━━━━━━━━\\nΣ Gesamt: {{ $json.total }}\\n\\n🕐 {{ $json.timestamp }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "name": "Info per Threema",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          896,
+          192
+        ],
+        "id": "1e56fc4f-c65b-45eb-91fe-ae780b4fde25"
+      },
+      {
+        "parameters": {
+          "jsCode": "\nconst data = $input.first().json;\nconst github = $json;\nconst local = data.currentWorkflow;\n\nlet action = 'skip';\nlet sha = null;\n\nif (github.error || github.message === 'Not Found') {\n  action = 'create';\n} else {\n  sha = github.sha;\n  const remoteContent = (github.content || '').replace(/\\s/g, '');\n  const localContent = (local.content || '').replace(/\\s/g, '');\n  if (remoteContent !== localContent) {\n    action = 'update';\n  }\n}\n\nreturn {\n  json: { ...data, currentWorkflow: { ...local, action: action, sha: sha } }\n};\n"
+        },
+        "name": "Handlung bestimmen",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -448,
+          96
+        ],
+        "id": "a0ca82ae-270e-4aa5-a974-dae01ac84d8b"
+      }
+    ],
+    "connections": {
+      "Config": {
+        "main": [
+          [
+            {
+              "node": "Alle Workflows holen",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Initialisierung": {
+        "main": [
+          [
+            {
+              "node": "Extrahiere Workflow",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Extrahiere Workflow": {
+        "main": [
+          [
+            {
+              "node": "GitHub prüfen",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Alle Workflows holen": {
+        "main": [
+          [
+            {
+              "node": "Initialisierung",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Zeitplan: alle 15 Min": {
+        "main": [
+          [
+            {
+              "node": "Config",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Bei Klick ausführen": {
+        "main": [
+          [
+            {
+              "node": "Config",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "GitHub prüfen": {
+        "main": [
+          [
+            {
+              "node": "Handlung bestimmen",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Gibt es Änderungen?": {
+        "main": [
+          [
+            {
+              "node": "Nach GitHub schieben",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Statistiken überspringen",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Nach GitHub schieben": {
+        "main": [
+          [
+            {
+              "node": "Statistik aktualisieren",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Statistik aktualisieren": {
+        "main": [
+          [
+            {
+              "node": "Schleife prüfen",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Statistiken überspringen": {
+        "main": [
+          [
+            {
+              "node": "Schleife prüfen",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Schleife prüfen": {
+        "main": [
+          [
+            {
+              "node": "Extrahiere Workflow",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Statistik abschließen",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Statistik abschließen": {
+        "main": [
+          [
+            {
+              "node": "Info per Threema",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Handlung bestimmen": {
+        "main": [
+          [
+            {
+              "node": "Gibt es Änderungen?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Marcus Kunkel",
+    "name": "Version e099dc2b",
+    "description": "",
+    "autosaved": true
+  },
+  "tags": []
+}
