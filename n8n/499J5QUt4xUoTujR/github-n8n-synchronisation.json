@@ -1,6 +1,4 @@
 {
-  "updatedAt": "2026-01-28T12:39:58.705Z",
-  "createdAt": "2026-01-02T14:58:17.255Z",
   "id": "499J5QUt4xUoTujR",
   "name": "GitHub → n8n Synchronisation",
   "active": true,
@@ -584,7 +582,6 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "86ceb630-4ac5-41f9-a88f-17ff5b2ad5dd",
   "activeVersionId": "86ceb630-4ac5-41f9-a88f-17ff5b2ad5dd",
   "triggerCount": 1,
   "shared": [
@@ -1175,6 +1172,5 @@
     "name": "Version 86ceb630",
     "description": "",
     "autosaved": true
-  },
-  "tags": []
+  }
 }
