@@ -1,6 +1,4 @@
 {
-  "updatedAt": "2026-01-27T13:12:59.157Z",
-  "createdAt": "2025-11-23T18:11:10.643Z",
   "id": "gkgmJNNtuTAZgcyC",
   "name": "fonio AGS Nachbearbeitung Transkript",
   "active": true,
@@ -926,7 +924,6 @@
       }
     ]
   },
-  "versionId": "f5d4e4ae-db4a-41f9-8387-8aac2fbe221b",
   "activeVersionId": "f5d4e4ae-db4a-41f9-8387-8aac2fbe221b",
   "triggerCount": 1,
   "shared": [
@@ -1681,6 +1678,5 @@
     "name": "Version f5d4e4ae",
     "description": "",
     "autosaved": true
-  },
-  "tags": []
+  }
 }
