@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-28T12:16:15.444Z",
+  "updatedAt": "2026-01-28T12:28:29.584Z",
   "createdAt": "2026-01-27T10:15:57.086Z",
   "id": "49W0_QAnGHo78Vzt0XBfx",
   "name": "n8n GitHub Backup v6",
@@ -56,7 +56,7 @@
     },
     {
       "parameters": {
-        "jsCode": "\nconst data = $input.first().json;\nconst workflows = data.workflows;\nconst currentIndex = data.index;\n\nif (currentIndex >= workflows.length) {\n  return { json: { ...data, shouldContinue: false } };\n}\n\nconst wf = workflows[currentIndex];\nconst workflowId = wf.id;\nconst workflowName = wf.name || 'Unnamed';\nconst cleanName = workflowName.replace(/[^a-zA-Z0-9-_]/g, '-').toLowerCase();\n\nconst content = btoa(unescape(encodeURIComponent(JSON.stringify(wf, null, 2))));\n\nreturn {\n  json: {\n    ...data,\n    currentWorkflow: {\n      id: workflowId,\n      name: workflowName,\n      filepath: `n8n/${workflowId}/${cleanName}.json`,\n      content: content,\n      message: `🤖 Auto-Backup: ${workflowName}`\n    },\n    shouldContinue: true\n  }\n};\n"
+        "jsCode": "const data = $input.first().json;\nconst wf = data.workflows[data.index];\n\nconst workflowId = wf.id;\nconst workflowName = wf.name || 'Unnamed';\n\n// Optimierte Namensbereinigung (erlaubt Umlaute für Konsistenz mit alten Backups)\nconst cleanName = workflowName\n  .replace(/[^a-zA-Z0-9-_äöüÄÖÜß ]/g, '') // Erlaubt Umlaute und Leerzeichen kurzzeitig\n  .replace(/\\s+/g, '-') // Ersetzt Leerzeichen durch Bindestriche\n  .toLowerCase();\n\nconst content = btoa(unescape(encodeURIComponent(JSON.stringify(wf, null, 2))));\n\nreturn {\n  json: {\n    ...data,\n    currentWorkflow: {\n      id: workflowId,\n      name: workflowName,\n      folderpath: `n8n/${workflowId}`,\n      filepath: `n8n/${workflowId}/${cleanName}.json`,\n      filename: `${cleanName}.json`,\n      content: content,\n      message: `🤖 Auto-Backup: ${workflowName}`\n    }\n  }\n};"
       },
       "name": "Extrahiere Workflow",
       "type": "n8n-nodes-base.code",
@@ -268,7 +268,7 @@
     },
     {
       "parameters": {
-        "jsCode": "\nconst data = $input.first().json;\nreturn {\n  json: {\n    total: data.anzahl,\n    success: data.stats.success,\n    errors: data.stats.errors,\n    skipped: data.stats.skipped,\n    timestamp: new Date().toLocaleString('de-DE'),\n    threemaSecret: data.threemaSecret,\n    threemaFrom: data.threemaFrom,\n    threemaTo: data.threemaTo\n  }\n};\n"
+        "jsCode": "\nconst data = $input.first().json;\nreturn {\n  json: {\n    total: data.anzahl,\n    success: data.stats.success,\n    errors: data.stats.errors,\n    skipped: data.stats.skipped,\n    timestamp: new Date().toLocaleString('de-DE', { timeZone: 'Europe/Berlin' }),\n    threemaSecret: data.threemaSecret,\n    threemaFrom: data.threemaFrom,\n    threemaTo: data.threemaTo\n  }\n};\n"
       },
       "name": "Statistik abschließen",
       "type": "n8n-nodes-base.code",
@@ -300,7 +300,7 @@
             },
             {
               "name": "text",
-              "value": "=✅ n8n GitHub Backup\\n\\n📊 Statistik:\\n✓ Erfolgreich: {{ $json.success }}\\n⊘ Übersprungen: {{ $json.skipped }}\\n✗ Fehler: {{ $json.errors }}\\n━━━━━━━━━━━━━━\\nΣ Gesamt: {{ $json.total }}\\n\\n🕐 {{ $json.timestamp }}"
+              "value": "=✅ n8n GitHub Backup\n\n📊 Statistik:\n✓ Erfolgreich: {{ $json.success }}\n⊘ Übersprungen: {{ $json.skipped }}\n✗ Fehler: {{ $json.errors }}\n━━━━━━━━━━━━━━\nΣ Gesamt: {{ $json.total }}\n\n🕐 {{ $json.timestamp }}"
             }
           ]
         },
@@ -508,8 +508,8 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "8f129a79-e303-491a-997b-41326d785a4e",
-  "activeVersionId": "e099dc2b-77a4-46dc-85ae-4d736d843ea2",
+  "versionId": "c1d9ddc9-27d8-48f1-a71e-f614e752cd31",
+  "activeVersionId": "c1d9ddc9-27d8-48f1-a71e-f614e752cd31",
   "triggerCount": 1,
   "shared": [
     {
@@ -521,9 +521,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-01-27T12:24:02.000Z",
-    "createdAt": "2026-01-27T12:23:57.984Z",
-    "versionId": "e099dc2b-77a4-46dc-85ae-4d736d843ea2",
+    "updatedAt": "2026-01-28T12:29:07.000Z",
+    "createdAt": "2026-01-28T12:28:29.585Z",
+    "versionId": "c1d9ddc9-27d8-48f1-a71e-f614e752cd31",
     "workflowId": "49W0_QAnGHo78Vzt0XBfx",
     "nodes": [
       {
@@ -563,7 +563,7 @@
       },
       {
         "parameters": {
-          "jsCode": "\nconst config = $('Config').first().json;\nconst workflows = $input.first().json.data || [];\n\nreturn {\n  json: {\n    workflows: workflows,\n    anzahl: workflows.length,\n    index: 0,\n    stats: { success: 0, skipped: 0, errors: 0 },\n    threemaSecret: config.secret,\n    threemaFrom: config.threemaFrom,\n    threemaTo: config.threemaTo\n  }\n};\n"
+          "jsCode": "\nconst config = $('Config').first().json;\nconst rawWorkflows = $input.first().json.data || [];\n\n// Wir filtern die Liste: Nur Workflows mit Name und ID\nconst workflows = rawWorkflows.filter(w => w.id && w.name);\n\nreturn {\n  json: {\n    workflows: workflows,\n    anzahl: workflows.length, // Das sollte jetzt 31 sein\n    index: 0,\n    stats: { success: 0, skipped: 0, errors: 0 },\n    threemaSecret: $('Config').first().json.secret,\n    threemaFrom: $('Config').first().json.threemaFrom,\n    threemaTo: $('Config').first().json.threemaTo\n  }\n};"
         },
         "name": "Initialisierung",
         "type": "n8n-nodes-base.code",
@@ -576,7 +576,7 @@
       },
       {
         "parameters": {
-          "jsCode": "\nconst data = $input.first().json;\nconst workflows = data.workflows;\nconst currentIndex = data.index;\n\nif (currentIndex >= workflows.length) {\n  return { json: { ...data, shouldContinue: false } };\n}\n\nconst wf = workflows[currentIndex];\nconst workflowId = wf.id;\nconst workflowName = wf.name || 'Unnamed';\nconst cleanName = workflowName.replace(/[^a-zA-Z0-9-_]/g, '-').toLowerCase();\n\nconst content = btoa(unescape(encodeURIComponent(JSON.stringify(wf, null, 2))));\n\nreturn {\n  json: {\n    ...data,\n    currentWorkflow: {\n      id: workflowId,\n      name: workflowName,\n      filepath: `n8n/${workflowId}/${cleanName}.json`,\n      content: content,\n      message: `🤖 Auto-Backup: ${workflowName}`\n    },\n    shouldContinue: true\n  }\n};\n"
+          "jsCode": "const data = $input.first().json;\nconst wf = data.workflows[data.index];\n\nconst workflowId = wf.id;\nconst workflowName = wf.name || 'Unnamed';\n\n// Optimierte Namensbereinigung (erlaubt Umlaute für Konsistenz mit alten Backups)\nconst cleanName = workflowName\n  .replace(/[^a-zA-Z0-9-_äöüÄÖÜß ]/g, '') // Erlaubt Umlaute und Leerzeichen kurzzeitig\n  .replace(/\\s+/g, '-') // Ersetzt Leerzeichen durch Bindestriche\n  .toLowerCase();\n\nconst content = btoa(unescape(encodeURIComponent(JSON.stringify(wf, null, 2))));\n\nreturn {\n  json: {\n    ...data,\n    currentWorkflow: {\n      id: workflowId,\n      name: workflowName,\n      folderpath: `n8n/${workflowId}`,\n      filepath: `n8n/${workflowId}/${cleanName}.json`,\n      filename: `${cleanName}.json`,\n      content: content,\n      message: `🤖 Auto-Backup: ${workflowName}`\n    }\n  }\n};"
         },
         "name": "Extrahiere Workflow",
         "type": "n8n-nodes-base.code",
@@ -655,6 +655,7 @@
             "mode": "name"
           },
           "filePath": "={{ $json.currentWorkflow.filepath }}",
+          "asBinaryProperty": false,
           "additionalParameters": {}
         },
         "name": "GitHub prüfen",
@@ -671,7 +672,8 @@
             "id": "uE78TkEY6lWLV4oP",
             "name": "API GitHub"
           }
-        }
+        },
+        "onError": "continueRegularOutput"
       },
       {
         "parameters": {
@@ -727,7 +729,7 @@
       },
       {
         "parameters": {
-          "jsCode": "\nconst data = $input.first().json;\nconst action = data.currentWorkflow.action;\nconst newStats = { ...data.stats };\nif (action === 'skip') {\n  newStats.skipped += 1;\n} else if ($json.commit && $json.commit.sha) {\n  newStats.success += 1;\n} else {\n  newStats.errors += 1;\n}\nreturn { json: { ...data, stats: newStats, index: data.index + 1 } };\n"
+          "jsCode": "const data = $node[\"Handlung bestimmen\"].json;\nconst newStats = { ...data.stats };\nnewStats.success += 1;\n\nreturn {\n  json: { \n    ...data, \n    stats: newStats, \n    index: data.index + 1 // Hier wird sicher hochgezählt\n  }\n};"
         },
         "name": "Statistik aktualisieren",
         "type": "n8n-nodes-base.code",
@@ -740,7 +742,7 @@
       },
       {
         "parameters": {
-          "jsCode": "\nconst data = $input.first().json;\nconst newStats = { ...data.stats };\nnewStats.skipped += 1;\nreturn { json: { ...data, stats: newStats, index: data.index + 1 } };\n"
+          "jsCode": "const data = $node[\"Handlung bestimmen\"].json;\nconst newStats = { ...data.stats };\nnewStats.skipped += 1;\n\nreturn {\n  json: { \n    ...data, \n    stats: newStats, \n    index: data.index + 1 // Auch hier wird sicher hochgezählt\n  }\n};"
         },
         "name": "Statistiken überspringen",
         "type": "n8n-nodes-base.code",
@@ -754,6 +756,12 @@
       {
         "parameters": {
           "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
             "conditions": [
               {
                 "id": "check-loop",
@@ -764,7 +772,8 @@
                   "operation": "lt"
                 }
               }
-            ]
+            ],
+            "combinator": "and"
           },
           "options": {}
         },
@@ -779,7 +788,7 @@
       },
       {
         "parameters": {
-          "jsCode": "\nconst data = $input.first().json;\nreturn {\n  json: {\n    total: data.anzahl,\n    success: data.stats.success,\n    errors: data.stats.errors,\n    skipped: data.stats.skipped,\n    timestamp: new Date().toLocaleString('de-DE'),\n    threemaSecret: data.threemaSecret,\n    threemaFrom: data.threemaFrom,\n    threemaTo: data.threemaTo\n  }\n};\n"
+          "jsCode": "\nconst data = $input.first().json;\nreturn {\n  json: {\n    total: data.anzahl,\n    success: data.stats.success,\n    errors: data.stats.errors,\n    skipped: data.stats.skipped,\n    timestamp: new Date().toLocaleString('de-DE', { timeZone: 'Europe/Berlin' }),\n    threemaSecret: data.threemaSecret,\n    threemaFrom: data.threemaFrom,\n    threemaTo: data.threemaTo\n  }\n};\n"
         },
         "name": "Statistik abschließen",
         "type": "n8n-nodes-base.code",
@@ -811,7 +820,7 @@
               },
               {
                 "name": "text",
-                "value": "=✅ n8n GitHub Backup\\n\\n📊 Statistik:\\n✓ Erfolgreich: {{ $json.success }}\\n⊘ Übersprungen: {{ $json.skipped }}\\n✗ Fehler: {{ $json.errors }}\\n━━━━━━━━━━━━━━\\nΣ Gesamt: {{ $json.total }}\\n\\n🕐 {{ $json.timestamp }}"
+                "value": "=✅ n8n GitHub Backup\n\n📊 Statistik:\n✓ Erfolgreich: {{ $json.success }}\n⊘ Übersprungen: {{ $json.skipped }}\n✗ Fehler: {{ $json.errors }}\n━━━━━━━━━━━━━━\nΣ Gesamt: {{ $json.total }}\n\n🕐 {{ $json.timestamp }}"
               }
             ]
           },
@@ -828,7 +837,7 @@
       },
       {
         "parameters": {
-          "jsCode": "\nconst data = $input.first().json;\nconst github = $json;\nconst local = data.currentWorkflow;\n\nlet action = 'skip';\nlet sha = null;\n\nif (github.error || github.message === 'Not Found') {\n  action = 'create';\n} else {\n  sha = github.sha;\n  const remoteContent = (github.content || '').replace(/\\s/g, '');\n  const localContent = (local.content || '').replace(/\\s/g, '');\n  if (remoteContent !== localContent) {\n    action = 'update';\n  }\n}\n\nreturn {\n  json: { ...data, currentWorkflow: { ...local, action: action, sha: sha } }\n};\n"
+          "jsCode": "// 1. Holen wir uns die lokalen Daten vom Extraktions-Node\nconst local = $node[\"Extrahiere Workflow\"].json.currentWorkflow;\n\n// 2. Holen wir uns die Antwort von GitHub\nconst github = $node[\"GitHub prüfen\"].json;\n\n// 3. Holen wir uns den gesamten \"Rucksack\" (für index, stats, etc.), \n// damit die Schleife weiterlaufen kann\nconst fullContext = $node[\"Extrahiere Workflow\"].json;\n\nlet action = 'skip';\nlet sha = null;\n\n// Prüfung: Wenn GitHub einen SHA liefert, existiert die Datei bereits\nif (github && github.sha) {\n  sha = github.sha;\n  \n  // Inhaltsvergleich (Leerzeichen/Umbrüche entfernen)\n  const remoteContent = (github.content || '').replace(/\\s/g, '');\n  const localContent = (local.content || '').replace(/\\s/g, '');\n  \n  if (remoteContent !== localContent) {\n    action = 'update';\n  } else {\n    action = 'skip';\n  }\n} \n// Wenn kein SHA da ist (Datei neu)\nelse {\n  action = 'create';\n  sha = null;\n}\n\n// WICHTIG: Wir geben das gesamte Objekt zurück, damit index & anzahl erhalten bleiben!\nreturn {\n  json: { \n    ...fullContext, \n    currentWorkflow: { \n      ...local, \n      action: action, \n      sha: sha \n    } \n  }\n};"
         },
         "name": "Handlung bestimmen",
         "type": "n8n-nodes-base.code",
@@ -1011,7 +1020,7 @@
       }
     },
     "authors": "Marcus Kunkel",
-    "name": "Version e099dc2b",
+    "name": "Version c1d9ddc9",
     "description": "",
     "autosaved": true
   },
