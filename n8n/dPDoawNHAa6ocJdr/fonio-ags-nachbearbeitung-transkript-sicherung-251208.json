@@ -1,6 +1,4 @@
 {
-  "updatedAt": "2026-01-20T19:15:28.822Z",
-  "createdAt": "2025-12-08T15:12:07.204Z",
   "id": "dPDoawNHAa6ocJdr",
   "name": "fonio AGS Nachbearbeitung Transkript Sicherung 251208",
   "active": false,
@@ -329,7 +327,6 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "a9805cff-7262-44ab-8fba-c14f351bf25e",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -341,6 +338,5 @@
       "projectId": "yr4Hj71ou1NOsi2p"
     }
   ],
-  "activeVersion": null,
-  "tags": []
+  "activeVersion": null
 }
