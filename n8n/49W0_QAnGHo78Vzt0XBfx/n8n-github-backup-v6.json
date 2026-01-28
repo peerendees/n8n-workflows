@@ -1,6 +1,4 @@
 {
-  "updatedAt": "2026-01-28T12:28:29.584Z",
-  "createdAt": "2026-01-27T10:15:57.086Z",
   "id": "49W0_QAnGHo78Vzt0XBfx",
   "name": "n8n GitHub Backup v6",
   "active": true,
@@ -56,7 +54,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const data = $input.first().json;\nconst wf = data.workflows[data.index];\n\nconst workflowId = wf.id;\nconst workflowName = wf.name || 'Unnamed';\n\n// Optimierte Namensbereinigung (erlaubt Umlaute für Konsistenz mit alten Backups)\nconst cleanName = workflowName\n  .replace(/[^a-zA-Z0-9-_äöüÄÖÜß ]/g, '') // Erlaubt Umlaute und Leerzeichen kurzzeitig\n  .replace(/\\s+/g, '-') // Ersetzt Leerzeichen durch Bindestriche\n  .toLowerCase();\n\nconst content = btoa(unescape(encodeURIComponent(JSON.stringify(wf, null, 2))));\n\nreturn {\n  json: {\n    ...data,\n    currentWorkflow: {\n      id: workflowId,\n      name: workflowName,\n      folderpath: `n8n/${workflowId}`,\n      filepath: `n8n/${workflowId}/${cleanName}.json`,\n      filename: `${cleanName}.json`,\n      content: content,\n      message: `🤖 Auto-Backup: ${workflowName}`\n    }\n  }\n};"
+        "jsCode": "const data = $input.first().json;\nconst wf = data.workflows[data.index];\n\nconst workflowId = wf.id;\nconst workflowName = wf.name || 'Unnamed';\n\n// Wir erstellen eine Kopie des Workflows ohne die sich ständig ändernden Metadaten\nconst wfClean = JSON.parse(JSON.stringify(wf));\ndelete wfClean.updatedAt;\ndelete wfClean.createdAt;\ndelete wfClean.versionId; // Das ist der Hauptverursacher für falsche Änderungen\ndelete wfClean.tags;      // Optional: falls Tags nicht mitgesichert werden sollen\n\n// Optimierte Namensbereinigung\nconst cleanName = workflowName\n  .replace(/[^a-zA-Z0-9-_äöüÄÖÜß ]/g, '')\n  .replace(/\\s+/g, '-')\n  .toLowerCase();\n\n// Hostinger-kompatibles Base64 des BEREINIGTEN Workflows\nconst content = btoa(unescape(encodeURIComponent(JSON.stringify(wfClean, null, 2))));\n\nreturn {\n  json: {\n    ...data,\n    currentWorkflow: {\n      id: workflowId,\n      name: workflowName,\n      folderpath: `n8n/${workflowId}`,\n      filepath: `n8n/${workflowId}/${cleanName}.json`,\n      filename: `${cleanName}.json`,\n      content: content,\n      message: `🤖 Auto-Backup: ${workflowName}`\n    }\n  }\n};"
       },
       "name": "Extrahiere Workflow",
       "type": "n8n-nodes-base.code",
@@ -317,7 +315,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// 1. Holen wir uns die lokalen Daten vom Extraktions-Node\nconst local = $node[\"Extrahiere Workflow\"].json.currentWorkflow;\n\n// 2. Holen wir uns die Antwort von GitHub\nconst github = $node[\"GitHub prüfen\"].json;\n\n// 3. Holen wir uns den gesamten \"Rucksack\" (für index, stats, etc.), \n// damit die Schleife weiterlaufen kann\nconst fullContext = $node[\"Extrahiere Workflow\"].json;\n\nlet action = 'skip';\nlet sha = null;\n\n// Prüfung: Wenn GitHub einen SHA liefert, existiert die Datei bereits\nif (github && github.sha) {\n  sha = github.sha;\n  \n  // Inhaltsvergleich (Leerzeichen/Umbrüche entfernen)\n  const remoteContent = (github.content || '').replace(/\\s/g, '');\n  const localContent = (local.content || '').replace(/\\s/g, '');\n  \n  if (remoteContent !== localContent) {\n    action = 'update';\n  } else {\n    action = 'skip';\n  }\n} \n// Wenn kein SHA da ist (Datei neu)\nelse {\n  action = 'create';\n  sha = null;\n}\n\n// WICHTIG: Wir geben das gesamte Objekt zurück, damit index & anzahl erhalten bleiben!\nreturn {\n  json: { \n    ...fullContext, \n    currentWorkflow: { \n      ...local, \n      action: action, \n      sha: sha \n    } \n  }\n};"
+        "jsCode": "const local = $node[\"Extrahiere Workflow\"].json.currentWorkflow;\nconst github = $node[\"GitHub prüfen\"].json;\nconst fullContext = $node[\"Extrahiere Workflow\"].json;\n\nlet action = 'skip';\nlet sha = null;\n\n// FALL 1: Datei existiert auf GitHub\nif (github && github.sha) {\n  sha = github.sha;\n  \n  // Normalisierung: Alle Whitespaces/Zeilenumbrüche entfernen für exakten Vergleich\n  const remoteContent = (github.content || '').replace(/\\s/g, '');\n  const localContent = (local.content || '').replace(/\\s/g, '');\n  \n  if (remoteContent !== localContent) {\n    action = 'update';\n  } else {\n    action = 'skip';\n  }\n} \n// FALL 2: Datei ist neu\nelse if (github && (github.message === 'Not Found' || github.error)) {\n  action = 'create';\n}\n// FALL 3: Sicherheitsskip\nelse {\n  action = 'skip';\n}\n\nreturn {\n  json: { \n    ...fullContext, \n    currentWorkflow: { ...local, action: action, sha: sha } \n  }\n};"
       },
       "name": "Handlung bestimmen",
       "type": "n8n-nodes-base.code",
@@ -508,8 +506,7 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "c1d9ddc9-27d8-48f1-a71e-f614e752cd31",
-  "activeVersionId": "c1d9ddc9-27d8-48f1-a71e-f614e752cd31",
+  "activeVersionId": "3d30b018-5ee7-4b8b-8657-977ee1f92154",
   "triggerCount": 1,
   "shared": [
     {
@@ -521,9 +518,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-01-28T12:29:07.000Z",
-    "createdAt": "2026-01-28T12:28:29.585Z",
-    "versionId": "c1d9ddc9-27d8-48f1-a71e-f614e752cd31",
+    "updatedAt": "2026-01-28T14:14:36.000Z",
+    "createdAt": "2026-01-28T14:14:15.199Z",
+    "versionId": "3d30b018-5ee7-4b8b-8657-977ee1f92154",
     "workflowId": "49W0_QAnGHo78Vzt0XBfx",
     "nodes": [
       {
@@ -576,7 +573,7 @@
       },
       {
         "parameters": {
-          "jsCode": "const data = $input.first().json;\nconst wf = data.workflows[data.index];\n\nconst workflowId = wf.id;\nconst workflowName = wf.name || 'Unnamed';\n\n// Optimierte Namensbereinigung (erlaubt Umlaute für Konsistenz mit alten Backups)\nconst cleanName = workflowName\n  .replace(/[^a-zA-Z0-9-_äöüÄÖÜß ]/g, '') // Erlaubt Umlaute und Leerzeichen kurzzeitig\n  .replace(/\\s+/g, '-') // Ersetzt Leerzeichen durch Bindestriche\n  .toLowerCase();\n\nconst content = btoa(unescape(encodeURIComponent(JSON.stringify(wf, null, 2))));\n\nreturn {\n  json: {\n    ...data,\n    currentWorkflow: {\n      id: workflowId,\n      name: workflowName,\n      folderpath: `n8n/${workflowId}`,\n      filepath: `n8n/${workflowId}/${cleanName}.json`,\n      filename: `${cleanName}.json`,\n      content: content,\n      message: `🤖 Auto-Backup: ${workflowName}`\n    }\n  }\n};"
+          "jsCode": "const data = $input.first().json;\nconst wf = data.workflows[data.index];\n\nconst workflowId = wf.id;\nconst workflowName = wf.name || 'Unnamed';\n\n// Wir erstellen eine Kopie des Workflows ohne die sich ständig ändernden Metadaten\nconst wfClean = JSON.parse(JSON.stringify(wf));\ndelete wfClean.updatedAt;\ndelete wfClean.createdAt;\ndelete wfClean.versionId; // Das ist der Hauptverursacher für falsche Änderungen\ndelete wfClean.tags;      // Optional: falls Tags nicht mitgesichert werden sollen\n\n// Optimierte Namensbereinigung\nconst cleanName = workflowName\n  .replace(/[^a-zA-Z0-9-_äöüÄÖÜß ]/g, '')\n  .replace(/\\s+/g, '-')\n  .toLowerCase();\n\n// Hostinger-kompatibles Base64 des BEREINIGTEN Workflows\nconst content = btoa(unescape(encodeURIComponent(JSON.stringify(wfClean, null, 2))));\n\nreturn {\n  json: {\n    ...data,\n    currentWorkflow: {\n      id: workflowId,\n      name: workflowName,\n      folderpath: `n8n/${workflowId}`,\n      filepath: `n8n/${workflowId}/${cleanName}.json`,\n      filename: `${cleanName}.json`,\n      content: content,\n      message: `🤖 Auto-Backup: ${workflowName}`\n    }\n  }\n};"
         },
         "name": "Extrahiere Workflow",
         "type": "n8n-nodes-base.code",
@@ -837,7 +834,7 @@
       },
       {
         "parameters": {
-          "jsCode": "// 1. Holen wir uns die lokalen Daten vom Extraktions-Node\nconst local = $node[\"Extrahiere Workflow\"].json.currentWorkflow;\n\n// 2. Holen wir uns die Antwort von GitHub\nconst github = $node[\"GitHub prüfen\"].json;\n\n// 3. Holen wir uns den gesamten \"Rucksack\" (für index, stats, etc.), \n// damit die Schleife weiterlaufen kann\nconst fullContext = $node[\"Extrahiere Workflow\"].json;\n\nlet action = 'skip';\nlet sha = null;\n\n// Prüfung: Wenn GitHub einen SHA liefert, existiert die Datei bereits\nif (github && github.sha) {\n  sha = github.sha;\n  \n  // Inhaltsvergleich (Leerzeichen/Umbrüche entfernen)\n  const remoteContent = (github.content || '').replace(/\\s/g, '');\n  const localContent = (local.content || '').replace(/\\s/g, '');\n  \n  if (remoteContent !== localContent) {\n    action = 'update';\n  } else {\n    action = 'skip';\n  }\n} \n// Wenn kein SHA da ist (Datei neu)\nelse {\n  action = 'create';\n  sha = null;\n}\n\n// WICHTIG: Wir geben das gesamte Objekt zurück, damit index & anzahl erhalten bleiben!\nreturn {\n  json: { \n    ...fullContext, \n    currentWorkflow: { \n      ...local, \n      action: action, \n      sha: sha \n    } \n  }\n};"
+          "jsCode": "const local = $node[\"Extrahiere Workflow\"].json.currentWorkflow;\nconst github = $node[\"GitHub prüfen\"].json;\nconst fullContext = $node[\"Extrahiere Workflow\"].json;\n\nlet action = 'skip';\nlet sha = null;\n\n// FALL 1: Datei existiert auf GitHub\nif (github && github.sha) {\n  sha = github.sha;\n  \n  // Normalisierung: Alle Whitespaces/Zeilenumbrüche entfernen für exakten Vergleich\n  const remoteContent = (github.content || '').replace(/\\s/g, '');\n  const localContent = (local.content || '').replace(/\\s/g, '');\n  \n  if (remoteContent !== localContent) {\n    action = 'update';\n  } else {\n    action = 'skip';\n  }\n} \n// FALL 2: Datei ist neu\nelse if (github && (github.message === 'Not Found' || github.error)) {\n  action = 'create';\n}\n// FALL 3: Sicherheitsskip\nelse {\n  action = 'skip';\n}\n\nreturn {\n  json: { \n    ...fullContext, \n    currentWorkflow: { ...local, action: action, sha: sha } \n  }\n};"
         },
         "name": "Handlung bestimmen",
         "type": "n8n-nodes-base.code",
@@ -1020,9 +1017,8 @@
       }
     },
     "authors": "Marcus Kunkel",
-    "name": "Version c1d9ddc9",
+    "name": "Version 3d30b018",
     "description": "",
     "autosaved": true
-  },
-  "tags": []
+  }
 }
