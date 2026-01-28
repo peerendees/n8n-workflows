@@ -1,6 +1,4 @@
 {
-  "updatedAt": "2026-01-20T19:12:57.162Z",
-  "createdAt": "2025-11-17T21:03:36.257Z",
   "id": "CCJmgqzH9XCESXGz",
   "name": "My Sub-workflow",
   "active": true,
@@ -167,7 +165,6 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "99d3901b-455e-4629-804b-823baef4fa18",
   "activeVersionId": "99d3901b-455e-4629-804b-823baef4fa18",
   "triggerCount": 0,
   "shared": [
@@ -340,6 +337,5 @@
     "name": null,
     "description": null,
     "autosaved": false
-  },
-  "tags": []
+  }
 }
