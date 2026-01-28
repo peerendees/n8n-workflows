@@ -1,0 +1,68 @@
+{
+  "updatedAt": "2026-01-22T12:39:35.230Z",
+  "createdAt": "2026-01-22T12:39:02.593Z",
+  "id": "C00FjYiV-tvnT9NtGdUX_",
+  "name": "Test Workflow",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "2baff3c8-3425-4d95-852f-2712faca3894",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "e72dec47-b755-4e57-a609-a51531eb5a46",
+      "name": "Ein Test Node"
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Ein Test Node",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "bd1fee46-11da-4766-b287-69a4e3846673",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-01-22T12:39:02.597Z",
+      "createdAt": "2026-01-22T12:39:02.597Z",
+      "role": "workflow:owner",
+      "workflowId": "C00FjYiV-tvnT9NtGdUX_",
+      "projectId": "yr4Hj71ou1NOsi2p"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
