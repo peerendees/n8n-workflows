@@ -1,6 +1,4 @@
 {
-  "updatedAt": "2026-01-27T13:01:49.141Z",
-  "createdAt": "2026-01-27T07:41:41.757Z",
   "id": "GVFNZB24QlQFJvN8",
   "name": "fonio Nachbearbeitung Transkript Prototyp",
   "active": true,
@@ -975,7 +973,6 @@
       }
     ]
   },
-  "versionId": "00e44232-68cd-4529-a536-e76804032602",
   "activeVersionId": "daf1bc61-e0c3-46ff-b150-a2692e34f7e8",
   "triggerCount": 1,
   "shared": [
@@ -1736,19 +1733,5 @@
     "name": "Version daf1bc61",
     "description": "",
     "autosaved": true
-  },
-  "tags": [
-    {
-      "updatedAt": "2025-11-23T13:54:55.934Z",
-      "createdAt": "2025-11-23T13:54:55.934Z",
-      "id": "UbtH830CoddJZ3Zk",
-      "name": "generator"
-    },
-    {
-      "updatedAt": "2025-12-23T09:34:51.833Z",
-      "createdAt": "2025-12-23T09:34:51.833Z",
-      "id": "jj3XLdaKjqa8OQ2V",
-      "name": "BERENT"
-    }
-  ]
+  }
 }
