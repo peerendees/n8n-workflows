@@ -1,6 +1,4 @@
 {
-  "updatedAt": "2026-01-28T12:21:09.471Z",
-  "createdAt": "2025-11-08T18:17:37.239Z",
   "id": "wtVL3a6B2x2Xintd",
   "name": "fonio Training Persona Generator",
   "active": true,
@@ -512,7 +510,6 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "40b61e99-298b-46b3-b9e3-eaa3fc805ac3",
   "activeVersionId": "40b61e99-298b-46b3-b9e3-eaa3fc805ac3",
   "triggerCount": 1,
   "shared": [
@@ -1030,6 +1027,5 @@
     "name": null,
     "description": null,
     "autosaved": false
-  },
-  "tags": []
+  }
 }
