@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-22T06:00:45.285Z",
+  "updatedAt": "2026-01-28T12:19:23.880Z",
   "createdAt": "2026-01-02T14:58:17.255Z",
   "id": "499J5QUt4xUoTujR",
   "name": "GitHub → n8n Synchronisation",
@@ -572,13 +572,13 @@
   "settings": {
     "executionOrder": "v1",
     "callerPolicy": "workflowsFromSameOwner",
-    "availableInMCP": false
+    "availableInMCP": true
   },
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "3420d9cb-ef3c-4e95-83f9-8c62fe4b2c4d",
-  "activeVersionId": "3420d9cb-ef3c-4e95-83f9-8c62fe4b2c4d",
+  "versionId": "f9b7d422-e97c-4e0d-9572-9c695fd44f99",
+  "activeVersionId": "f9b7d422-e97c-4e0d-9572-9c695fd44f99",
   "triggerCount": 1,
   "shared": [
     {
@@ -590,9 +590,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-01-21T22:23:57.000Z",
-    "createdAt": "2026-01-21T22:23:50.901Z",
-    "versionId": "3420d9cb-ef3c-4e95-83f9-8c62fe4b2c4d",
+    "updatedAt": "2026-01-22T06:47:21.275Z",
+    "createdAt": "2026-01-22T06:47:21.275Z",
+    "versionId": "f9b7d422-e97c-4e0d-9572-9c695fd44f99",
     "workflowId": "499J5QUt4xUoTujR",
     "nodes": [
       {
@@ -1159,9 +1159,9 @@
       }
     },
     "authors": "Marcus Kunkel",
-    "name": "Version 3420d9cb",
-    "description": "",
-    "autosaved": true
+    "name": null,
+    "description": null,
+    "autosaved": false
   },
   "tags": []
 }
