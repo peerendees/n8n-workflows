@@ -1,6 +1,4 @@
 {
-  "updatedAt": "2026-01-28T12:31:02.084Z",
-  "createdAt": "2025-11-06T20:35:24.122Z",
   "id": "hR36jIx0wREZK0Bf",
   "name": "Threema Gateway Universal - Nachrichten & Dateien",
   "active": false,
@@ -668,7 +666,6 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "0ef0eedb-f8df-423f-ac4b-4a0401ffbeb2",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -680,19 +677,5 @@
       "projectId": "yr4Hj71ou1NOsi2p"
     }
   ],
-  "activeVersion": null,
-  "tags": [
-    {
-      "updatedAt": "2025-11-06T20:35:10.952Z",
-      "createdAt": "2025-11-06T20:35:10.952Z",
-      "id": "1XDySxVCWynR8Twd",
-      "name": "threema"
-    },
-    {
-      "updatedAt": "2025-11-06T20:35:10.956Z",
-      "createdAt": "2025-11-06T20:35:10.956Z",
-      "id": "nKGGZ6FxgEmmFhE2",
-      "name": "gateway"
-    }
-  ]
+  "activeVersion": null
 }
