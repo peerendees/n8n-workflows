@@ -1,6 +1,4 @@
 {
-  "updatedAt": "2026-01-20T19:14:13.935Z",
-  "createdAt": "2025-11-23T13:33:43.638Z",
   "id": "QxKsC28H7gqaUd3j",
   "name": "fonio AGS Anrufername",
   "active": false,
@@ -254,7 +252,6 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "404b4f81-27b9-4597-8698-6bea8ff768fa",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -266,6 +263,5 @@
       "projectId": "yr4Hj71ou1NOsi2p"
     }
   ],
-  "activeVersion": null,
-  "tags": []
+  "activeVersion": null
 }
