@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-19T17:51:34.043Z",
+  "updatedAt": "2026-01-27T13:12:59.157Z",
   "createdAt": "2025-11-23T18:11:10.643Z",
   "id": "gkgmJNNtuTAZgcyC",
   "name": "fonio AGS Nachbearbeitung Transkript",
@@ -15,11 +15,11 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -352,
-        -256
+        -576,
+        80
       ],
       "id": "dbb2ce2e-7047-422a-b8a2-7cd7f735f599",
-      "name": "Webhook",
+      "name": "fonio-Webhook",
       "webhookId": "d9a56c84-3178-44a5-9d50-e8a42a1f9a00"
     },
     {
@@ -69,10 +69,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -128,
-        -352
+        -352,
+        -16
       ],
-      "id": "b905e673-945d-4303-8ddb-de9c95625fc3",
+      "id": "a2cade9e-e4ae-48b8-abbc-7550a5001529",
       "name": "Daten extrahieren"
     },
     {
@@ -89,9 +89,9 @@
       "typeVersion": 1.3,
       "position": [
         1288,
-        -32
+        304
       ],
-      "id": "b72b4dd9-4588-4dc0-996c-834b03ded117",
+      "id": "2fed403f-7751-4cbc-b573-9e6582199b6b",
       "name": "Anthropic Chat Model",
       "credentials": {
         "anthropicApi": {
@@ -120,10 +120,10 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        -128,
-        -160
+        -352,
+        176
       ],
-      "id": "81634710-edda-4819-b56f-ba9fe6669b9b",
+      "id": "79e527cc-ba11-444f-b8f4-c94e8e6c5ad7",
       "name": "Dringlichkeitskriterien laden",
       "credentials": {
         "googleApi": {
@@ -137,10 +137,10 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        96,
-        -256
+        -128,
+        80
       ],
-      "id": "6f7d2c27-b551-43ff-b5b9-39c8e7048df2",
+      "id": "dbc1f0ee-8859-4268-8ca9-ee6ea003d03d",
       "name": "Merge"
     },
     {
@@ -167,9 +167,9 @@
       "typeVersion": 3.4,
       "position": [
         2016,
-        -256
+        80
       ],
-      "id": "1f135291-aa87-4abe-a14d-abd42f414692",
+      "id": "570cad79-d6ae-4020-aa2f-d89ddf290e4c",
       "name": "E-Mail vorbereiten"
     },
     {
@@ -194,9 +194,9 @@
       "typeVersion": 1,
       "position": [
         320,
-        -256
+        80
       ],
-      "id": "278b33d4-0e5b-4441-8a6e-327b66660ab8",
+      "id": "5aff3735-6037-4247-b471-e2b1b5412182",
       "name": "Daten anonymisieren"
     },
     {
@@ -207,9 +207,9 @@
       "typeVersion": 2,
       "position": [
         1568,
-        -256
+        80
       ],
-      "id": "830134ee-1845-49cc-9d3d-933ee1e989e8",
+      "id": "c6b98a9e-6c10-495a-956c-2d6333ba46d7",
       "name": "Re-Personalisierung"
     },
     {
@@ -225,9 +225,9 @@
       "typeVersion": 3,
       "position": [
         1216,
-        -256
+        80
       ],
-      "id": "0aeac5e6-c9be-4642-9858-9cf4394bc907",
+      "id": "673f36ad-b194-4bf3-8259-04163ec4e8a3",
       "name": "Klassifikations-Agent für IT-Hotline-Transkripte",
       "executeOnce": true
     },
@@ -240,11 +240,11 @@
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        -408,
-        -432
+        -624,
+        -96
       ],
       "typeVersion": 1,
-      "id": "4fdd3c4a-ed5e-412d-8936-d879bf746f75",
+      "id": "6e17648c-24d0-4771-866d-7d0fa8d0691c",
       "name": "Sticky Note"
     },
     {
@@ -256,10 +256,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "position": [
         264,
-        -432
+        -96
       ],
       "typeVersion": 1,
-      "id": "378ee67b-ad94-4607-8875-ba6b18e100a3",
+      "id": "6fde1e96-9d9e-44a1-9459-f8161e6f2d21",
       "name": "Sticky Note1"
     },
     {
@@ -270,9 +270,9 @@
       "typeVersion": 2,
       "position": [
         992,
-        -256
+        80
       ],
-      "id": "2bcc7acd-bd58-4a14-8ceb-0b35bb0c24cc",
+      "id": "7db4ce35-a3ef-4b5b-92d8-1aca0506713f",
       "name": "Azure Antwort verarbeiten"
     },
     {
@@ -284,9 +284,9 @@
       "typeVersion": 2,
       "position": [
         544,
-        -256
+        80
       ],
-      "id": "89b4ab5b-743d-419c-9908-00cd492681b2",
+      "id": "0933c8d2-c435-4a2c-91de-5b3dbc91d85f",
       "name": "Aufgabenstellung für Azure-Anonymisierung"
     },
     {
@@ -310,9 +310,9 @@
       "typeVersion": 4.3,
       "position": [
         768,
-        -256
+        80
       ],
-      "id": "cbc2d314-649e-4214-8bac-a48859f4bb6a",
+      "id": "2044e0cc-33f7-4e03-af90-3d3063c5a1e0",
       "name": "Anonymisieren (Mistral in Azure)",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -320,7 +320,7 @@
       "credentials": {
         "httpHeaderAuth": {
           "id": "4gc7MePUZVuCyowB",
-          "name": "API n8n für Azure"
+          "name": "API LLM in Azure (Mistral)"
         },
         "httpBearerAuth": {
           "id": "24SORzPv91ZRH2UW",
@@ -330,42 +330,18 @@
     },
     {
       "parameters": {
-        "fromEmail": "helpdesk@ags-it.de",
-        "toEmail": "helpdesk@ags-it.de",
-        "subject": "={{ $json.subject }}",
-        "html": "={{ $json.htmlBody }}",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.emailSend",
-      "typeVersion": 2.1,
-      "position": [
-        2240,
-        -256
-      ],
-      "id": "0cd6a345-9aa5-4152-9155-46ba19a4474e",
-      "name": "E-Mail senden",
-      "webhookId": "32ae0708-d567-42b3-a2e8-987354d3ea61",
-      "credentials": {
-        "smtp": {
-          "id": "8O5B5z4vS8yeagJh",
-          "name": "AGS SMTP Einstellungen"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "content": "## Ausgabe SMTP-Server AGS\n– E-Mail vorbereiten\n– E-Mail versenden",
-        "height": 336,
-        "width": 464,
+        "content": "## Ausgabe SMTP-Server Kunde\n– E-Mail vorbereiten\n– E-Mail versenden",
+        "height": 432,
+        "width": 656,
         "color": 4
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        1944,
-        -432
+        1960,
+        -96
       ],
       "typeVersion": 1,
-      "id": "2e5e43c2-c2e1-4dbd-b6aa-098b8f5493fd",
+      "id": "ac3ff5e7-4f33-4c59-8efb-342f44fe5d04",
       "name": "Sticky Note2"
     },
     {
@@ -386,14 +362,197 @@
       "typeVersion": 3.4,
       "position": [
         1792,
-        -256
+        80
       ],
-      "id": "31b6713e-3b3f-4c35-af01-c159a23754d6",
+      "id": "08df8f59-a1df-494c-98ac-7393b763ac0b",
       "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d0b17452-7f76-40a4-8608-7b6068ca9685",
+              "name": "liveMode",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "983ea52f-1354-4137-b1da-9cf42ec3700a",
+              "name": "threemaFrom",
+              "value": "*BERENT1",
+              "type": "string"
+            },
+            {
+              "id": "1b6a00b3-45a8-45b8-9191-09e15d9a1959",
+              "name": "threemaTo",
+              "value": "BUMFMZ39",
+              "type": "string"
+            },
+            {
+              "id": "threema-secret",
+              "name": "secret",
+              "value": "18DOvPKBV7ize3Nh",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        96,
+        80
+      ],
+      "id": "73b83607-4c5f-419d-b568-02b7ce9e5ef0",
+      "name": "Config"
+    },
+    {
+      "parameters": {
+        "content": "## Config\nEInige Konfigurationseinstellungen",
+        "height": 336,
+        "width": 224,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        32,
+        -96
+      ],
+      "typeVersion": 1,
+      "id": "49b060ca-6998-4e8e-b841-0615a8bba0d7",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://msgapi.threema.ch/send_simple",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "secret",
+              "value": "={{ $('Config').first().json.secret }}"
+            },
+            {
+              "name": "from",
+              "value": "={{ $('Config').first().json.threemaFrom }}"
+            },
+            {
+              "name": "to",
+              "value": "={{ $('Config').first().json.threemaTo }}"
+            },
+            {
+              "name": "text",
+              "value": "=🔏 Transkript Nachbearbeitung\n\n🔔 Kategorie: {{ $('Re-Personalisierung').item.json.Kategorie }}\n🛍️ Kunde: {{ $('Merge').first().json.body.extractionData.einrichtung_name }}\n☎️ Anrufer: {{ $('Merge').first().json.body.extractionData.anrufer_name }}\n🏷️ Stichwort: {{ $('Re-Personalisierung').item.json.Themenstichwort }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0e193229-95b3-4553-8d93-2ad3b95e1361",
+      "name": "Threema Notification",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2464,
+        176
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "x5y4aJ1X9shkkOZh",
+          "name": "API Threema Work Secret"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "397bfe29-a77c-4d6a-9c54-62c554700e04",
+              "leftValue": "={{ false }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2240,
+        -16
+      ],
+      "id": "15369477-f80e-4a0c-8a66-0e1f04983d39",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "fromEmail": "office@berent.ai",
+        "toEmail": "office@berent.ai",
+        "subject": "={{ $json.subject }}",
+        "html": "={{ $json.htmlBody }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        2240,
+        176
+      ],
+      "id": "788a9dec-4f74-47aa-a1a2-d1fd4787760c",
+      "name": "E-Mail an BERENT senden",
+      "webhookId": "068c998c-5810-4b16-956b-64a9171c2f6d",
+      "credentials": {
+        "smtp": {
+          "id": "biGV4ad70JiHpzdA",
+          "name": "SMTP IONOS"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "helpdesk@ags-it.de",
+        "toEmail": "helpdesk@ags-it.de",
+        "subject": "={{ $json.subject }}",
+        "html": "={{ $json.htmlBody }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        2464,
+        -16
+      ],
+      "id": "9e2b79de-ceec-4b20-a25d-09f649995990",
+      "name": "E-Mail an Kunde senden",
+      "webhookId": "068c998c-5810-4b16-956b-64a9171c2f6d",
+      "credentials": {
+        "smtp": {
+          "id": "8O5B5z4vS8yeagJh",
+          "name": "AGS SMTP Einstellungen"
+        }
+      }
     }
   ],
   "connections": {
-    "Webhook": {
+    "fonio-Webhook": {
       "main": [
         [
           {
@@ -446,7 +605,7 @@
       "main": [
         [
           {
-            "node": "Daten anonymisieren",
+            "node": "Config",
             "type": "main",
             "index": 0
           }
@@ -457,7 +616,12 @@
       "main": [
         [
           {
-            "node": "E-Mail senden",
+            "node": "E-Mail an BERENT senden",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "If",
             "type": "main",
             "index": 0
           }
@@ -540,102 +704,52 @@
           }
         ]
       ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Daten anonymisieren",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "E-Mail an Kunde senden",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "E-Mail an BERENT senden": {
+      "main": [
+        [
+          {
+            "node": "Threema Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
     "executionOrder": "v1",
     "timeSavedMode": "fixed",
     "callerPolicy": "workflowsFromSameOwner",
-    "availableInMCP": false
+    "availableInMCP": true
   },
   "staticData": null,
   "meta": {
     "templateCredsSetupCompleted": true
   },
   "pinData": {
-    "Daten anonymisieren": [
-      {
-        "json": {
-          "guardrailsInput": "agent: Herzlich willkommen bei AGS. Wie kann ich Ihnen helfen?\nuser: Moin, hier ist Michael Bauer, Schichtleiter bei Bauer Logistik. Wir haben Ärger mit den Handscannern.\nagent: Verstehe. Bitte beachten Sie, dieser Anruf wird DSGVO-konform aufgezeichnet. Möchten Sie fortfahren?\nuser: Ja, von mir aus. Wir müssen hier weiterkommen.\nagent: Alles klar. Was genau funktioniert nicht?\nuser: Die Handscanner in Halle 3 verlieren ständig die Verbindung. Mein Mitarbeiter Kevin beschwert sich schon den ganzen Morgen, dass er sich alle 5 Minuten neu einloggen muss.\nagent: Steht die Produktion dadurch still?\nuser: Nein, stehen tut sie nicht. Wir können arbeiten, aber es nervt tierisch und dauert doppelt so lange. Der LKW muss heute Abend raus.\nagent: Verstehe. Ist nur Halle 3 betroffen?\nuser: Ja, in den anderen Hallen läuft es. Es scheint an dem Access Point hinten links zu liegen, der blinkt rot.\nagent: Okay, ich stufe das als wichtig ein, da der Betrieb verlangsamt ist. Soll ich Sie zurückrufen?\nuser: Ja, aber bitte im Lagerbüro unter der Durchwahl -99. Ich bin nicht am Platz.\nagent: Alles klar, Durchwahl 99. Ein Netzwerktechniker prüft den Access Point und meldet sich.",
-          "checks": [
-            {
-              "name": "personalData",
-              "triggered": false,
-              "info": {
-                "analyzerResults": []
-              }
-            }
-          ]
-        },
-        "pairedItem": {
-          "item": 0
-        }
-      },
-      {
-        "json": {
-          "checks": [
-            {
-              "name": "personalData",
-              "triggered": false,
-              "info": {
-                "analyzerResults": []
-              }
-            }
-          ]
-        },
-        "pairedItem": {
-          "item": 1
-        }
-      },
-      {
-        "json": {
-          "checks": [
-            {
-              "name": "personalData",
-              "triggered": false,
-              "info": {
-                "analyzerResults": []
-              }
-            }
-          ]
-        },
-        "pairedItem": {
-          "item": 2
-        }
-      },
-      {
-        "json": {
-          "checks": [
-            {
-              "name": "personalData",
-              "triggered": false,
-              "info": {
-                "analyzerResults": []
-              }
-            }
-          ]
-        },
-        "pairedItem": {
-          "item": 3
-        }
-      },
-      {
-        "json": {
-          "checks": [
-            {
-              "name": "personalData",
-              "triggered": false,
-              "info": {
-                "analyzerResults": []
-              }
-            }
-          ]
-        },
-        "pairedItem": {
-          "item": 4
-        }
-      }
-    ],
     "Daten extrahieren": [
       {
         "json": {
@@ -651,9 +765,6 @@
               "einrichtung_name": "Bauer Logistik GmbH"
             }
           }
-        },
-        "pairedItem": {
-          "item": 0
         }
       }
     ],
@@ -672,9 +783,6 @@
               "einrichtung_name": "Bauer Logistik GmbH"
             }
           }
-        },
-        "pairedItem": {
-          "item": 0
         }
       },
       {
@@ -684,10 +792,6 @@
           "Kategorie": "Nofall",
           "Schlagworte": "Notfall; zeitkritisch; dringend; sofort; Schmerzen",
           "Beispiele": "Server ausgefallen; Server piept; einziger Arbeitsplatzrechner ausgefallen; Konnektor Problem; keine Verbindung im Netzwerk; Internet funktioniert nicht"
-        },
-        "pairedItem": {
-          "item": 0,
-          "input": 1
         }
       },
       {
@@ -697,10 +801,6 @@
           "Kategorie": "Dringend",
           "Schlagworte": "kritisch; alsbald; wichtig, nicht zeitkritisch",
           "Beispiele": "Server ausgefallen, gespiegelte Platten vorhanden; Arbeitsplatzrechner ausgefallen, weitere Geräte einsatzbereit; Kartenlesegerät nicht verbunden; Patientenkarten können nicht eingelesen werden; E-Mails kommen nicht an bzw. können nicht versendet werden; keine Verbindung zu Quincy; Telefonanlage funktioniert nicht"
-        },
-        "pairedItem": {
-          "item": 1,
-          "input": 1
         }
       },
       {
@@ -710,10 +810,6 @@
           "Kategorie": "Wenig dringlich",
           "Schlagworte": "möglichst zeitnah; in Kürze; offen, da undifferenziert",
           "Beispiele": "Drucker funktioniert nicht; Quincy-Verknüpfung nicht auf dem Desktop bzw. verschwunden; USV piept; Scanner funktioniert nicht; Fax / Faxgerät funktioniert nicht; keine Verbindung über VPN; Backup überprüfen (Festplatten voll); Computer ist laut; Anliegen kann per TeamViewer bearbeitet werden"
-        },
-        "pairedItem": {
-          "item": 2,
-          "input": 1
         }
       },
       {
@@ -723,10 +819,74 @@
           "Kategorie": "Informativ",
           "Schlagworte": "Auskunft, Information, Angebot, Beratung",
           "Beispiele": "Bestellung für [XY]; Frage bzgl. einer Rechnung oder eines Angebotes, Terminvereinbarung"
-        },
-        "pairedItem": {
-          "item": 3,
-          "input": 1
+        }
+      }
+    ],
+    "Daten anonymisieren": [
+      {
+        "json": {
+          "guardrailsInput": "agent: Herzlich willkommen bei AGS. Wie kann ich Ihnen helfen?\nuser: Moin, hier ist Michael Bauer, Schichtleiter bei Bauer Logistik. Wir haben Ärger mit den Handscannern.\nagent: Verstehe. Bitte beachten Sie, dieser Anruf wird DSGVO-konform aufgezeichnet. Möchten Sie fortfahren?\nuser: Ja, von mir aus. Wir müssen hier weiterkommen.\nagent: Alles klar. Was genau funktioniert nicht?\nuser: Die Handscanner in Halle 3 verlieren ständig die Verbindung. Mein Mitarbeiter Kevin beschwert sich schon den ganzen Morgen, dass er sich alle 5 Minuten neu einloggen muss.\nagent: Steht die Produktion dadurch still?\nuser: Nein, stehen tut sie nicht. Wir können arbeiten, aber es nervt tierisch und dauert doppelt so lange. Der LKW muss heute Abend raus.\nagent: Verstehe. Ist nur Halle 3 betroffen?\nuser: Ja, in den anderen Hallen läuft es. Es scheint an dem Access Point hinten links zu liegen, der blinkt rot.\nagent: Okay, ich stufe das als wichtig ein, da der Betrieb verlangsamt ist. Soll ich Sie zurückrufen?\nuser: Ja, aber bitte im Lagerbüro unter der Durchwahl -99. Ich bin nicht am Platz.\nagent: Alles klar, Durchwahl 99. Ein Netzwerktechniker prüft den Access Point und meldet sich.",
+          "checks": [
+            {
+              "name": "personalData",
+              "triggered": false,
+              "info": {
+                "analyzerResults": []
+              }
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "checks": [
+            {
+              "name": "personalData",
+              "triggered": false,
+              "info": {
+                "analyzerResults": []
+              }
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "checks": [
+            {
+              "name": "personalData",
+              "triggered": false,
+              "info": {
+                "analyzerResults": []
+              }
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "checks": [
+            {
+              "name": "personalData",
+              "triggered": false,
+              "info": {
+                "analyzerResults": []
+              }
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "checks": [
+            {
+              "name": "personalData",
+              "triggered": false,
+              "info": {
+                "analyzerResults": []
+              }
+            }
+          ]
         }
       }
     ],
@@ -736,15 +896,38 @@
           "body": {
             "formattedTranscript": "agent: Herzlich willkommen bei AGS. Wie kann ich Ihnen helfen?<br/>user: Moin, hier ist Michael Bauer, Schichtleiter bei Bauer Logistik. Wir haben Ärger mit den Handscannern.<br/>agent: Verstehe. Bitte beachten Sie, dieser Anruf wird DSGVO-konform aufgezeichnet. Möchten Sie fortfahren?<br/>user: Ja, von mir aus. Wir müssen hier weiterkommen.<br/>agent: Alles klar. Was genau funktioniert nicht?<br/>user: Die Handscanner in Halle 3 verlieren ständig die Verbindung. Mein Mitarbeiter Kevin beschwert sich schon den ganzen Morgen, dass er sich alle 5 Minuten neu einloggen muss.<br/>agent: Steht die Produktion dadurch still?<br/>user: Nein, stehen tut sie nicht. Wir können arbeiten, aber es nervt tierisch und dauert doppelt so lange. Der LKW muss heute Abend raus.<br/>agent: Verstehe. Ist nur Halle 3 betroffen?<br/>user: Ja, in den anderen Hallen läuft es. Es scheint an dem Access Point hinten links zu liegen, der blinkt rot.<br/>agent: Okay, ich stufe das als wichtig ein, da der Betrieb verlangsamt ist. Soll ich Sie zurückrufen?<br/>user: Ja, aber bitte im Lagerbüro unter der Durchwahl -99. Ich bin nicht am Platz.<br/>agent: Alles klar, Durchwahl 99. Ein Netzwerktechniker prüft den Access Point und meldet sich."
           }
-        },
-        "pairedItem": {
-          "item": 0
+        }
+      }
+    ],
+    "E-Mail an BERENT senden": [
+      {
+        "json": {
+          "accepted": [
+            "office@berent.ai"
+          ],
+          "rejected": [],
+          "ehlo": [
+            "8BITMIME",
+            "AUTH PLAIN LOGIN",
+            "SIZE 141557760"
+          ],
+          "envelopeTime": 62,
+          "messageTime": 23,
+          "messageSize": 3040,
+          "response": "250 Requested mail action okay, completed: id=1M42X0-1vkiSQ2ywK-00Es5Z",
+          "envelope": {
+            "from": "office@berent.ai",
+            "to": [
+              "office@berent.ai"
+            ]
+          },
+          "messageId": "<534e605e-8d7f-eb6e-dafd-e29cd39880bd@berent.ai>"
         }
       }
     ]
   },
-  "versionId": "46d199d7-1d71-46cb-8521-25b2ee766364",
-  "activeVersionId": "46d199d7-1d71-46cb-8521-25b2ee766364",
+  "versionId": "f5d4e4ae-db4a-41f9-8387-8aac2fbe221b",
+  "activeVersionId": "f5d4e4ae-db4a-41f9-8387-8aac2fbe221b",
   "triggerCount": 1,
   "shared": [
     {
@@ -756,9 +939,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-01-19T17:51:56.000Z",
-    "createdAt": "2026-01-19T17:51:34.046Z",
-    "versionId": "46d199d7-1d71-46cb-8521-25b2ee766364",
+    "updatedAt": "2026-01-27T13:13:04.000Z",
+    "createdAt": "2026-01-27T13:12:59.158Z",
+    "versionId": "f5d4e4ae-db4a-41f9-8387-8aac2fbe221b",
     "workflowId": "gkgmJNNtuTAZgcyC",
     "nodes": [
       {
@@ -770,11 +953,11 @@
         "type": "n8n-nodes-base.webhook",
         "typeVersion": 2.1,
         "position": [
-          -352,
-          -256
+          -576,
+          80
         ],
         "id": "dbb2ce2e-7047-422a-b8a2-7cd7f735f599",
-        "name": "Webhook",
+        "name": "fonio-Webhook",
         "webhookId": "d9a56c84-3178-44a5-9d50-e8a42a1f9a00"
       },
       {
@@ -824,10 +1007,10 @@
         "type": "n8n-nodes-base.set",
         "typeVersion": 3.4,
         "position": [
-          -128,
-          -352
+          -352,
+          -16
         ],
-        "id": "b905e673-945d-4303-8ddb-de9c95625fc3",
+        "id": "a2cade9e-e4ae-48b8-abbc-7550a5001529",
         "name": "Daten extrahieren"
       },
       {
@@ -844,9 +1027,9 @@
         "typeVersion": 1.3,
         "position": [
           1288,
-          -32
+          304
         ],
-        "id": "b72b4dd9-4588-4dc0-996c-834b03ded117",
+        "id": "2fed403f-7751-4cbc-b573-9e6582199b6b",
         "name": "Anthropic Chat Model",
         "credentials": {
           "anthropicApi": {
@@ -875,10 +1058,10 @@
         "type": "n8n-nodes-base.googleSheets",
         "typeVersion": 4.7,
         "position": [
-          -128,
-          -160
+          -352,
+          176
         ],
-        "id": "81634710-edda-4819-b56f-ba9fe6669b9b",
+        "id": "79e527cc-ba11-444f-b8f4-c94e8e6c5ad7",
         "name": "Dringlichkeitskriterien laden",
         "credentials": {
           "googleApi": {
@@ -892,10 +1075,10 @@
         "type": "n8n-nodes-base.merge",
         "typeVersion": 3.2,
         "position": [
-          96,
-          -256
+          -128,
+          80
         ],
-        "id": "6f7d2c27-b551-43ff-b5b9-39c8e7048df2",
+        "id": "dbc1f0ee-8859-4268-8ca9-ee6ea003d03d",
         "name": "Merge"
       },
       {
@@ -922,9 +1105,9 @@
         "typeVersion": 3.4,
         "position": [
           2016,
-          -256
+          80
         ],
-        "id": "1f135291-aa87-4abe-a14d-abd42f414692",
+        "id": "570cad79-d6ae-4020-aa2f-d89ddf290e4c",
         "name": "E-Mail vorbereiten"
       },
       {
@@ -949,9 +1132,9 @@
         "typeVersion": 1,
         "position": [
           320,
-          -256
+          80
         ],
-        "id": "278b33d4-0e5b-4441-8a6e-327b66660ab8",
+        "id": "5aff3735-6037-4247-b471-e2b1b5412182",
         "name": "Daten anonymisieren"
       },
       {
@@ -962,9 +1145,9 @@
         "typeVersion": 2,
         "position": [
           1568,
-          -256
+          80
         ],
-        "id": "830134ee-1845-49cc-9d3d-933ee1e989e8",
+        "id": "c6b98a9e-6c10-495a-956c-2d6333ba46d7",
         "name": "Re-Personalisierung"
       },
       {
@@ -980,9 +1163,9 @@
         "typeVersion": 3,
         "position": [
           1216,
-          -256
+          80
         ],
-        "id": "0aeac5e6-c9be-4642-9858-9cf4394bc907",
+        "id": "673f36ad-b194-4bf3-8259-04163ec4e8a3",
         "name": "Klassifikations-Agent für IT-Hotline-Transkripte",
         "executeOnce": true
       },
@@ -995,11 +1178,11 @@
         },
         "type": "n8n-nodes-base.stickyNote",
         "position": [
-          -408,
-          -432
+          -624,
+          -96
         ],
         "typeVersion": 1,
-        "id": "4fdd3c4a-ed5e-412d-8936-d879bf746f75",
+        "id": "6e17648c-24d0-4771-866d-7d0fa8d0691c",
         "name": "Sticky Note"
       },
       {
@@ -1011,10 +1194,10 @@
         "type": "n8n-nodes-base.stickyNote",
         "position": [
           264,
-          -432
+          -96
         ],
         "typeVersion": 1,
-        "id": "378ee67b-ad94-4607-8875-ba6b18e100a3",
+        "id": "6fde1e96-9d9e-44a1-9459-f8161e6f2d21",
         "name": "Sticky Note1"
       },
       {
@@ -1025,9 +1208,9 @@
         "typeVersion": 2,
         "position": [
           992,
-          -256
+          80
         ],
-        "id": "2bcc7acd-bd58-4a14-8ceb-0b35bb0c24cc",
+        "id": "7db4ce35-a3ef-4b5b-92d8-1aca0506713f",
         "name": "Azure Antwort verarbeiten"
       },
       {
@@ -1039,9 +1222,9 @@
         "typeVersion": 2,
         "position": [
           544,
-          -256
+          80
         ],
-        "id": "89b4ab5b-743d-419c-9908-00cd492681b2",
+        "id": "0933c8d2-c435-4a2c-91de-5b3dbc91d85f",
         "name": "Aufgabenstellung für Azure-Anonymisierung"
       },
       {
@@ -1065,9 +1248,9 @@
         "typeVersion": 4.3,
         "position": [
           768,
-          -256
+          80
         ],
-        "id": "cbc2d314-649e-4214-8bac-a48859f4bb6a",
+        "id": "2044e0cc-33f7-4e03-af90-3d3063c5a1e0",
         "name": "Anonymisieren (Mistral in Azure)",
         "retryOnFail": true,
         "waitBetweenTries": 5000,
@@ -1075,7 +1258,7 @@
         "credentials": {
           "httpHeaderAuth": {
             "id": "4gc7MePUZVuCyowB",
-            "name": "API n8n für Azure"
+            "name": "API LLM in Azure (Mistral)"
           },
           "httpBearerAuth": {
             "id": "24SORzPv91ZRH2UW",
@@ -1085,42 +1268,18 @@
       },
       {
         "parameters": {
-          "fromEmail": "helpdesk@ags-it.de",
-          "toEmail": "helpdesk@ags-it.de",
-          "subject": "={{ $json.subject }}",
-          "html": "={{ $json.htmlBody }}",
-          "options": {}
-        },
-        "type": "n8n-nodes-base.emailSend",
-        "typeVersion": 2.1,
-        "position": [
-          2240,
-          -256
-        ],
-        "id": "0cd6a345-9aa5-4152-9155-46ba19a4474e",
-        "name": "E-Mail senden",
-        "webhookId": "32ae0708-d567-42b3-a2e8-987354d3ea61",
-        "credentials": {
-          "smtp": {
-            "id": "8O5B5z4vS8yeagJh",
-            "name": "AGS SMTP Einstellungen"
-          }
-        }
-      },
-      {
-        "parameters": {
-          "content": "## Ausgabe SMTP-Server AGS\n– E-Mail vorbereiten\n– E-Mail versenden",
-          "height": 336,
-          "width": 464,
+          "content": "## Ausgabe SMTP-Server Kunde\n– E-Mail vorbereiten\n– E-Mail versenden",
+          "height": 432,
+          "width": 656,
           "color": 4
         },
         "type": "n8n-nodes-base.stickyNote",
         "position": [
-          1944,
-          -432
+          1960,
+          -96
         ],
         "typeVersion": 1,
-        "id": "2e5e43c2-c2e1-4dbd-b6aa-098b8f5493fd",
+        "id": "ac3ff5e7-4f33-4c59-8efb-342f44fe5d04",
         "name": "Sticky Note2"
       },
       {
@@ -1141,14 +1300,197 @@
         "typeVersion": 3.4,
         "position": [
           1792,
-          -256
+          80
         ],
-        "id": "31b6713e-3b3f-4c35-af01-c159a23754d6",
+        "id": "08df8f59-a1df-494c-98ac-7393b763ac0b",
         "name": "Edit Fields"
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "d0b17452-7f76-40a4-8608-7b6068ca9685",
+                "name": "liveMode",
+                "value": true,
+                "type": "boolean"
+              },
+              {
+                "id": "983ea52f-1354-4137-b1da-9cf42ec3700a",
+                "name": "threemaFrom",
+                "value": "*BERENT1",
+                "type": "string"
+              },
+              {
+                "id": "1b6a00b3-45a8-45b8-9191-09e15d9a1959",
+                "name": "threemaTo",
+                "value": "BUMFMZ39",
+                "type": "string"
+              },
+              {
+                "id": "threema-secret",
+                "name": "secret",
+                "value": "18DOvPKBV7ize3Nh",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          96,
+          80
+        ],
+        "id": "73b83607-4c5f-419d-b568-02b7ce9e5ef0",
+        "name": "Config"
+      },
+      {
+        "parameters": {
+          "content": "## Config\nEInige Konfigurationseinstellungen",
+          "height": 336,
+          "width": 224,
+          "color": 7
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          32,
+          -96
+        ],
+        "typeVersion": 1,
+        "id": "49b060ca-6998-4e8e-b841-0615a8bba0d7",
+        "name": "Sticky Note3"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://msgapi.threema.ch/send_simple",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "secret",
+                "value": "={{ $('Config').first().json.secret }}"
+              },
+              {
+                "name": "from",
+                "value": "={{ $('Config').first().json.threemaFrom }}"
+              },
+              {
+                "name": "to",
+                "value": "={{ $('Config').first().json.threemaTo }}"
+              },
+              {
+                "name": "text",
+                "value": "=🔏 Transkript Nachbearbeitung\n\n🔔 Kategorie: {{ $('Re-Personalisierung').item.json.Kategorie }}\n🛍️ Kunde: {{ $('Merge').first().json.body.extractionData.einrichtung_name }}\n☎️ Anrufer: {{ $('Merge').first().json.body.extractionData.anrufer_name }}\n🏷️ Stichwort: {{ $('Re-Personalisierung').item.json.Themenstichwort }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "0e193229-95b3-4553-8d93-2ad3b95e1361",
+        "name": "Threema Notification",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          2464,
+          176
+        ],
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "x5y4aJ1X9shkkOZh",
+            "name": "API Threema Work Secret"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "397bfe29-a77c-4d6a-9c54-62c554700e04",
+                "leftValue": "={{ false }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          2240,
+          -16
+        ],
+        "id": "15369477-f80e-4a0c-8a66-0e1f04983d39",
+        "name": "If"
+      },
+      {
+        "parameters": {
+          "fromEmail": "office@berent.ai",
+          "toEmail": "office@berent.ai",
+          "subject": "={{ $json.subject }}",
+          "html": "={{ $json.htmlBody }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 2.1,
+        "position": [
+          2240,
+          176
+        ],
+        "id": "788a9dec-4f74-47aa-a1a2-d1fd4787760c",
+        "name": "E-Mail an BERENT senden",
+        "webhookId": "068c998c-5810-4b16-956b-64a9171c2f6d",
+        "credentials": {
+          "smtp": {
+            "id": "biGV4ad70JiHpzdA",
+            "name": "SMTP IONOS"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "fromEmail": "helpdesk@ags-it.de",
+          "toEmail": "helpdesk@ags-it.de",
+          "subject": "={{ $json.subject }}",
+          "html": "={{ $json.htmlBody }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 2.1,
+        "position": [
+          2464,
+          -16
+        ],
+        "id": "9e2b79de-ceec-4b20-a25d-09f649995990",
+        "name": "E-Mail an Kunde senden",
+        "webhookId": "068c998c-5810-4b16-956b-64a9171c2f6d",
+        "credentials": {
+          "smtp": {
+            "id": "8O5B5z4vS8yeagJh",
+            "name": "AGS SMTP Einstellungen"
+          }
+        }
       }
     ],
     "connections": {
-      "Webhook": {
+      "fonio-Webhook": {
         "main": [
           [
             {
@@ -1201,7 +1543,7 @@
         "main": [
           [
             {
-              "node": "Daten anonymisieren",
+              "node": "Config",
               "type": "main",
               "index": 0
             }
@@ -1212,7 +1554,12 @@
         "main": [
           [
             {
-              "node": "E-Mail senden",
+              "node": "E-Mail an BERENT senden",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "If",
               "type": "main",
               "index": 0
             }
@@ -1295,12 +1642,45 @@
             }
           ]
         ]
+      },
+      "Config": {
+        "main": [
+          [
+            {
+              "node": "Daten anonymisieren",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "If": {
+        "main": [
+          [
+            {
+              "node": "E-Mail an Kunde senden",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "E-Mail an BERENT senden": {
+        "main": [
+          [
+            {
+              "node": "Threema Notification",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "authors": "Marcus Kunkel",
-    "name": "Version 0.9.8",
-    "description": "Anpassung E-Mail vorbereiten",
-    "autosaved": false
+    "name": "Version f5d4e4ae",
+    "description": "",
+    "autosaved": true
   },
   "tags": []
 }
