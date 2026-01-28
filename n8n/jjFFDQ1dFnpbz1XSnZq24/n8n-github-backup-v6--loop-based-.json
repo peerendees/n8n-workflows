@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-27T10:04:59.955Z",
+  "updatedAt": "2026-01-28T11:47:55.650Z",
   "createdAt": "2026-01-27T08:37:35.510Z",
   "id": "jjFFDQ1dFnpbz1XSnZq24",
   "name": "n8n GitHub Backup v6 (Loop-Based)",
@@ -525,7 +525,8 @@
   },
   "settings": {
     "executionOrder": "v1",
-    "availableInMCP": true
+    "availableInMCP": true,
+    "callerPolicy": "workflowsFromSameOwner"
   },
   "staticData": null,
   "meta": {
@@ -533,7 +534,7 @@
   },
   "pinData": {},
   "versionId": "851ea33a-94df-4311-8591-0725f5931108",
-  "activeVersionId": "c2b75a5d-8c51-4638-87e0-0bcb079f8fb1",
+  "activeVersionId": "851ea33a-94df-4311-8591-0725f5931108",
   "triggerCount": 1,
   "shared": [
     {
@@ -545,9 +546,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-01-27T10:04:32.000Z",
-    "createdAt": "2026-01-27T10:04:20.445Z",
-    "versionId": "c2b75a5d-8c51-4638-87e0-0bcb079f8fb1",
+    "updatedAt": "2026-01-27T10:04:59.955Z",
+    "createdAt": "2026-01-27T10:04:59.955Z",
+    "versionId": "851ea33a-94df-4311-8591-0725f5931108",
     "workflowId": "jjFFDQ1dFnpbz1XSnZq24",
     "nodes": [
       {
@@ -633,8 +634,8 @@
         ],
         "credentials": {
           "httpHeaderAuth": {
-            "id": "aZMd0okvVFkvyGnj",
-            "name": "GitHub Token"
+            "id": "oaJkHRuARNWjW2UA",
+            "name": "API n8n für n8n"
           }
         }
       },
@@ -1068,8 +1069,8 @@
       }
     },
     "authors": "Marcus Kunkel",
-    "name": "Version c2b75a5d",
-    "description": "",
+    "name": null,
+    "description": null,
     "autosaved": true
   },
   "tags": []
