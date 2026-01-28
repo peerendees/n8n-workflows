@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-27T14:01:08.009Z",
+  "updatedAt": "2026-01-28T11:48:17.864Z",
   "createdAt": "2026-01-27T07:39:04.415Z",
   "id": "lcGaB_uCQ0rhck3yJ1biW",
   "name": "Hedy nach Notion Meeting - Optimiert",
@@ -624,7 +624,8 @@
   },
   "settings": {
     "executionOrder": "v1",
-    "availableInMCP": false
+    "availableInMCP": false,
+    "callerPolicy": "workflowsFromSameOwner"
   },
   "staticData": null,
   "meta": {
