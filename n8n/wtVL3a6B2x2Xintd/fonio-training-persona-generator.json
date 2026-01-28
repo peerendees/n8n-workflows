@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-11-09T21:11:10.000Z",
+  "updatedAt": "2026-01-27T08:45:16.070Z",
   "createdAt": "2025-11-08T18:17:37.239Z",
   "id": "wtVL3a6B2x2Xintd",
   "name": "fonio Training Persona Generator",
@@ -503,7 +503,8 @@
     }
   },
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "availableInMCP": true
   },
   "staticData": null,
   "meta": {
