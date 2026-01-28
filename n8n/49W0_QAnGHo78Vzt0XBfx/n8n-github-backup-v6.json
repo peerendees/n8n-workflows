@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-28T11:46:29.167Z",
+  "updatedAt": "2026-01-28T12:16:15.444Z",
   "createdAt": "2026-01-27T10:15:57.086Z",
   "id": "49W0_QAnGHo78Vzt0XBfx",
   "name": "n8n GitHub Backup v6",
@@ -43,7 +43,7 @@
     },
     {
       "parameters": {
-        "jsCode": "\nconst config = $('Config').first().json;\nconst workflows = $input.first().json.data || [];\n\nreturn {\n  json: {\n    workflows: workflows,\n    anzahl: workflows.length,\n    index: 0,\n    stats: { success: 0, skipped: 0, errors: 0 },\n    threemaSecret: config.secret,\n    threemaFrom: config.threemaFrom,\n    threemaTo: config.threemaTo\n  }\n};\n"
+        "jsCode": "\nconst config = $('Config').first().json;\nconst rawWorkflows = $input.first().json.data || [];\n\n// Wir filtern die Liste: Nur Workflows mit Name und ID\nconst workflows = rawWorkflows.filter(w => w.id && w.name);\n\nreturn {\n  json: {\n    workflows: workflows,\n    anzahl: workflows.length, // Das sollte jetzt 31 sein\n    index: 0,\n    stats: { success: 0, skipped: 0, errors: 0 },\n    threemaSecret: $('Config').first().json.secret,\n    threemaFrom: $('Config').first().json.threemaFrom,\n    threemaTo: $('Config').first().json.threemaTo\n  }\n};"
       },
       "name": "Initialisierung",
       "type": "n8n-nodes-base.code",
@@ -209,7 +209,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Wir holen uns die Daten vom Stand VOR dem Upload\nconst data = $node[\"Handlung bestimmen\"].json;\nconst action = data.currentWorkflow.action;\n\n// Wir holen uns das Ergebnis vom Upload (vom direkten Vorgänger)\nconst githubResult = $input.first().json;\n\nconst newStats = { ...data.stats };\n\n// Wenn der Upload erfolgreich war (GitHub liefert 'commit' oder 'content' zurück)\nif (githubResult.commit || githubResult.content) {\n  newStats.success += 1;\n} else {\n  newStats.errors += 1;\n}\n\nreturn {\n  json: { \n    ...data, \n    stats: newStats, \n    index: data.index + 1 \n  }\n};"
+        "jsCode": "const data = $node[\"Handlung bestimmen\"].json;\nconst newStats = { ...data.stats };\nnewStats.success += 1;\n\nreturn {\n  json: { \n    ...data, \n    stats: newStats, \n    index: data.index + 1 // Hier wird sicher hochgezählt\n  }\n};"
       },
       "name": "Statistik aktualisieren",
       "type": "n8n-nodes-base.code",
@@ -222,7 +222,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Wir holen uns die Daten direkt vom \"Handlung bestimmen\"-Node\nconst data = $node[\"Handlung bestimmen\"].json;\n\nconst newStats = { ...data.stats };\nnewStats.skipped += 1;\n\nreturn {\n  json: { \n    ...data, \n    stats: newStats, \n    index: data.index + 1 \n  }\n};"
+        "jsCode": "const data = $node[\"Handlung bestimmen\"].json;\nconst newStats = { ...data.stats };\nnewStats.skipped += 1;\n\nreturn {\n  json: { \n    ...data, \n    stats: newStats, \n    index: data.index + 1 // Auch hier wird sicher hochgezählt\n  }\n};"
       },
       "name": "Statistiken überspringen",
       "type": "n8n-nodes-base.code",
@@ -236,6 +236,12 @@
     {
       "parameters": {
         "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
           "conditions": [
             {
               "id": "check-loop",
@@ -246,7 +252,8 @@
                 "operation": "lt"
               }
             }
-          ]
+          ],
+          "combinator": "and"
         },
         "options": {}
       },
@@ -501,7 +508,7 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "f5f94a0f-67c5-4dfd-97bb-bb52566c3497",
+  "versionId": "8f129a79-e303-491a-997b-41326d785a4e",
   "activeVersionId": "e099dc2b-77a4-46dc-85ae-4d736d843ea2",
   "triggerCount": 1,
   "shared": [
