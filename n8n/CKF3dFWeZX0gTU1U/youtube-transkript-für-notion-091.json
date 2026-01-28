@@ -1,6 +1,4 @@
 {
-  "updatedAt": "2026-01-28T12:30:23.758Z",
-  "createdAt": "2025-11-11T22:01:32.621Z",
   "id": "CKF3dFWeZX0gTU1U",
   "name": "YouTube-Transkript für Notion 0.9.1",
   "active": false,
@@ -174,7 +172,6 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "56bf5671-3ae3-43b6-9d15-7293f763a9a2",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -186,6 +183,5 @@
       "projectId": "yr4Hj71ou1NOsi2p"
     }
   ],
-  "activeVersion": null,
-  "tags": []
+  "activeVersion": null
 }
