@@ -1,6 +1,4 @@
 {
-  "updatedAt": "2026-01-20T19:12:41.879Z",
-  "createdAt": "2025-11-23T15:45:35.268Z",
   "id": "BFYzOmXZPvhoUbBS",
   "name": "fonio AGS Nachbearbeitung Transkript alt",
   "active": false,
@@ -161,7 +159,6 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "d5df5744-7d36-4fbb-ac6a-a36b16241341",
   "activeVersionId": null,
   "triggerCount": 1,
   "shared": [
@@ -173,6 +170,5 @@
       "projectId": "yr4Hj71ou1NOsi2p"
     }
   ],
-  "activeVersion": null,
-  "tags": []
+  "activeVersion": null
 }
