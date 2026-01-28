@@ -1,6 +1,4 @@
 {
-  "updatedAt": "2026-01-20T12:45:14.717Z",
-  "createdAt": "2025-11-14T16:13:23.250Z",
   "id": "Y56BJExGtL558gem",
   "name": "fonio AGS E-Mail-Generator",
   "active": false,
@@ -189,7 +187,6 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "ca8ca0f8-ee9e-4efc-ac99-6ce9ae803b83",
   "activeVersionId": null,
   "triggerCount": 1,
   "shared": [
@@ -201,6 +198,5 @@
       "projectId": "yr4Hj71ou1NOsi2p"
     }
   ],
-  "activeVersion": null,
-  "tags": []
+  "activeVersion": null
 }
