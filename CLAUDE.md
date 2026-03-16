@@ -16,7 +16,7 @@ This repository manages **n8n workflow automation** with bidirectional GitHub sy
 n8n-workflows/
 ├── n8n/                          # Auto-backed-up workflows (by workflow ID)
 │   └── {workflowId}/
-│       └── {workflowId}.json     # n8n workflow export (36 workflows)
+│       └── {Workflow-Name}.json  # n8n workflow export, named by workflow (36 workflows)
 ├── workflows/                    # Categorized workflow templates & references
 │   ├── ai-agents/                # AI agent workflows
 │   ├── analysis/                 # Data analysis workflows
@@ -48,7 +48,7 @@ n8n-workflows/
 ## Key Concepts
 
 ### Workflow Storage
-- **`n8n/` directory**: Each workflow is stored in a folder named by its n8n workflow ID, containing a single JSON file with the same ID as filename. This is the **primary backup location** used by the auto-backup n8n workflow.
+- **`n8n/` directory**: Each workflow is stored in a folder named by its n8n workflow ID, containing a single JSON file named after the workflow (e.g. `idFjvvr1pC3GfJZm/Claude → GitHub Push.json`). This is the **primary backup location** used by the auto-backup n8n workflow.
 - **`workflows/` directory**: Manually organized workflow templates grouped by category. These are reference/template files, not live backups.
 - Workflow JSON files follow n8n's export format with `name`, `active`, `nodes`, `connections`, and `settings` fields.
 
