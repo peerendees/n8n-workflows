@@ -49,8 +49,27 @@ config                      n8n Encryption Key — NICHT aendern/exponieren
 
 ## Skills
 
-<!-- Wird spaeter befuellt -->
+Die folgenden Workflow-Kategorien sind im Einsatz:
+
+- **KI-Agenten:** Claude/Anthropic + OpenAI via LangChain, Guardrails, Content-Erstellung, Brainstorming per Spracheingabe
+- **Transkription (fonio):** Anruf-Transkripte nachbearbeiten, Persona-Generierung, Anrufercheck, E-Mail-Generierung aus Transkripten
+- **Kommunikation:** Threema Work Gateway (Senden/Empfangen), Telegram Voice-to-Text, Gmail Inbox Management
+- **Content & Daten:** YouTube-Transkripte nach Notion, LinkedIn-Scraping, Blogbeitrag-Erstellung
+- **Infrastruktur:** Bidirektionaler GitHub-Sync (Backup + Restore), Workflow-Migration, Credential-Validierung
 
 ## Connectoren/APIs
 
-<!-- Wird spaeter befuellt -->
+| Connector | Verwendung | Haeufigkeit |
+|-----------|-----------|-------------|
+| Threema Gateway API | Nachrichten senden/empfangen, Benachrichtigungen | hoch |
+| OpenAI / LangChain | KI-Agenten, Textverarbeitung, Guardrails | hoch |
+| Anthropic (Claude) | KI-Agenten via LangChain | mittel |
+| Notion API | Datenbanken, Seiten erstellen/aktualisieren | mittel |
+| Telegram Bot API | Voice-Messages, Trigger, Benachrichtigungen | mittel |
+| GitHub API | Workflow-Backup und Sync | mittel |
+| Google Sheets | Datenimport/-export | mittel |
+| YouTube API | Transkripte herunterladen | gering |
+| DeepL API | Uebersetzungen | gering |
+| IONOS E-Mail (SMTP) | E-Mail-Versand | gering |
+| Gmail API | Inbox-Management | gering |
+| Google Drive | Dateiverwaltung | gering |
