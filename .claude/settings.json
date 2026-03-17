@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "INPUT=$(cat); CMD=$(echo \"$INPUT\" | jq -r '.tool_input.command // empty'); echo \"$CMD\" | grep -q 'git push' || exit 0; BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null); [ \"$BRANCH\" = \"main\" ] && exit 0; CHANGED=$(git diff main..HEAD --name-only 2>/dev/null | grep '^n8n/' | head -10); [ -z \"$CHANGED\" ] && exit 0; FILES=$(echo \"$CHANGED\" | sed 's/^/  /' | head -5); COUNT=$(echo \"$CHANGED\" | wc -l | tr -d ' '); printf '{\"systemMessage\":\"⚠️  MERGE ERFORDERLICH — n8n-Workflow-Aenderungen auf Feature-Branch!\\n\\n%s geaenderte Datei(en) im n8n/-Verzeichnis auf Branch [%s]:\\n%s\\n\\nDer Sync-Workflow holt nur von main. Der Backup-Workflow ueberschreibt GitHub alle 15 Min mit dem alten n8n-Stand.\\n\\n→ Jetzt PR mergen oder manuell in n8n uebernehmen!\\n→ Optional: Backup-Workflow in n8n kurz deaktivieren bis zum Merge.\"}' \"$COUNT\" \"$BRANCH\" \"$FILES\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
