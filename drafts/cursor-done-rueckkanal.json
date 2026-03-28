@@ -1,0 +1,215 @@
+{
+  "name": "BERENT Commit-Sync Linear",
+  "nodes": [
+    {
+      "parameters": {
+        "owner": "peerendees",
+        "repository": "berent.ai",
+        "events": ["push"]
+      },
+      "id": "trigger-github-push",
+      "name": "GitHub Push Trigger",
+      "type": "n8n-nodes-base.githubTrigger",
+      "typeVersion": 1,
+      "position": [0, 0],
+      "credentials": {
+        "githubApi": {
+          "id": "",
+          "name": "GitHub Personal Access Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// GitHub Push normalisieren (Webhook mit body / Trigger mit flachem JSON / body als String)\nfunction normalizePushPayload(json) {\n  let root = json;\n  if (json.body !== undefined && json.body !== null) {\n    if (typeof json.body === 'string') {\n      try {\n        root = JSON.parse(json.body);\n      } catch {\n        root = {};\n      }\n    } else {\n      root = json.body;\n    }\n  }\n  let commits = Array.isArray(root.commits) ? root.commits : [];\n  if (commits.length === 0 && root.head_commit && root.head_commit.message) {\n    commits = [root.head_commit];\n  }\n  return { commits, repository: root.repository };\n}\n\nconst items = $input.all();\nconst results = [];\nconst regex = /\\[BER-(\\d+)\\]\\s*done:?\\s*([\\s\\S]*)/i;\n\nfor (const item of items) {\n  const { commits, repository } = normalizePushPayload(item.json);\n\n  for (const commit of commits) {\n    const message = commit.message || '';\n    const match = message.match(regex);\n\n    if (match) {\n      const descRaw = (match[2] || '').trim();\n      const description = descRaw.split(/\\r?\\n/)[0].trim();\n      results.push({\n        json: {\n          issueNumber: parseInt(match[1], 10),\n          issueId: 'BER-' + match[1],\n          description,\n          commitSha: (commit.id || commit.sha || '').substring(0, 8),\n          commitUrl: commit.url || '',\n          author: commit.author?.name || commit.author?.username || 'unknown',\n          timestamp: commit.timestamp || new Date().toISOString(),\n          matched: true,\n          repository: repository?.full_name || '',\n        },\n      });\n    }\n  }\n}\n\nif (results.length === 0) {\n  results.push({ json: { matched: false } });\n}\n\nreturn results;"
+      },
+      "id": "parse-commits",
+      "name": "Commit-Message parsen",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [220, 0]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "" },
+          "conditions": [
+            {
+              "id": "condition-matched",
+              "leftValue": "={{ $json.matched }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "check-match",
+      "name": "BER-Pattern gefunden?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [440, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linear.app/graphql",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ query: 'query IssueByIdentifier($identifier: String!) { issues(filter: { identifier: { eq: $identifier } }) { nodes { id identifier title } } }', variables: { identifier: $json.issueId } }) }}",
+        "options": {}
+      },
+      "id": "linear-lookup",
+      "name": "Linear Issue Lookup",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [660, -100],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "",
+          "name": "Linear API Key"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linear.app/graphql",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ query: 'mutation IssueUpdate($id: String!, $stateId: String!) { issueUpdate(id: $id, input: { stateId: $stateId }) { success issue { id identifier title state { name } } } }', variables: { id: $json.data?.issues?.nodes?.[0]?.id, stateId: '71127dd5-e5f5-412a-89e5-83260040c02b' } }) }}",
+        "options": {}
+      },
+      "id": "linear-done",
+      "name": "Linear auf Done setzen",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [880, -100],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "",
+          "name": "Linear API Key"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://msgapi.threema.ch/send_simple",
+        "authentication": "none",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "specifyBody": "keypair",
+        "bodyParameters": {
+          "parameters": [
+            { "name": "from", "value": "={{ $env.THREEMA_GATEWAY_ID }}" },
+            { "name": "to", "value": "={{ $env.THREEMA_RECIPIENT_ID }}" },
+            { "name": "secret", "value": "={{ $env.THREEMA_API_SECRET }}" },
+            { "name": "text", "value": "=✅ {{ $('Commit-Message parsen').item.json.issueId }} erledigt: {{ $('Commit-Message parsen').item.json.description }}\n\nPARA-Hub-Update steht aus.\nCommit: {{ $('Commit-Message parsen').item.json.commitSha }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "threema-notify",
+      "name": "Threema Benachrichtigung",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [1100, -100]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.notion.com/v1/comments",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            { "name": "Notion-Version", "value": "2022-06-28" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ parent: { page_id: '33131cc6-fd56-8102-b0d7-d10557364753' }, rich_text: [{ type: 'text', text: { content: $('Commit-Message parsen').item.json.issueId + ' erledigt am ' + $now.toFormat('yyyy-MM-dd') + '. Dashboard-Update ausstehend. Commit: ' + $('Commit-Message parsen').item.json.commitSha } }] }) }}",
+        "options": {}
+      },
+      "id": "notion-comment",
+      "name": "Notion PARA-Hub Kommentar",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [1320, -100],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "",
+          "name": "Notion API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const parse = $('Commit-Message parsen').item.json;\nconst lookup = $('Linear Issue Lookup').item.json;\nconst linearDone = $('Linear auf Done setzen').item.json;\nconst threema = $('Threema Benachrichtigung').item.json;\nconst notion = $('Notion PARA-Hub Kommentar').item.json;\n\nconst linearUuid = lookup?.data?.issues?.nodes?.[0]?.id;\nconst linearLookupOk = !!linearUuid;\nconst linearUpdateOk = linearDone?.data?.issueUpdate?.success === true;\nconst notionOk = !!(notion?.id || notion?.object === 'comment');\n\nreturn {\n  json: {\n    issueId: parse.issueId,\n    beschreibung: parse.description,\n    linear_lookup_ok: linearLookupOk,\n    linear_update_ok: linearUpdateOk,\n    threema_gesendet: !threema?.error,\n    notion_kommentar_ok: notionOk,\n    nachricht: `Rückkanal für ${parse.issueId}: Linear ${linearUpdateOk ? 'Done' : 'nicht gesetzt'}, Threema/Notion siehe Flags.`\n  }\n};"
+      },
+      "id": "ergebnis",
+      "name": "Ergebnis",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1540, -100]
+    }
+  ],
+  "connections": {
+    "GitHub Push Trigger": {
+      "main": [
+        [{ "node": "Commit-Message parsen", "type": "main", "index": 0 }]
+      ]
+    },
+    "Commit-Message parsen": {
+      "main": [
+        [{ "node": "BER-Pattern gefunden?", "type": "main", "index": 0 }]
+      ]
+    },
+    "BER-Pattern gefunden?": {
+      "main": [
+        [{ "node": "Linear Issue Lookup", "type": "main", "index": 0 }],
+        []
+      ]
+    },
+    "Linear Issue Lookup": {
+      "main": [
+        [{ "node": "Linear auf Done setzen", "type": "main", "index": 0 }]
+      ]
+    },
+    "Linear auf Done setzen": {
+      "main": [
+        [{ "node": "Threema Benachrichtigung", "type": "main", "index": 0 }]
+      ]
+    },
+    "Threema Benachrichtigung": {
+      "main": [
+        [{ "node": "Notion PARA-Hub Kommentar", "type": "main", "index": 0 }]
+      ]
+    },
+    "Notion PARA-Hub Kommentar": {
+      "main": [
+        [{ "node": "Ergebnis", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

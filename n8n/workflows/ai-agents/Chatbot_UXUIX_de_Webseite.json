@@ -1,0 +1,471 @@
+{
+  "name": "Chatbot UXUIX.de Webseite",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Hallo 👋! Schön, dass Sie hier sind. Haben Sie eine Frage oder brauchen Sie Unterstützung?",
+        "options": {
+          "inputPlaceholder": "Bitte hier Ihre Fragen einstellen. Vielen Dank. ",
+          "responseMode": "lastNode",
+          "subtitle": "Starten Sie den Chatbot. Wir helfen Ihnen 24/7 weiter.",
+          "title": "Hallo! 👋 Ich bin Ihr persönlicher Assistent."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        100,
+        0
+      ],
+      "id": "7dca59a2-9106-4c13-9a73-1243f68cd657",
+      "name": "When chat message received",
+      "webhookId": "b3494254-1e2d-43a3-9610-8305ddd8894d"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Du bist ein hilfreicher KI - Chatbot names Frida für UXUIX GmbH. Deine Aufgabe ist es, Nutzerfragen zu unseren Produkten und Dienstleistungen zu beantworten. Versuche herauszufinden, was der User möchte bzw. welches Problem gelöst werden soll?\n\nBeginne mit einer einfachen Konversation. Small talk. Stelle weitere Fragen, um sein Problem zu finden.\n\n⭐ **Nutze immer die Funktion `get_company_data`, um aktuelle Daten aus Google Sheets abzurufen.**  \n⭐ Falls du keine passende Information findest, frage höflich nach weiteren Details.  \n⭐ Formuliere deine Antworten so, als würdest du direkt mit einem Kunden sprechen. Sei freundlich, professionell und direkt.  \n\nAntwort-Logik für verschiedene Szenarien:\n\n🔹 Falls jemand nach unseren Produkten fragt, liste sie mit einer kurzen Beschreibung auf. Die Daten findest du unter Google Sheets Produkte.\n\n🔹 Falls jemand nach einer bestimmten Dienstleistung fragt, erkläre sie einfach und verständlich.\n\n🔹 Falls jemand nach Preisen fragt, erkläre sie einfach und verständlich. Die Daten findest du unter Google Sheets Preise.\n\n🔹 Falls jemand nach allgemeinen Themen zu UXUIX fragt, erkläre sie einfach und verständlich. Die Daten findest du unter Google Sheets Unternehmen.\n\n🔹 Falls jemand nach technischer Unterstützung oder Support fragt, erläutere gängige Lösungen oder verweise auf unser Support-Team. Die Daten findest du unter Google Sheets Support.\n\n🔹 Falls jemand nach Karrieremöglichkeiten fragt, erläutere offene Stellen, Vorteile und den Bewerbungsprozess. Die Daten findest du unter Google Sheets Karriere.\n\n🔹 Falls jemand nach einer Partnerschaft fragt, erkläre die Arten der Kooperationen und wie eine Zusammenarbeit initiiert werden kann. Die Daten findest du unter Google Sheets Partnerschaften.\n\n🔹 Falls jemand allgemeine oder häufig gestellte Fragen (FAQs) stellt, greife auf die häufigsten Fragen und Antworten zurück. Die Daten findest du unter Google Sheets FAQ.\n\n🔹 Falls eine Information nicht in Google Sheets steht, sag das offen und frage nach weiteren Details, um die bestmögliche Antwort zu geben.\n\nAntwort-Logik für den Chatbot:\n\nAntwortformat: Verwende HTML für die Formatierung der Antworten. Vermeide die Nutzung von Markdown-Sonderzeichen wie ##, #, ###, *, **, ***, ****.​\n\nStrukturierte Antworten: Halte Antworten kurz und prägnant, um die Lesbarkeit zu gewährleisten.​\n\nAnpassung an den Kontext: Passe den Inhalt der Antwort an die spezifische Anfrage des Nutzers an.​\n\nFehlende Informationen: Wenn bestimmte Informationen nicht verfügbar sind, informiere den Nutzer darüber und bitte um weitere Details.\n\n🔹 Beispielhafte HTML-Struktur für Antworten:\n  <div>\n  <p><strong>Unsere Dienstleistungen:</strong></p>\n  <ul>\n    <li><strong>Beratung & Consulting:</strong> Wir bieten umfassende Beratung zur Optimierung Ihrer digitalen Prozesse.</li>\n    <li><strong>Workshop-Entwicklung:</strong> Interaktive Workshops zur Teamentwicklung und Prozessoptimierung.</li>\n    <li><strong>KI-gestützte Prozessautomatisierung:</strong> Effiziente Gestaltung Ihrer Geschäftsprozesse mithilfe von KI.</li>\n  </ul>\n  <p>Für weitere Informationen nutzen Sie bitte unser <a href=\"https://www.uxuix.de/kontakt/\">Kontaktformular</a>.</p>\n</div>\n\n\nHier ist die Nutzeranfrage:\n\n{{ $json.chatInput }}\n\nWenn Du merkst, dass der User Interesse hat, dann verlinke auf das Kontaktformular https://www.uxuix.de/kontakt/ oder sage Ihm, dass er sich direkt an uns wenden kann. Mittels Emnail an mk@uxuix.de oder telefonisch unter 017623806899. Aber nicht sofort beim ersten Austausch.\n\nE-Mail-Bedingungen 🚨\nFalls einer der folgenden Fälle eintritt, sende mit dem Gmail Tool eine E-Mail an mk@uxuix.de mit einer Zusammenfassung der Konversation:\n\nDer User hört auf zu schreiben.\nDer User gibt Kontaktdaten an (E-Mail, Telefonnummer, Name).\nDer User stellt eine konkrete Anfrage zu einem Produkt oder einer Dienstleistung.\n\n\n\n\n  ",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        420,
+        0
+      ],
+      "id": "92c74e35-6bd0-43cb-8fee-298e33eedbfd",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        300,
+        200
+      ],
+      "id": "b035c3e0-e4f8-4bd8-870d-ba26c93ba770",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "x4HNIVEuXp8inMsO",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        540,
+        260
+      ],
+      "id": "1a35d6d5-dcb7-4ab8-a22d-09aa6ef69650",
+      "name": "Window Buffer Memory"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "19rHlXS7uxnKfOUh81v9rw_81xk32kpARMcCelIh8CAU",
+          "mode": "list",
+          "cachedResultName": "Chatbot Unterlagen UXUIX GmbH ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19rHlXS7uxnKfOUh81v9rw_81xk32kpARMcCelIh8CAU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 32680284,
+          "mode": "list",
+          "cachedResultName": "Produkte ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19rHlXS7uxnKfOUh81v9rw_81xk32kpARMcCelIh8CAU/edit#gid=32680284"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.5,
+      "position": [
+        720,
+        260
+      ],
+      "id": "2e5ce7ca-9f67-400c-b2e2-437f8efc3ea9",
+      "name": "Google Sheets Produkte",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "XYxPB4lyNfrngOSC",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "19rHlXS7uxnKfOUh81v9rw_81xk32kpARMcCelIh8CAU",
+          "mode": "list",
+          "cachedResultName": "Chatbot Unterlagen UXUIX GmbH ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19rHlXS7uxnKfOUh81v9rw_81xk32kpARMcCelIh8CAU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2054402539,
+          "mode": "list",
+          "cachedResultName": "Preise",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19rHlXS7uxnKfOUh81v9rw_81xk32kpARMcCelIh8CAU/edit#gid=2054402539"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.5,
+      "position": [
+        880,
+        260
+      ],
+      "id": "ebb5853c-1a0d-4800-9415-0dee00b87714",
+      "name": "Google Sheets Preise",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "XYxPB4lyNfrngOSC",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "mk@uxuix.de",
+        "subject": "zusammenfassung ",
+        "message": "={{ $fromAI(\"summary\") }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        1860,
+        260
+      ],
+      "id": "05a06faa-05f1-4282-914a-ea59ff4347b8",
+      "name": "Gmail",
+      "webhookId": "7aad146c-82e2-4229-a9a5-e6caa97a1b7e",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "7hIfNfXGrFPrOGxn",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "19rHlXS7uxnKfOUh81v9rw_81xk32kpARMcCelIh8CAU",
+          "mode": "list",
+          "cachedResultName": "Chatbot Unterlagen UXUIX GmbH ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19rHlXS7uxnKfOUh81v9rw_81xk32kpARMcCelIh8CAU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1797926912,
+          "mode": "list",
+          "cachedResultName": "Allgemeine Unterlagen",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19rHlXS7uxnKfOUh81v9rw_81xk32kpARMcCelIh8CAU/edit#gid=1797926912"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.5,
+      "position": [
+        1040,
+        260
+      ],
+      "id": "12d31315-43b2-4155-92bc-ada444f040f9",
+      "name": "Google Sheets Unternehmen",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "XYxPB4lyNfrngOSC",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "19rHlXS7uxnKfOUh81v9rw_81xk32kpARMcCelIh8CAU",
+          "mode": "list",
+          "cachedResultName": "Chatbot Unterlagen UXUIX GmbH ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19rHlXS7uxnKfOUh81v9rw_81xk32kpARMcCelIh8CAU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 347210307,
+          "mode": "list",
+          "cachedResultName": "FAQ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19rHlXS7uxnKfOUh81v9rw_81xk32kpARMcCelIh8CAU/edit#gid=347210307"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.5,
+      "position": [
+        1200,
+        260
+      ],
+      "id": "ae6bf9a2-e57a-4108-8510-20f650dda951",
+      "name": "Google Sheets FAQ",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "XYxPB4lyNfrngOSC",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "19rHlXS7uxnKfOUh81v9rw_81xk32kpARMcCelIh8CAU",
+          "mode": "list",
+          "cachedResultName": "Chatbot Unterlagen UXUIX GmbH ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19rHlXS7uxnKfOUh81v9rw_81xk32kpARMcCelIh8CAU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 96760490,
+          "mode": "list",
+          "cachedResultName": "Support & Technische Hilfe ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19rHlXS7uxnKfOUh81v9rw_81xk32kpARMcCelIh8CAU/edit#gid=96760490"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.5,
+      "position": [
+        1360,
+        260
+      ],
+      "id": "5ca7f264-a71c-4cb2-b0a9-cdcf962612cd",
+      "name": "Google Sheets Support",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "XYxPB4lyNfrngOSC",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "19rHlXS7uxnKfOUh81v9rw_81xk32kpARMcCelIh8CAU",
+          "mode": "list",
+          "cachedResultName": "Chatbot Unterlagen UXUIX GmbH ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19rHlXS7uxnKfOUh81v9rw_81xk32kpARMcCelIh8CAU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1382583835,
+          "mode": "list",
+          "cachedResultName": "Karriere Jobs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19rHlXS7uxnKfOUh81v9rw_81xk32kpARMcCelIh8CAU/edit#gid=1382583835"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.5,
+      "position": [
+        1540,
+        260
+      ],
+      "id": "d15cd76f-540b-4467-b424-f5295c762515",
+      "name": "Google Sheets Karriere",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "XYxPB4lyNfrngOSC",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "19rHlXS7uxnKfOUh81v9rw_81xk32kpARMcCelIh8CAU",
+          "mode": "list",
+          "cachedResultName": "Chatbot Unterlagen UXUIX GmbH ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19rHlXS7uxnKfOUh81v9rw_81xk32kpARMcCelIh8CAU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 752098654,
+          "mode": "list",
+          "cachedResultName": "Partnerschaften",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19rHlXS7uxnKfOUh81v9rw_81xk32kpARMcCelIh8CAU/edit#gid=752098654"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.5,
+      "position": [
+        1700,
+        260
+      ],
+      "id": "7eceb1f1-e17e-436c-9711-287a9f4e92a7",
+      "name": "Google Sheets Partnerschaften",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "XYxPB4lyNfrngOSC",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets Produkte": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets Preise": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        []
+      ]
+    },
+    "Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets Unternehmen": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets FAQ": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets Support": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets Karriere": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets Partnerschaften": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b5f6e012-65fd-494a-93cb-c6731133449f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6016a2c42809145bb5595efe0d5a74b96d1cd48c284cca27c515339a8cf66d9b"
+  },
+  "id": "hJxfUNXPeXavkt9S",
+  "tags": []
+}

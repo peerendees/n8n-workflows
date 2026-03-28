@@ -1,0 +1,494 @@
+{
+  "name": "Brainstorming Assistent Sprachesteuerung",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}",
+        "options": {
+          "systemMessage": "=<system_prompt>\nDU BIST EIN HOCHSPEZIALISIERTER BRAINSTORMING-ASSISTENT FÜR LARS FIËCK – FREELANCE STRATEGY DIRECTOR UND ZERTIFIZIERTER AI CONSULTANT MIT ÜBER 20 JAHREN ERFAHRUNG IN MARKENFÜHRUNG, KREATIVSTRATEGIE UND KI-INNOVATION.\n\n### DEINE MISSION ###\n\nDU UNTERSTÜTZT LARS IN INTELLIGENTEN, PRAXISNAHEN UND STRATEGISCH WERTVOLLEN BRAINSTORMING-SESSIONS ZU THEMEN RUND UM:\n\n- MARKENSTRATEGIE IN ZEITEN VON KI\n- ANWENDUNG VON GENERATIVER KI IN KREATIVEN UND KOMMUNIKATIVEN PROZESSEN\n- ENTWICKLUNG VON WORKSHOP-FORMATEN, USE CASES UND STRATEGIEN FÜR AGENTUREN UND MARKETINGTEAMS\n- DEEP RESEARCH UND IMPULSGEBUNG ZU AI-TOOLS, ETHIK, EU AI ACT, TRENDS, BEST PRACTICES\n\n---\n\n### TOOL-ZUGRIFFE ###\n\nDU HAST ZUGRIFF AUF DIE FOLGENDEN TOOLS UND VERWENDEST SIE NACH BEDARF STRATEGISCH:\n\n- `Wikipedia`: FÜR SCHNELLE ERKLÄRUNG UND KONTEXTUALISIERUNG VON BEGRIFFEN UND KONZEPTEN  \n- `Google Suche`: FÜR AKTUELLE TRENDS, CASE STUDIES, NEUE TOOLS, REGULATORISCHE ENTWICKLUNGEN  \n- `Think`: UM DEIN ERGEBNIS VOR DER AUSGABE KRITISCH ZU REFLEKTIEREN, FEHLER ZU IDENTIFIZIEREN UND DEINE IDEEN ZU VERFEINERN  \n- `Ergebnisse per Mail schicken`: BEI DER ANWEISUNG „SCHICKE MIR DAS ERGEBNIS“ ERSTELLST DU EINE STRUKTURIERTE, STRATEGISCH WERTVOLLE ZUSAMMENFASSUNG DES BRAINSTORMINGS UND VERSENDEST SIE PER E-MAIL AN LARS FIËCK\n\n#### E-MAIL-LOGIK:\n\n- **Subject**: KLAR, KURZ, STRATEGISCH – Z. B. „Workshopideen für generative KI in Agenturen“ oder „Use-Cases: Midjourney in Markenprozessen“  \n- **Message Body**:  \n  - **Kontext (1 Satz)**  \n  - **Zentrale Erkenntnisse in 3–5 Bullet Points**  \n  - **Optionale Impulsfragen für Weiterarbeit**  \n  - **Schluss-Satz mit klarem Call-to-Action oder Reminder für Lars**  \n- NUTZE PROFESSIONELLE, KLARE UND STRATEGISCH ANGEMESSENE SPRACHE\n\n---\n\n### DEINE METHODIK: CHAIN OF THOUGHTS ###\n\n<chain_of_thoughts_rules>\n// 1. VERSTEHEN: ANALYSIERE DAS BRIEFING ODER DIE FRAGE VON LARS GENAU  \n// 2. KERN IDENTIFIZIEREN: BESTIMME DIE STRATEGISCH RELEVANTEN UND KREATIV WIRKUNGSVOLLEN KERNPUNKTE  \n// 3. AUFTEILEN: STRUKTURIERE DAS THEMA IN TEILASPEKTE (Z. B. CHANCEN, RISIKEN, ANWENDUNGSFELDER, FORMATIDEEN)  \n// 4. ANALYSIEREN: UNTERSTÜTZE JEDE IDEE MIT RATIONALEM, PRAXISBEZOGENEM DENKEN – STETS MIT MARKEN- UND KOMMUNIKATIONSKOMPETENZ  \n// 5. VERKNÜPFEN: STELLE BEZÜGE HER ZWISCHEN STRATEGIE, KREATIVITÄT UND TECHNOLOGIE  \n// 6. EDGE CASES: ÜBERPRÜFE GEDANKEN AUF REALITÄTSBEZUG UND RELEVANZ FÜR UNTERSCHIEDLICHE TEAMSTRUKTUREN ODER KUNDENTYPEN  \n// 7. IMPULS: GIB KONKRETE, UMSETZBARE IDEEN, WORKSHOP-BLOCKS ODER PROVOKATIVE FRAGEN FÜR DIE WEITERE ARBEIT  \n// 8. REFLEKTION (THINK): WENDE DAS TOOL `Think` AN, UM DEINE ANTWORT ZU ÜBERDENKEN, ZU PRÜFEN UND GEZIELT ZU VERBESSERN  \n</chain_of_thoughts_rules>\n\n---\n\n### WAS DU NICHT TUN DARFST ###\n\n**WAS DU UNTER KEINEN UMSTÄNDEN TUN DARFST:**\n\n- **VERMEIDE UNREFLEKTIERTE ANTWORTEN OHNE DAS TOOL `Think`, WENN STRATEGISCHE KOMPLEXITÄT VORLIEGT**\n- **SCHICKE KEINE MAILS OHNE STRUKT**\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        16,
+        -32
+      ],
+      "id": "207f1072-6b9d-4a54-8f1d-08def38a187e",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -176,
+        352
+      ],
+      "id": "cce40bd2-9948-433a-9a56-9caa2dbf31bc",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "BemWrmvav0L2YPCu",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "contextWindowLength": 20
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -32,
+        352
+      ],
+      "id": "f5521a5e-5746-472f-84ed-a9c3b7e67945",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolWikipedia",
+      "typeVersion": 1,
+      "position": [
+        224,
+        352
+      ],
+      "id": "c14fadd0-3af9-44ac-a5d5-5980d03fa51e",
+      "name": "Wikipedia"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolSerpApi",
+      "typeVersion": 1,
+      "position": [
+        352,
+        352
+      ],
+      "id": "a4396de7-f771-4761-a915-bf5e70837ef0",
+      "name": "Google Suche",
+      "credentials": {
+        "serpApi": {
+          "id": "O4v0IiTw9TdklPvi",
+          "name": "SerpAPI account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1.1,
+      "position": [
+        96,
+        352
+      ],
+      "id": "54b96cde-4e7b-4e64-b792-6547017ce16f",
+      "name": "Think"
+    },
+    {
+      "parameters": {
+        "sendTo": "fieck.lars@gmail.com",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', `Titel unseres Brainstormings`, 'string') }}",
+        "emailType": "text",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', `Strukturierte Zusammenfassung unseres Brainstormings`, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        496,
+        352
+      ],
+      "id": "a19801d9-3d1e-431b-a5c1-ff19a16dd13c",
+      "name": "Ergebnisse per Mail schicken",
+      "webhookId": "b04ae50a-7471-42a7-a7b1-fbb20a87f2e3",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "XjwrFioTqQ7HT7ud",
+          "name": "Gmail Lars"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {
+          "chatIds": "7100977906"
+        }
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -944,
+        0
+      ],
+      "id": "850e3344-2ff9-4011-89b4-81d5cc649716",
+      "name": "Telegram Trigger",
+      "webhookId": "ff92015f-344f-434d-8f46-453f25ecf711",
+      "credentials": {
+        "telegramApi": {
+          "id": "oFESWAPCqQ1jrBuQ",
+          "name": "Brainstorming Bot Lars"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEmpty",
+                      "singleValue": true
+                    },
+                    "id": "c04edae6-42ed-4df6-8089-4e291dc97a26"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Text"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "33bbf746-caab-435f-a472-2ea238f091f6",
+                    "leftValue": "={{ $json.message.voice }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "object",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Voice"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        -736,
+        0
+      ],
+      "id": "fcb41e77-eae1-4c0b-925f-80d05220cf88",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1aea2a41-9f7d-4444-b87b-4004caa3a084",
+              "name": "text",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -464,
+        -96
+      ],
+      "id": "47a1f563-7b16-4b37-97c6-a685acb37b75",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.voice.file_id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -544,
+        64
+      ],
+      "id": "4725c00d-4dd0-4934-9775-a27e8a1d95b8",
+      "name": "Get a file",
+      "webhookId": "1b11f79c-3f53-441d-bfd3-6700a62569bc",
+      "credentials": {
+        "telegramApi": {
+          "id": "oFESWAPCqQ1jrBuQ",
+          "name": "Brainstorming Bot Lars"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -368,
+        64
+      ],
+      "id": "1a1e212b-7259-4cc8-a778-98eb9ae48661",
+      "name": "Transcribe a recording",
+      "credentials": {
+        "openAiApi": {
+          "id": "lgWZob0MWo2BZfJh",
+          "name": "OpenAi account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "input": "={{ $json.output }}",
+        "voice": "fable",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        368,
+        -32
+      ],
+      "id": "ed5165f5-1d52-4ec1-ae3f-843878648219",
+      "name": "Generate audio",
+      "credentials": {
+        "openAiApi": {
+          "id": "lgWZob0MWo2BZfJh",
+          "name": "OpenAi account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAudio",
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "binaryData": true,
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        576,
+        -32
+      ],
+      "id": "238e349b-0c5c-45dc-8180-c3956da930fe",
+      "name": "Send an audio file",
+      "webhookId": "b0cb3f9e-7a18-4350-89bd-1667be0afd7a",
+      "credentials": {
+        "telegramApi": {
+          "id": "oFESWAPCqQ1jrBuQ",
+          "name": "Brainstorming Bot Lars"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wikipedia": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Suche": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ergebnisse per Mail schicken": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file": {
+      "main": [
+        [
+          {
+            "node": "Transcribe a recording",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe a recording": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Generate audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate audio": {
+      "main": [
+        [
+          {
+            "node": "Send an audio file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "6bd45ef9-64ca-4a68-b221-3f492cdcc4a6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8eaaee104223d7e2bb36f403bb1af3334251bd6507ce9816c9d90f86c9a08824"
+  },
+  "id": "3z42oqx7nuMBGgBL",
+  "tags": []
+}

@@ -1,0 +1,100 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "// Parse Hedy Webhook-Daten und normalisiere für Notion (Option 2)\n// Die Hedy API sendet Daten direkt im Root, nicht in 'body'\nconst webhookData = $json;\n\n// Extrahiere Event-Typ und Daten\nconst eventType = webhookData.event || '';\nconst eventData = webhookData.data || {};\nconst timestamp = webhookData.timestamp || new Date().toISOString();\n\n// Bestimme Werte je nach Event-Typ\nlet title = '';\nlet summary = '';\nlet content = '';\nlet sessionId = null;\nlet sessionTitle = null;\nlet dueDate = null;\nlet status = null;\n\nif (eventType.startsWith('session.')) {\n  // Session-Events: session.created, session.ended\n  title = eventData.title || `Session ${eventData.id || ''}`;\n  summary = eventData.meeting_minutes || eventData.title || '';\n  content = eventData.transcript || \n            eventData.meeting_minutes || \n            eventData.conversations || \n            `Session ${eventType} - ${timestamp}`;\n  sessionId = eventData.id || null;\n  sessionTitle = eventData.title || null;\n  \n} else if (eventType === 'highlight.created') {\n  // Highlight-Events\n  title = eventData.title || 'Highlight';\n  summary = eventData.mainIdea || eventData.title || '';\n  \n  const parts = [];\n  if (eventData.mainIdea) parts.push(`**Hauptidee:** ${eventData.mainIdea}`);\n  if (eventData.cleanedQuote) parts.push(`**Zitat:** ${eventData.cleanedQuote}`);\n  if (eventData.rawQuote && eventData.rawQuote !== eventData.cleanedQuote) {\n    parts.push(`**Original:** ${eventData.rawQuote}`);\n  }\n  if (eventData.aiInsight) parts.push(`**AI Insight:** ${eventData.aiInsight}`);\n  content = parts.join('\\n\\n') || 'Keine Details verfügbar';\n  \n  sessionId = eventData.sessionId || null;\n  \n} else if (eventType === 'todo.exported') {\n  // Todo-Events - WICHTIG: data.text statt data.message!\n  title = eventData.text || 'Unnamed Todo';\n  summary = eventData.dueDate || '';\n  status = 'offen'; // Standard-Status für neue Todos\n  \n  const parts = [];\n  parts.push(`**Text:** ${eventData.text || ''}`);\n  if (eventData.dueDate) {\n    parts.push(`**Fälligkeitsdatum:** ${eventData.dueDate}`);\n  }\n  if (eventData.sessionId) parts.push(`**Session ID:** ${eventData.sessionId}`);\n  if (eventData.id) parts.push(`**Todo ID:** ${eventData.id}`);\n  content = parts.join('\\n');\n  \n  sessionId = eventData.sessionId || null;\n  \n} else {\n  // Unbekanntes Event - Fallback\n  title = `Unknown Event: ${eventType || 'N/A'}`;\n  summary = '';\n  content = `**Event-Typ:** ${eventType}\\n\\n**Daten:**\\n\\n\\`\\`\\`json\\n${JSON.stringify(eventData, null, 2)}\\n\\`\\`\\``;\n}\n\nreturn {\n  json: {\n    eventType: eventType,\n    title: title,\n    summary: summary,\n    content: content,\n    timestamp: timestamp,\n    sessionId: sessionId || '',\n    sessionTitle: sessionTitle || '',\n    dueDate: dueDate || '',\n    status: status || '',\n    // Behalte originale Daten für Debugging\n    rawData: webhookData\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1900, -224],
+      "id": "parse-hedy-data",
+      "name": "Parse Hedy Daten"
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "databaseId": {
+          "__rl": true,
+          "value": "2ca31cc6-fd56-8079-8a58-d74ec1097a36",
+          "mode": "list",
+          "cachedResultName": "Hedy Transkripte 0.9",
+          "cachedResultUrl": "https://www.notion.so/2ca31cc6fd5680798a58d74ec1097a36"
+        },
+        "title": "Hedy Transkript",
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Titel|title",
+              "title": "={{ $json.title }}"
+            },
+            {
+              "key": "Event-Typ|select",
+              "selectValue": "={{ $json.eventType }}"
+            },
+            {
+              "key": "Status|select",
+              "selectValue": "={{ $json.status || '' }}"
+            },
+            {
+              "key": "Transkript|rich_text",
+              "textContent": "={{ $json.content }}"
+            },
+            {
+              "key": "Session ID|text",
+              "textValue": "={{ $json.sessionId }}"
+            },
+            {
+              "key": "Session Titel|text",
+              "textValue": "={{ $json.sessionTitle }}"
+            },
+            {
+              "key": "Erstellungsdatum|date",
+              "dateValue": "={{ $json.timestamp }}"
+            },
+            {
+              "key": "Due Date|date",
+              "dateValue": "={{ $json.dueDate || '' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [2072, -224],
+      "id": "a82bbbce-23bd-4926-8852-a525f1f28791",
+      "name": "Hedy Transkript 0.9",
+      "credentials": {
+        "notionApi": {
+          "id": "KpKj51GJ0big0oYv",
+          "name": "API Notion"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Hedy API": {
+      "main": [
+        [
+          {
+            "node": "Parse Hedy Daten",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Hedy Daten": {
+      "main": [
+        [
+          {
+            "node": "Hedy Transkript 0.9",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
+

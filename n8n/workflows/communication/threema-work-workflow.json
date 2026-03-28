@@ -1,0 +1,514 @@
+{
+  "name": "Threema Work Voice to berent.ai Transcription",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "threema-webhook",
+        "options": {}
+      },
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "name": "Threema Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "threema-work-webhook"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.messageType }}",
+              "operation": "equal",
+              "value2": "file"
+            }
+          ]
+        }
+      },
+      "id": "b2c3d4e5-f6a7-8901-bcde-f23456789012",
+      "name": "Check File Message",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.file.mimeType }}",
+              "operation": "contains",
+              "value2": "audio"
+            }
+          ]
+        }
+      },
+      "id": "c3d4e5f6-a7b8-9012-cdef-345678901234",
+      "name": "Check Audio File",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [650, 200]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.threema.ch/work/messages/{{ $json.messageId }}/file",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "={{ $credentials.threemaWorkApi.apiKey }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000,
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "d4e5f6a7-b8c9-0123-defa-456789012345",
+      "name": "Download Audio File",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [850, 100],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "5",
+          "name": "Threema Work API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {
+          "binaryPropertyName": "data",
+          "model": "whisper-1",
+          "language": "de",
+          "responseFormat": "json",
+          "temperature": 0
+        }
+      },
+      "id": "e5f6a7b8-c9d0-1234-efab-567890123456",
+      "name": "Transcribe with OpenAI",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [1050, 100],
+      "credentials": {
+        "openAiApi": {
+          "id": "2",
+          "name": "OpenAI API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://berent.ai/api/transcriptions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "transcript",
+              "value": "={{ $json.text }}"
+            },
+            {
+              "name": "source",
+              "value": "threema-work"
+            },
+            {
+              "name": "user_id",
+              "value": "={{ $node['Threema Webhook'].json.from }}"
+            },
+            {
+              "name": "timestamp",
+              "value": "={{ $now.toISO() }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "f6a7b8c9-d0e1-2345-fabc-678901234567",
+      "name": "Send to berent.ai",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1250, 100],
+      "continueOnFail": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "3",
+          "name": "berent.ai API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.error ? true : false }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "b8c9d0e1-f2a3-4567-bcde-890123456789",
+      "name": "Check for Errors",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1450, 100]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.threema.ch/work/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "={{ $credentials.threemaWorkApi.apiKey }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "to",
+              "value": "={{ $node['Threema Webhook'].json.from }}"
+            },
+            {
+              "name": "text",
+              "value": "✅ Sprachnachricht erfolgreich transkribiert und an berent.ai gesendet:\\n\\n{{ $node['Transcribe with OpenAI'].json.text }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "a7b8c9d0-e1f2-3456-abcd-789012345678",
+      "name": "Send Success Message",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1650, 200],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "5",
+          "name": "Threema Work API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.threema.ch/work/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "={{ $credentials.threemaWorkApi.apiKey }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "to",
+              "value": "={{ $node['Threema Webhook'].json.from }}"
+            },
+            {
+              "name": "text",
+              "value": "❌ Fehler beim Verarbeiten der Sprachnachricht. Bitte versuchen Sie es erneut oder kontaktieren Sie den Support."
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "c9d0e1f2-a3b4-5678-cdef-901234567890",
+      "name": "Send Error Message",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1650, 50],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "5",
+          "name": "Threema Work API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "n8n-workflow@berent.ai",
+        "toEmail": "office@berent.ai",
+        "subject": "n8n Workflow Fehler - Threema Work Sprachnachricht",
+        "text": "=Fehler bei der Verarbeitung einer Threema Work Sprachnachricht:\\n\\n- Zeitpunkt: {{ $now.format('dd.MM.yyyy HH:mm:ss') }}\\n- Fehlertyp: Verbindungsfehler zu berent.ai\\n- Details: {{ $json.error.message || 'Unbekannter Fehler' }}\\n- Threema User: {{ $node['Threema Webhook'].json.from }}\\n- HTTP Status: {{ $json.statusCode || 'N/A' }}\\n\\nBitte prüfen Sie die API-Verbindung und Logs.",
+        "options": {}
+      },
+      "id": "d0e1f2a3-b4c5-6789-defa-012345678901",
+      "name": "Send Error Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [1850, 50],
+      "credentials": {
+        "smtp": {
+          "id": "4",
+          "name": "SMTP Server"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.threema.ch/work/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "={{ $credentials.threemaWorkApi.apiKey }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "to",
+              "value": "={{ $node['Threema Webhook'].json.from }}"
+            },
+            {
+              "name": "text",
+              "value": "ℹ️ Bitte senden Sie eine Sprachnachricht. Andere Dateiformate werden nicht unterstützt."
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "e1f2a3b4-c5d6-7890-efab-123456789012",
+      "name": "Send No Audio Message",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [850, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "5",
+          "name": "Threema Work API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.threema.ch/work/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "={{ $credentials.threemaWorkApi.apiKey }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "to",
+              "value": "={{ $node['Threema Webhook'].json.from }}"
+            },
+            {
+              "name": "text",
+              "value": "ℹ️ Bitte senden Sie eine Datei. Textnachrichten werden für die Transkription nicht unterstützt."
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "f2a3b4c5-d6e7-8901-fabc-234567890123",
+      "name": "Send No File Message",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [650, 400],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "5",
+          "name": "Threema Work API"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Threema Webhook": {
+      "main": [
+        [
+          {
+            "node": "Check File Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check File Message": {
+      "main": [
+        [
+          {
+            "node": "Check Audio File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send No File Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Audio File": {
+      "main": [
+        [
+          {
+            "node": "Download Audio File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send No Audio Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Audio File": {
+      "main": [
+        [
+          {
+            "node": "Transcribe with OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe with OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Send to berent.ai",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send to berent.ai": {
+      "main": [
+        [
+          {
+            "node": "Check for Errors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check for Errors": {
+      "main": [
+        [
+          {
+            "node": "Send Error Message",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Error Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Success Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": ""
+  },
+  "versionId": "12345678-90ab-cdef-1234-567890abcdef",
+  "id": "100",
+  "meta": {
+    "instanceId": "n8n-instance-id"
+  },
+  "tags": []
+} 

@@ -1,0 +1,30 @@
+==========================================
+SETUP RECHNER 1 - KOPIERBARE BEFEHLE
+==========================================
+
+Führe diese Befehle auf Rechner 1 als Admin-Benutzer (oder kunkel) aus:
+
+1. Repository klonen:
+cd /Users/Shared && git clone https://github.com/peerendees/n8n-workflows.git n8n-workflows
+
+2. Setup-Script ausführen:
+cd /Users/Shared/n8n-workflows && ./docs/setup/setup-rechner-1.sh
+
+3. Cursor öffnen:
+- Cursor öffnen
+- File → Open Folder → /Users/kunkel/n8n-workflows
+
+==========================================
+ALTERNATIV: EINZELNE BEFEHLE
+==========================================
+
+cd /Users/Shared
+git clone https://github.com/peerendees/n8n-workflows.git n8n-workflows
+cd /Users/Shared/n8n-workflows
+./docs/setup/fix-permissions.sh
+ln -s /Users/Shared/n8n-workflows ~/n8n-workflows
+cd ~/n8n-workflows
+./docs/setup/check-cursor-workspace.sh
+
+==========================================
+

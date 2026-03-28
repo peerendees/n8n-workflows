@@ -1,0 +1,312 @@
+{
+  "id": "d28GNCcCfJWr5pLB",
+  "active": true,
+  "connections": {
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Nachricht an Threema Work vorbereiten",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "AI Agent",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Daten extrahieren": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Config",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Mistral Cloud Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "index": 0,
+            "node": "AI Agent",
+            "type": "ai_languageModel"
+          }
+        ]
+      ]
+    },
+    "Nachricht an Threema Work vorbereiten": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Send Threema Notification",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Daten extrahieren",
+            "type": "main"
+          }
+        ]
+      ]
+    }
+  },
+  "name": "fonio BERENT Nachbearbeitung Transkript",
+  "nodes": [
+    {
+      "name": "Webhook",
+      "parameters": {
+        "httpMethod": "POST",
+        "options": {},
+        "path": "berent-nachbereitung-bfcb9e43-50b2-423e-a3bc-c95bb7f0c3be"
+      },
+      "position": [
+        -544,
+        -352
+      ],
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "webhookId": "bfcb9e43-50b2-423e-a3bc-c95bb7f0c3be"
+    },
+    {
+      "name": "Daten extrahieren",
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "anrufername",
+              "type": "string",
+              "value": "={{ $json.body[0].body.context.anrufer_name ?? $json.body.context?.anrufer_name ?? '' }}"
+            },
+            {
+              "name": "telefonnummer",
+              "type": "string",
+              "value": "={{ $json.body[0].body.fromNumber ?? $json.body.fromNumber ?? '' }}"
+            },
+            {
+              "name": "einrichtungstyp",
+              "type": "string",
+              "value": "={{ $json.body[0].body.context.einrichtung_typ ?? $json.body.context?.einrichtung_typ ?? '' }}"
+            },
+            {
+              "name": "einrichtungsname",
+              "type": "string",
+              "value": "={{ $json.body[0].body.context.einrichtung_name ?? $json.body.context?.einrichtung_name ?? '' }}"
+            },
+            {
+              "name": "transkript",
+              "type": "string",
+              "value": "={{ $json.body[0].body.formattedTranscript ?? $json.body.formattedTranscript ?? '' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "position": [
+        -320,
+        -352
+      ],
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4
+    },
+    {
+      "executeOnce": true,
+      "name": "AI Agent",
+      "parameters": {
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=<SYSTEM_PROMPT>\n\nYOU ARE A HIGHLY RELIABLE INFORMATION EXTRACTION AGENT FOR INTERNAL IT SUPPORT CALL SUMMARIZATION (BERENT.AI WORKFLOW).  \nYOUR TASK IS TO CONVERT A RAW PHONE CALL TRANSCRIPT INTO A STRUCTURED JSON PUSH NOTIFICATION.\n\nTHE MODEL IS SMALL → KEEP REASONING SIMPLE, PRECISE, AND RULE-BASED.\n\n--------------------------------\n### INPUT YOU RECEIVE ###\n- transcript (string)\n- anrufername (string)\n- telefonnummer (string)\n- einrichtungstyp (string)\n- einrichtungsname (string)\n\n--------------------------------\n### YOUR GOAL ###\nEXTRACT ONLY FACTUAL INFORMATION FROM THE TRANSCRIPT AND RETURN A CLEAN JSON OBJECT.\n\n--------------------------------\n### REQUIRED OUTPUT FORMAT ###\nRETURN EXACTLY THIS JSON STRUCTURE — NO EXTRA TEXT:\n\n{\n  \"Themenstichwort\": \"string\",\n  \"Beschreibung\": [\"string\", \"string\", \"string\"],\n  \"AnsprechpartnerBleibt\": boolean,\n  \"AnsprechpartnerName\": \"string\",\n  \"AnsprechpartnerTelefon\": \"string\",\n  \"RueckrufnummerAnders\": boolean,\n  \"Rueckrufnummer\": \"string\"\n}\n\n--------------------------------\n### FIELD RULES ###\n\n1. Themenstichwort:\n- 2–4 WORDS ONLY\n- SHORT, PRECISE ISSUE SUMMARY\n- EXAMPLES: \"Server Ausfall\", \"Office 365 Lizenz\", \"Drucker Problem\"\n\n2. Beschreibung:\n- 3–5 BULLET POINTS (ARRAY OF STRINGS)\n- SHORT, CLEAR, MOST IMPORTANT FIRST\n- EACH POINT MAX ~10 WORDS\n- NO FULL SENTENCES REQUIRED\n- FOCUS ON ACTIONABLE INFO\n\n3. AnsprechpartnerBleibt:\n- TRUE → caller remains contact person (DEFAULT)\n- FALSE → a DIFFERENT contact person was explicitly named\n\n4. AnsprechpartnerName:\n- ONLY if different person mentioned\n- OTHERWISE EMPTY STRING \"\"\n\n5. AnsprechpartnerTelefon:\n- ONLY if explicitly mentioned\n- OTHERWISE EMPTY STRING \"\"\n\n6. RueckrufnummerAnders:\n- TRUE → if different callback number requested\n- FALSE → if same as incoming number\n\n7. Rueckrufnummer:\n- ONLY if different number mentioned\n- OTHERWISE EMPTY STRING \"\"\n\n--------------------------------\n### CRITICAL RULES ###\n\n- NEVER INVENT INFORMATION\n- ONLY USE WHAT IS IN THE TRANSCRIPT\n- IF INFORMATION IS MISSING → USE:\n  \"\" (empty string) OR false\n\n- CORRECT OBVIOUS NAME ERRORS:\n  Example: \"Göte Institut\" → \"Goethe Institut\"\n\n- KEEP OUTPUT SHORT → MOBILE PUSH NOTIFICATION\n\n- OUTPUT MUST BE VALID JSON:\n  - NO MARKDOWN\n  - NO COMMENTS\n  - NO TEXT BEFORE OR AFTER\n  - MUST PARSE WITH JSON.parse\n\n--------------------------------\n### CHAIN OF THOUGHT (INTERNAL ONLY — DO NOT OUTPUT) ###\n\nFOLLOW THESE STEPS INTERNALLY:\n\n1. UNDERSTAND:\n   READ FULL TRANSCRIPT CAREFULLY\n\n2. BASICS:\n   IDENTIFY:\n   - MAIN ISSUE\n   - KEY FACTS\n   - PEOPLE\n   - PHONE NUMBERS\n\n3. BREAK DOWN:\n   SPLIT INTO:\n   - ISSUE TYPE\n   - ACTIONS / PROBLEMS\n   - CONTACT DETAILS\n\n4. ANALYZE:\n   CHECK:\n   - IS ANOTHER CONTACT PERSON MENTIONED?\n   - IS A DIFFERENT CALLBACK NUMBER REQUESTED?\n\n5. BUILD:\n   CREATE:\n   - SHORT TOPIC (2–4 WORDS)\n   - 3–5 BULLETS\n\n6. EDGE CASES:\n   - UNCLEAR TEXT → IGNORE, DO NOT GUESS\n   - PARTIAL NAMES → KEEP AS IS (CLEANED)\n\n7. FINAL ANSWER:\n   RETURN STRICT JSON ONLY\n\n--------------------------------\n### WHAT NOT TO DO ###\n\n- NEVER ADD EXPLANATIONS\n- NEVER OUTPUT MARKDOWN (```json)\n- NEVER GUESS MISSING DATA\n- NEVER WRITE LONG SENTENCES\n- NEVER EXCEED 5 BULLET POINTS\n- NEVER OUTPUT INVALID JSON\n- NEVER MIX LANGUAGES (KEEP GERMAN)\n- NEVER REPEAT INPUT TEXT\n\nBAD EXAMPLE:\n\"Der Kunde hatte vermutlich ein Problem mit dem Server und wollte eventuell zurückgerufen werden.\"\n→ THIS IS TOO VAGUE AND INVENTED\n\nGOOD EXAMPLE:\n\"Server nicht erreichbar\"\n\"Remote Zugriff funktioniert nicht\"\n\"Rückruf gewünscht\"\n\n--------------------------------\n### FEW-SHOT EXAMPLES ###\n\nINPUT (SHORTENED):\n\"Hallo, hier ist Herr Meier vom Goethe Institut. Unser Server ist seit heute früh nicht erreichbar. Bitte rufen Sie meine Kollegin Frau Schulz zurück unter 0176 123456.\"\n\nOUTPUT:\n{\n  \"Themenstichwort\": \"Server Ausfall\",\n  \"Beschreibung\": [\n    \"Server seit morgens nicht erreichbar\",\n    \"Goethe Institut betroffen\",\n    \"Dringender Rückruf gewünscht\"\n  ],\n  \"AnsprechpartnerBleibt\": false,\n  \"AnsprechpartnerName\": \"Frau Schulz\",\n  \"AnsprechpartnerTelefon\": \"0176 123456\",\n  \"RueckrufnummerAnders\": true,\n  \"Rueckrufnummer\": \"0176 123456\"\n}\n\n--------------------------------\n\n</SYSTEM_PROMPT>"
+        },
+        "promptType": "define",
+        "text": "=INPUT:\n\nAnrufername: {{ $('Daten extrahieren').first().json.anrufername }}\nTelefonnummer: {{ $('Daten extrahieren').first().json.telefonnummer }}\nEinrichtungstyp: {{ $('Daten extrahieren').first().json.einrichtungstyp }}\nEinrichtungsname: {{ $('Daten extrahieren').first().json.einrichtungsname }}\n\nTranskript:\n{{ $('Daten extrahieren').first().json.transkript }}\n\nAUFGABE:\nExtrahiere die geforderten Informationen und gib ausschließlich das JSON im definierten Format zurück."
+      },
+      "position": [
+        128,
+        -352
+      ],
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3
+    },
+    {
+      "name": "Nachricht an Threema Work vorbereiten",
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "ThreemaPush",
+              "type": "string",
+              "value": "=📳 Anruf bei BERENT.ai\nAnrufer: {{ $('Daten extrahieren').first().json.anrufername }} ({{ $('Daten extrahieren').first().json.telefonnummer }})\nOrganisation: {{ $('Daten extrahieren').first().json.einrichtungsname || 'nicht genannt' }}\n\n📌 {{ $json.Themenstichwort }}\n\n{{ $json.Beschreibung.map(b => '• ' + b).join('\\n') }}\n\n👤 Ansprechpartner: {{ $json.AnsprechpartnerBleibt ? 'Wie Anrufer' : $json.AnsprechpartnerName + ($json.AnsprechpartnerTelefon ? ' (' + $json.AnsprechpartnerTelefon + ')' : '') }}\n📞 Rückruf: {{ $json.RueckrufnummerAnders ? $json.Rueckrufnummer : $('Daten extrahieren').first().json.telefonnummer }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "position": [
+        480,
+        -352
+      ],
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4
+    },
+    {
+      "name": "Config",
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "threemaFrom",
+              "type": "string",
+              "value": "*BERENT1"
+            },
+            {
+              "name": "secret1",
+              "type": "string",
+              "value": "18DOvPKBV7ize3Nh"
+            },
+            {
+              "name": "from",
+              "type": "string",
+              "value": "={{ $json.body?.from ?? $json.from ?? '' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "position": [
+        -96,
+        -352
+      ],
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4
+    },
+    {
+      "name": "Sticky Note",
+      "parameters": {
+        "content": "## Eingabe\nAnruf über BERENT.ai und fonio",
+        "height": 256,
+        "width": 576
+      },
+      "position": [
+        -560,
+        -448
+      ],
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1
+    },
+    {
+      "name": "Sticky Note1",
+      "parameters": {
+        "color": 4,
+        "content": "## Verarbeitung\nEinfache Aufbereitung des Transkriptes",
+        "height": 464,
+        "width": 384
+      },
+      "position": [
+        48,
+        -448
+      ],
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1
+    },
+    {
+      "name": "Sticky Note2",
+      "parameters": {
+        "color": 5,
+        "content": "## Ausgabe\nThreema Work erhält eine Push mit dem aufbereiteten Skript.",
+        "height": 256,
+        "width": 400
+      },
+      "position": [
+        440,
+        -448
+      ],
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1
+    },
+    {
+      "credentials": {
+        "httpHeaderAuth": {
+          "name": "API Threema Work BERENT1"
+        }
+      },
+      "name": "Send Threema Notification",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "from",
+              "value": "*BERENT1"
+            },
+            {
+              "name": "to",
+              "value": "BUMFMZ39"
+            },
+            {
+              "name": "secret",
+              "value": "={{ $('Config').item.json.secret1 }}"
+            },
+            {
+              "name": "text",
+              "value": "={{ $json.ThreemaPush }}"
+            }
+          ]
+        },
+        "contentType": "form-urlencoded",
+        "genericAuthType": "httpHeaderAuth",
+        "method": "POST",
+        "options": {},
+        "sendBody": true,
+        "url": "https://msgapi.threema.ch/send_simple"
+      },
+      "position": [
+        704,
+        -352
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "credentials": {
+        "mistralCloudApi": {
+          "name": "API Mistral Cloud"
+        }
+      },
+      "name": "Mistral Cloud Chat Model",
+      "parameters": {
+        "options": {}
+      },
+      "position": [
+        200,
+        -128
+      ],
+      "type": "@n8n/n8n-nodes-langchain.lmChatMistralCloud",
+      "typeVersion": 1
+    }
+  ],
+  "settings": {
+    "availableInMCP": true,
+    "binaryMode": "separate",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionOrder": "v1",
+    "timeSavedMode": "fixed"
+  }
+}

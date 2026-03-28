@@ -1,0 +1,352 @@
+{
+  "meta": {
+    "instanceId": "docker-n8n"
+  },
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "manual-trigger",
+      "name": "Manueller Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [60, 300]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "channelId",
+              "value": "UCui4jxDaMb53Gdh-AZUTPAg"
+            },
+            {
+              "name": "authorName",
+              "value": "Liam Ottley"
+            }
+          ]
+        }
+      },
+      "id": "config",
+      "name": "Kanal Konfiguration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "search",
+        "operation": "list",
+        "part": "snippet",
+        "channelId": "={{ $json.channelId }}",
+        "order": "date",
+        "maxResults": 10,
+        "type": "video",
+        "additionalFields": {
+          "publishedAfter": "={{ DateTime.now().minus({ days: 30 }).toISO() }}"
+        }
+      },
+      "id": "youtube-search",
+      "name": "YouTube Videos abrufen",
+      "type": "n8n-nodes-youtube.youtube",
+      "typeVersion": 1,
+      "position": [420, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "video",
+        "operation": "get",
+        "part": "snippet,contentDetails,statistics",
+        "videoId": "={{ $json.id.videoId }}"
+      },
+      "id": "video-details",
+      "name": "Video Details",
+      "type": "n8n-nodes-youtube.youtube",
+      "typeVersion": 1,
+      "position": [600, 180]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.youtubetranscript.com/?video_id={{ $json.id.videoId }}",
+        "options": {
+          "timeout": 30000,
+          "retry": {
+            "enabled": true,
+            "maxTries": 3
+          }
+        }
+      },
+      "id": "get-transcript",
+      "name": "Transkript extrahieren",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [600, 320]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "has-transcript",
+              "leftValue": "={{ $json.transcript || $json.text || '' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            },
+            {
+              "id": "min-length",
+              "leftValue": "={{ ($json.transcript || $json.text || '').length }}",
+              "rightValue": "100",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "validate-transcript",
+      "name": "Transkript validieren",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [780, 320]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Alle Daten aus vorherigen Nodes sammeln\nconst searchData = $('youtube-search').item(0).json;\nconst videoDetails = $('video-details').item(0).json;\nconst transcriptData = $('get-transcript').item(0).json;\nconst config = $('config').item(0).json;\n\n// Transkript extrahieren und bereinigen\nlet rawTranscript = transcriptData.transcript || transcriptData.text || '';\nif (Array.isArray(transcriptData)) {\n  rawTranscript = transcriptData.map(item => item.text || item.content || '').join(' ');\n}\n\n// Text bereinigen und formatieren\nconst cleanTranscript = rawTranscript\n  .replace(/\\[.*?\\]/g, '')           // [Musik], [Applaus] etc.\n  .replace(/\\(.*?\\)/g, '')           // (inaudible) etc.\n  .replace(/\\s+/g, ' ')              // Mehrfache Leerzeichen\n  .replace(/\\n+/g, '\\n\\n')           // Absätze formatieren\n  .trim();\n\n// Video-Dauer aus ISO 8601 Format parsen (PT4M13S -> 4:13)\nfunction parseDuration(duration) {\n  if (!duration) return 'Unknown';\n  const match = duration.match(/PT(?:(\\d+)H)?(?:(\\d+)M)?(?:(\\d+)S)?/);\n  if (!match) return duration;\n  \n  const hours = parseInt(match[1] || 0);\n  const minutes = parseInt(match[2] || 0);\n  const seconds = parseInt(match[3] || 0);\n  \n  if (hours > 0) {\n    return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;\n  } else {\n    return `${minutes}:${seconds.toString().padStart(2, '0')}`;\n  }\n}\n\n// Tags aus Video-Titel und Beschreibung extrahieren\nfunction extractTags(title, description) {\n  const tags = [];\n  const text = (title + ' ' + description).toLowerCase();\n  \n  // AI/KI-bezogene Keywords\n  if (text.match(/(ai|artificial intelligence|chatgpt|gpt|claude|llm|machine learning|automation)/)) {\n    tags.push('AI');\n  }\n  \n  // Marketing Keywords\n  if (text.match(/(marketing|sales|business|growth|strategy|revenue)/)) {\n    tags.push('Marketing');\n  }\n  \n  // Tutorial Keywords\n  if (text.match(/(tutorial|how to|guide|step by step|walkthrough|setup)/)) {\n    tags.push('Tutorial');\n  }\n  \n  // Tool Keywords\n  if (text.match(/(tool|software|app|platform|api|integration)/)) {\n    tags.push('Tools');\n  }\n  \n  return tags.length > 0 ? tags : ['AI']; // Default fallback\n}\n\nreturn {\n  // Video Grunddaten\n  videoId: searchData.id.videoId,\n  title: videoDetails.snippet.title,\n  channelTitle: videoDetails.snippet.channelTitle,\n  authorName: config.authorName,\n  publishedAt: videoDetails.snippet.publishedAt,\n  description: videoDetails.snippet.description,\n  \n  // Statistiken\n  viewCount: parseInt(videoDetails.statistics?.viewCount || 0),\n  likeCount: parseInt(videoDetails.statistics?.likeCount || 0),\n  duration: parseDuration(videoDetails.contentDetails?.duration),\n  \n  // URLs\n  videoUrl: `https://youtube.com/watch?v=${searchData.id.videoId}`,\n  thumbnailUrl: videoDetails.snippet?.thumbnails?.high?.url || '',\n  \n  // Transkript\n  cleanTranscript: cleanTranscript,\n  transcriptLength: cleanTranscript.length,\n  wordCount: cleanTranscript.split(' ').length,\n  estimatedReadingTime: Math.ceil(cleanTranscript.split(' ').length / 200),\n  \n  // Auto-Tags\n  autoTags: extractTags(videoDetails.snippet.title, videoDetails.snippet.description)\n};"
+      },
+      "id": "prepare-data",
+      "name": "Daten zusammenführen",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [960, 220]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "text": "={{ $json.cleanTranscript }}",
+        "translateTo": "DE",
+        "options": {
+          "formality": "default",
+          "preserveFormatting": false
+        }
+      },
+      "id": "deepl-translate",
+      "name": "DeepL Übersetzen",
+      "type": "n8n-nodes-base.deepL",
+      "typeVersion": 1,
+      "position": [1140, 220]
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "create",
+        "databaseId": "22f31cc6-fd56-80f8-9a68-da6f99f3dade",
+        "properties": {
+          "Name": {
+            "type": "title",
+            "title": [
+              {
+                "text": {
+                  "content": "={{ $('prepare-data').item(0).json.title }}"
+                }
+              }
+            ]
+          },
+          "Autor": {
+            "type": "select",
+            "select": {
+              "name": "={{ $('prepare-data').item(0).json.authorName }}"
+            }
+          },
+          "Video URL": {
+            "type": "url",
+            "url": "={{ $('prepare-data').item(0).json.videoUrl }}"
+          },
+          "Kanal": {
+            "type": "rich_text",
+            "rich_text": [
+              {
+                "text": {
+                  "content": "={{ $('prepare-data').item(0).json.channelTitle }}"
+                }
+              }
+            ]
+          },
+          "Veröffentlicht": {
+            "type": "date",
+            "date": {
+              "start": "={{ $('prepare-data').item(0).json.publishedAt.split('T')[0] }}"
+            }
+          },
+          "Deutsche Übersetzung": {
+            "type": "rich_text",
+            "rich_text": [
+              {
+                "text": {
+                  "content": "={{ $json.text }}"
+                }
+              }
+            ]
+          },
+          "Tags": {
+            "type": "multi_select",
+            "multi_select": "={{ $('prepare-data').item(0).json.autoTags.map(tag => ({name: tag})) }}"
+          },
+          "Status": {
+            "type": "select",
+            "select": {
+              "name": "Neu"
+            }
+          },
+          "Bewertung": {
+            "type": "select",
+            "select": {
+              "name": "Unbewertet"
+            }
+          },
+          "Aufrufe": {
+            "type": "number",
+            "number": "={{ $('prepare-data').item(0).json.viewCount }}"
+          },
+          "Dauer": {
+            "type": "rich_text",
+            "rich_text": [
+              {
+                "text": {
+                  "content": "={{ $('prepare-data').item(0).json.duration }}"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "id": "notion-create",
+      "name": "Notion Eintrag erstellen",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2,
+      "position": [1320, 220]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "chatId": "DEINE_THREEMA_WORK_CHAT_ID",
+        "text": "=🎥 **Neues Video von {{ $('prepare-data').item(0).json.authorName }}**\n\n📺 **{{ $('prepare-data').item(0).json.title }}**\n\n🔗 {{ $('prepare-data').item(0).json.videoUrl }}\n\n⏱️ Dauer: {{ $('prepare-data').item(0).json.duration }}\n👀 Aufrufe: {{ $('prepare-data').item(0).json.viewCount.toLocaleString() }}\n\n🏷️ Tags: {{ $('prepare-data').item(0).json.autoTags.join(', ') }}\n\n✅ Automatisch übersetzt und in Notion gespeichert!"
+      },
+      "id": "threema-notification",
+      "name": "Threema Benachrichtigung",
+      "type": "n8n-nodes-base.threema",
+      "typeVersion": 1,
+      "position": [1500, 220]
+    }
+  ],
+  "connections": {
+    "manual-trigger": {
+      "main": [
+        [
+          {
+            "node": "config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "config": {
+      "main": [
+        [
+          {
+            "node": "youtube-search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "youtube-search": {
+      "main": [
+        [
+          {
+            "node": "video-details",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "get-transcript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get-transcript": {
+      "main": [
+        [
+          {
+            "node": "validate-transcript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "validate-transcript": {
+      "main": [
+        [
+          {
+            "node": "prepare-data",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "prepare-data": {
+      "main": [
+        [
+          {
+            "node": "deepl-translate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "deepl-translate": {
+      "main": [
+        [
+          {
+            "node": "notion-create",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "notion-create": {
+      "main": [
+        [
+          {
+            "node": "threema-notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

@@ -1,0 +1,240 @@
+# Workspace für zweiten Benutzer zugänglich machen
+
+## Option 1: Symlink (Empfohlen - Einfachste Lösung)
+
+Beide Benutzer arbeiten auf denselben Dateien. Änderungen werden gemeinsam gepusht.
+
+### Schritte:
+
+1. **Als zweiter Benutzer einloggen** (z.B. `adminku` oder `kunkel`)
+
+2. **Symlink erstellen:**
+```bash
+ln -s /Users/hpcn/n8n-workflows ~/n8n-workflows
+```
+
+3. **Berechtigungen prüfen:**
+```bash
+# Als Benutzer hpcn ausführen:
+chmod -R 755 /Users/hpcn/n8n-workflows
+```
+
+4. **Optional: Gruppe erstellen für gemeinsamen Zugriff:**
+```bash
+# Als Admin ausführen:
+sudo dseditgroup -o edit -a adminku -t user staff
+# oder für kunkel:
+sudo dseditgroup -o edit -a kunkel -t user staff
+```
+
+**Vorteile:**
+- ✅ Einfachste Lösung
+- ✅ Beide Benutzer sehen sofort alle Änderungen
+- ✅ Keine Synchronisation nötig
+- ✅ Git-Repository bleibt zentral
+
+**Nachteile:**
+- ⚠️ Beide Benutzer arbeiten auf denselben Dateien (kann zu Konflikten führen)
+- ⚠️ Benutzer `hpcn` muss Berechtigungen gewähren
+
+---
+
+## Option 2: Gemeinsames Verzeichnis in /Users/Shared
+
+Workspace wird in ein gemeinsames Verzeichnis verschoben.
+
+### Schritte:
+
+1. **Workspace verschieben:**
+```bash
+sudo mv /Users/hpcn/n8n-workflows /Users/Shared/n8n-workflows
+```
+
+2. **Berechtigungen setzen:**
+```bash
+sudo chown -R hpcn:staff /Users/Shared/n8n-workflows
+sudo chmod -R 775 /Users/Shared/n8n-workflows
+```
+
+3. **Symlink im ursprünglichen Verzeichnis erstellen (für hpcn):**
+```bash
+ln -s /Users/Shared/n8n-workflows /Users/hpcn/n8n-workflows
+```
+
+4. **Symlink für zweiten Benutzer erstellen:**
+```bash
+# Als zweiter Benutzer:
+ln -s /Users/Shared/n8n-workflows ~/n8n-workflows
+```
+
+**Vorteile:**
+- ✅ Zentraler Ort für alle Benutzer
+- ✅ Klarere Struktur
+- ✅ Workspace ist nicht an einen Benutzer gebunden
+
+**Nachteile:**
+- ⚠️ Workspace muss verschoben werden
+- ⚠️ Git-Repository-Pfad ändert sich (muss angepasst werden)
+
+---
+
+## Option 3: Git Clone (Getrennte Workspaces)
+
+Jeder Benutzer hat seinen eigenen Workspace, regelmäßiger Pull nötig.
+
+### Schritte:
+
+1. **Als zweiter Benutzer einloggen**
+
+2. **Repository klonen:**
+```bash
+cd ~
+git clone <dein-github-repo-url> n8n-workflows
+cd n8n-workflows
+```
+
+3. **Regelmäßig Pull durchführen:**
+```bash
+cd ~/n8n-workflows
+git pull origin main
+```
+
+**Vorteile:**
+- ✅ Jeder Benutzer arbeitet unabhängig
+- ✅ Keine Berechtigungsprobleme
+- ✅ Git-Konflikte werden klar sichtbar
+
+**Nachteile:**
+- ⚠️ Regelmäßiger Pull nötig
+- ⚠️ Änderungen müssen gepusht werden, damit der andere sie sieht
+- ⚠️ Mehr Verwaltungsaufwand
+
+---
+
+## Empfehlung
+
+**Für deinen Use Case (regelmäßiges Pushen nach GitHub):**
+
+**Option 1 (Symlink)** ist am einfachsten, wenn beide Benutzer zusammenarbeiten und Änderungen sofort sichtbar sein sollen.
+
+**Option 3 (Git Clone)** ist besser, wenn beide Benutzer unabhängig arbeiten und ihre Änderungen über Git synchronisieren wollen.
+
+---
+
+## Cursor-Chats gemeinsam nutzen
+
+**WICHTIG:** Cursor speichert Chat-Historie und Workspace-Einstellungen benutzer-spezifisch in:
+- `~/Library/Application Support/Cursor/User/workspaceStorage/`
+
+Um die **Chat-Historie gemeinsam zu nutzen**, gibt es zwei Optionen:
+
+### Option A: Gemeinsame Workspace-Storage (Empfohlen)
+
+Beide Benutzer teilen sich die gleichen Chat-Daten und Einstellungen.
+
+**Schritte:**
+
+1. **Workspace-Hash ermitteln:**
+```bash
+# Als Benutzer hpcn:
+cd /Users/hpcn/n8n-workflows
+python3 -c "import hashlib; print(hashlib.sha256(b'/Users/hpcn/n8n-workflows').hexdigest())"
+# Ausgabe z.B.: 764036eb332790b7f7d8420e138150d27b9e1d80400232beb0244548b94b09fd
+```
+
+2. **Gemeinsames Verzeichnis erstellen:**
+```bash
+# Als Admin:
+sudo mkdir -p /Users/Shared/Cursor-WorkspaceStorage
+sudo chown -R hpcn:staff /Users/Shared/Cursor-WorkspaceStorage
+sudo chmod -R 775 /Users/Shared/Cursor-WorkspaceStorage
+```
+
+3. **Workspace-Storage verschieben:**
+```bash
+# Als Benutzer hpcn:
+WORKSPACE_HASH="764036eb332790b7f7d8420e138150d27b9e1d80400232beb0244548b94b09fd"
+mv ~/Library/Application\ Support/Cursor/User/workspaceStorage/$WORKSPACE_HASH /Users/Shared/Cursor-WorkspaceStorage/
+```
+
+4. **Symlink für beide Benutzer erstellen:**
+```bash
+# Als Benutzer hpcn:
+WORKSPACE_HASH="764036eb332790b7f7d8420e138150d27b9e1d80400232beb0244548b94b09fd"
+ln -s /Users/Shared/Cursor-WorkspaceStorage/$WORKSPACE_HASH ~/Library/Application\ Support/Cursor/User/workspaceStorage/$WORKSPACE_HASH
+
+# Als zweiter Benutzer (z.B. adminku oder kunkel):
+# Zuerst den Workspace-Hash für den Symlink-Pfad ermitteln:
+cd ~/n8n-workflows  # (Symlink auf /Users/hpcn/n8n-workflows)
+python3 -c "import hashlib; print(hashlib.sha256(b'/Users/hpcn/n8n-workflows').hexdigest())"
+# Sollte der gleiche Hash sein!
+
+WORKSPACE_HASH="764036eb332790b7f7d8420e138150d27b9e1d80400232beb0244548b94b09fd"
+mkdir -p ~/Library/Application\ Support/Cursor/User/workspaceStorage/
+ln -s /Users/Shared/Cursor-WorkspaceStorage/$WORKSPACE_HASH ~/Library/Application\ Support/Cursor/User/workspaceStorage/$WORKSPACE_HASH
+```
+
+**Vorteile:**
+- ✅ Beide Benutzer sehen die gleichen Chats
+- ✅ Workspace-Einstellungen werden geteilt
+- ✅ Keine Duplikation der Daten
+
+**Nachteile:**
+- ⚠️ Beide Benutzer sollten nicht gleichzeitig Cursor öffnen (kann zu Datenbank-Konflikten führen)
+- ⚠️ Manueller Setup nötig
+
+### Option B: Getrennte Chats (Einfacher, aber keine gemeinsame Historie)
+
+Jeder Benutzer hat seine eigenen Chat-Daten. Einfacher Setup, aber keine gemeinsame Historie.
+
+**Vorteile:**
+- ✅ Keine Konfiguration nötig
+- ✅ Keine Konflikte bei gleichzeitiger Nutzung
+- ✅ Jeder Benutzer hat seine eigene Chat-Historie
+
+**Nachteile:**
+- ⚠️ Keine gemeinsame Chat-Historie
+- ⚠️ Jeder muss seine eigenen Chats führen
+
+---
+
+## Empfehlung für Cursor-Chats
+
+**Für die gemeinsame Nutzung der Chats:**
+
+- **Option A** ist besser, wenn beide Benutzer zusammenarbeiten und die Chat-Historie wichtig ist
+- **Option B** ist besser, wenn beide unabhängig arbeiten oder gleichzeitig Cursor nutzen wollen
+
+**WICHTIGER HINWEIS:**
+- Cursor sollte nicht gleichzeitig von beiden Benutzern geöffnet werden, wenn Option A verwendet wird
+- Die SQLite-Datenbank (`state.vscdb`) kann bei gleichzeitiger Nutzung beschädigt werden
+- Am besten: Ein Benutzer schließt Cursor, bevor der andere es öffnet
+
+---
+
+## Berechtigungen prüfen
+
+Nach dem Setup kannst du testen:
+
+```bash
+# Als zweiter Benutzer:
+cd ~/n8n-workflows
+ls -la
+touch test.txt
+rm test.txt
+```
+
+Falls Berechtigungsfehler auftreten:
+```bash
+# Als Benutzer hpcn:
+chmod -R 775 /Users/hpcn/n8n-workflows
+```
+
+## Cursor-Chats testen
+
+Nach dem Setup der gemeinsamen Workspace-Storage:
+
+1. **Als Benutzer hpcn:** Cursor öffnen, einen Chat starten
+2. **Cursor schließen**
+3. **Als zweiter Benutzer:** Cursor öffnen, sollte den gleichen Chat sehen
+

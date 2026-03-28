@@ -1,0 +1,787 @@
+{
+  "name": "Inbox Manager",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "a3a230b3-e701-4e80-9436-bc9d33c45013",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputText": "={{ $json.text }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "Hohe Priorität",
+              "description": "E-Mails, die eine hohe Priorität haben und sofortige Aufmerksamkeit erfordern. Dazu gehören insbesondere: Anfragen oder Nachrichten von wichtigen Kunden, Geschäftspartnern oder Lieferanten, die zeitkritische Entscheidungen oder Antworten erfordern. Antworten auf laufende Konversationen, die für den Geschäftsablauf oder die Kundenbetreuung entscheidend sind. E-Mails mit Schlüsselbegriffen wie „dringend“, „wichtig“, „sofort“, „kritisch“, „zeitnah“, „Deadline“, „Notfall“ oder ähnlichen Begriffen, die eine hohe Dringlichkeit signalisieren. Nachrichten von Vorgesetzten, direkten Mitarbeitern oder anderen entscheidenden Stakeholdern, die geschäftsrelevante Anweisungen, Eskalationen oder kurzfristige Anforderungen enthalten. System- oder Sicherheitswarnungen, die unmittelbares Handeln erfordern, z. B. Serverausfälle, Sicherheitsvorfälle oder Zahlungsprobleme. Kundenbeschwerden oder Eskalationen, die eine schnelle Reaktion erfordern, um negative Folgen zu vermeiden. Vertrags- oder Angebotsanfragen mit engen Fristen, die Einfluss auf Geschäftsabschlüsse oder laufende Projekte haben. Eine hohe Priorität liegt vor, wenn der Inhalt der E-Mail auf eine dringende Entscheidung, einen potenziellen geschäftlichen oder operativen Schaden oder eine zeitkritische Verpflichtung hinweist."
+            },
+            {
+              "category": "Rechnungen & Finanzen",
+              "description": "E-Mails, die finanzielle Dokumente, Transaktionen oder buchhalterische Vorgänge betreffen. Dazu gehören insbesondere: Rechnungen, Quittungen, Zahlungserinnerungen oder Mahnungen, die sich auf offene oder abgeschlossene Zahlungen beziehen. Kontoauszüge, Transaktionsbestätigungen oder Abrechnungen von Banken, Zahlungsanbietern oder Finanzdienstleistern wie PayPal, Stripe, N26, Trade Republic, Scalable Capital oder Parqet. Steuer- und Buchhaltungsunterlagen, einschließlich Umsatzsteuerbescheiden, Steuererklärungen oder Anfragen von Finanzbehörden, Buchhaltungsdiensten wie Buhl oder Steuerwelt. Vertrags- oder Finanzierungsdokumente, die Kredite, Investitionen oder Finanzierungszusagen betreffen. E-Mails mit Schlüsselbegriffen wie „Rechnung“, „Zahlung“, „Überweisung“, „Buchhaltung“, „Steuer“, „Finanzamt“, „Gutschrift“, „Rückerstattung“, „Depot“, „Portfolio“, „Dividende“, „Anlage“ oder ähnlichen Begriffen, die auf finanzielle Prozesse hinweisen. Eine E-Mail gehört in diese Kategorie, wenn ihr Inhalt sich auf den Geldfluss, buchhalterische Vorgänge oder steuerliche Verpflichtungen bezieht."
+            },
+            {
+              "category": "Werbung",
+              "description": "E-Mails mit Marketing- oder Werbeinhalten, die darauf abzielen, Produkte, Dienstleistungen oder Angebote zu bewerben. Dazu gehören insbesondere: Newsletter, Rabattangebote, Sonderaktionen oder Produktankündigungen von Unternehmen, Online-Shops oder Dienstleistern. Werbung von Software-Anbietern, Streaming-Diensten, Finanz- oder Telekommunikationsunternehmen, die neue Produkte, Abonnements oder Upgrades bewerben. Werbe-E-Mails mit Schlüsselbegriffen wie „Rabatt“, „Sale“, „Sonderangebot“, „exklusiv“, „nur für kurze Zeit“, „kostenlos testen“ oder ähnlichen Formulierungen, die auf eine Verkaufsabsicht hindeuten. Unaufgeforderte Produktwerbung oder Akquise-Mails, die potenzielle Kunden zu einem Kauf oder einer Anmeldung bewegen sollen. Eine E-Mail fällt in diese Kategorie, wenn ihr primäres Ziel die kommerzielle Bewerbung eines Produkts, einer Dienstleistung oder eines Angebots ist."
+            },
+            {
+              "category": "3D-Druck Kundensupport",
+              "description": "E-Mails, die sich auf den Kundensupport für 3D-Druck- und 3D-Modellierungsdienstleistungen beziehen. Dazu gehören insbesondere: Anfragen zu individuellen 3D-Druckaufträgen, Materialoptionen, Drucktechniken oder Machbarkeitsprüfungen. Support-Anfragen zu bestehenden oder laufenden Aufträgen, einschließlich Rückfragen zu Druckqualität, Lieferzeiten oder Anpassungen. Technische Fragen zu 3D-Modellierungsprojekten, Datei-Kompatibilität (z. B. STL, OBJ) oder Optimierungen für den 3D-Druck. Reklamationen oder Korrekturwünsche zu gelieferten Drucken, fehlerhaften Modellen oder unpassenden Spezifikationen. E-Mails mit Begriffen wie „3D-Druck“, „Modellierung“, „Angebot“, „Bestellung“, „Druckfehler“, „Materialwahl“ oder ähnlichen Begriffen, die auf einen Support-Bedarf hinweisen. Eine E-Mail fällt in diese Kategorie, wenn sie sich auf Service-Anfragen, technische Unterstützung oder Problemlösungen im Bereich 3D-Druck und 3D-Modellierung bezieht."
+            },
+            {
+              "category": "KI-Community",
+              "description": "E-Mails, die sich auf die KI-Community, Automatisierung und verwandte Plattformen beziehen. Dazu gehören insbesondere: Benachrichtigungen oder Nachrichten von YouTube zu Kommentaren, Abonnenten oder Interaktionen mit KI-bezogenen Inhalten. E-Mails von der Plattform Skool, insbesondere aus den Communities 'KI-Agenten | Made in Germany' oder 'AI Automation Society (Skool)'. Diskussionsbeiträge, Anfragen oder Updates aus Foren, Gruppen oder Netzwerken, die sich mit KI-Agenten, Automatisierung oder No-Code-Tools beschäftigen. E-Mails mit Schlüsselbegriffen wie 'KI-Agent', 'n8n', 'Automation', 'No-Code', 'RAG', 'GPT', 'AI-Workflow', 'AI-Agent' oder ähnlichen Begriffen, die auf KI-gestützte Automatisierung und Community-Aktivitäten hinweisen. Eine E-Mail gehört in diese Kategorie, wenn sie Informationen, Diskussionen oder Interaktionen im Bereich KI-Agenten, Automatisierung und AI-gestützte Workflows enthält."
+            }
+          ]
+        },
+        "options": {
+          "systemPromptTemplate": "Analysiere den vom Nutzer bereitgestellten Text und ordne ihn einer der folgenden Kategorien zu: {categories}. Gib die Antwort ausschließlich im JSON-Format aus, ohne zusätzliche Erklärungen oder Kommentare."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "typeVersion": 1,
+      "position": [
+        220,
+        0
+      ],
+      "id": "4393799a-f005-43f5-a95b-29d17f6ea374",
+      "name": "Text Classifier"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "gpt-4o"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        180,
+        200
+      ],
+      "id": "4a816efb-2f9d-4ff8-a19a-192c6f899ebd",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $json.id }}",
+        "labelIds": [
+          "Label_3220627572191531899"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        680,
+        -360
+      ],
+      "id": "71039d88-babe-4ebf-b8e3-dc9a356e36f2",
+      "name": "Hohe Priorität",
+      "webhookId": "ce758868-943b-4f83-b202-02e8b1a9f9c3",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "{{ $json.id }}",
+        "labelIds": [
+          "Label_3092321957029092327"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        680,
+        -180
+      ],
+      "id": "fcf5691a-f0cf-4d11-baa1-c57e9115a1d3",
+      "name": "Rechnungen & Finanzen",
+      "webhookId": "857051a9-d0f6-4f43-b3cf-d018715f4be8",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $json.id }}",
+        "labelIds": [
+          "Label_2070173096735304292"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        680,
+        0
+      ],
+      "id": "10040e90-13a9-4d9b-826f-9ffe26f03315",
+      "name": "Werbung",
+      "webhookId": "9f08b73f-07a2-4da5-8341-326512eb2971",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $json.id }}",
+        "labelIds": [
+          "Label_4819718215391151341"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        680,
+        180
+      ],
+      "id": "c9babc9e-66c6-488b-90d5-2ee293fa0581",
+      "name": "3D-Druck Kundensupport",
+      "webhookId": "4a71a4f0-04a5-4d73-acf7-addfa1eb3ffe",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "{{ $json.id }}",
+        "labelIds": [
+          "Label_5980147848688175869"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        680,
+        360
+      ],
+      "id": "58f1efcb-d89d-4ee5-8d24-2182ad0e7c26",
+      "name": "KI-Community",
+      "webhookId": "d87c2b8d-d3d9-4853-abe5-d8b71c385ef9",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Du bist eine Assistenzkraft auf Vorstandsebene. Deine Aufgabe ist es, auf eingehende E-Mails mit hoher Priorität so genau und professionell wie möglich zu antworten. Lies die folgende E-Mail sorgfältig durch und verfasse eine klare, präzise und angemessene Antwort, die alle wesentlichen Punkte anspricht. Hier ist die E-Mail, auf die du antwortest: {{ $('Gmail Trigger').item.json.text }}\n\nGib bitte die folgenden Parameter aus:\nsubject\nmessage",
+              "role": "system"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        840,
+        -360
+      ],
+      "id": "782a2951-6da3-4284-89ba-d14fe5b0c57c",
+      "name": "OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "={{ $json.message.content.subject }}",
+        "message": "={{ $json.message.content.message }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1160,
+        -360
+      ],
+      "id": "7be13b44-df7f-4b05-ae8e-6790b5e9d414",
+      "name": "Gmail",
+      "webhookId": "a3570b5d-f33f-4acb-afd9-8daf916db37f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "5355046437",
+        "text": "=EMAIL MIT HOHER PRIORITÄT von {{ $('Gmail Trigger').item.json.from.value[0].name }}\n\nIch habe dir einen Entwurf mit folgendem Betreff erstellt:\n{{ $('OpenAI').item.json.message.content.subject }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1340,
+        -360
+      ],
+      "id": "02bbe9ba-5ed2-49c4-879d-a6cb43b841de",
+      "name": "Telegram",
+      "webhookId": "85671696-59d2-4117-8be6-c9400b390823",
+      "credentials": {
+        "telegramApi": {
+          "id": "XZViCHbX2vJdYuGk",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "Du bist ein Kundenservice-Mitarbeiter des Unternehmens '3D-Druck Jüterbog'. Deine Aufgabe ist es, auf eingehende Support- und Druck- sowie Modellierungsanfragen so genau und professionell wie möglich zu antworten. Falls die Anfrage nicht von dir bearbeitet werden kann, verweise den Absender bitte an folgende E-Mail-Adresse: info@3d-druck-jueterbog.de.\n\nSchließe die E-Mail immer mit 'Sebastian' ab und setze keinen Platzhalter wie [Ihr Name] oder [Your Name] an das Ende.",
+              "role": "system"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        840,
+        180
+      ],
+      "id": "35de63ce-d5ac-48d3-b3d3-7600d6f4d66d",
+      "name": "OpenAI1",
+      "credentials": {
+        "openAiApi": {
+          "id": "",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "thread",
+        "operation": "reply",
+        "threadId": "={{ $('3D-Druck Kundensupport').item.json.threadId }}",
+        "messageId": "={{ $('3D-Druck Kundensupport').item.json.id }}",
+        "message": "={{ $json.message.content }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1320,
+        180
+      ],
+      "id": "bc3addda-3bd7-44fa-b226-dd219eeda112",
+      "name": "Gmail1",
+      "webhookId": "17ab9b71-5489-499b-bcec-a0f8db18c01e",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "5355046437",
+        "text": "=Ich habe gerade auf eine 3D-Druck Kundenanfrage von {{ $('Gmail Trigger').item.json.from.value[0].name }} geantwortet.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1480,
+        180
+      ],
+      "id": "df0aff93-7b93-42aa-9f47-39492d3df5de",
+      "name": "Telegram1",
+      "webhookId": "3ec8f33b-85a2-4279-a6f3-0e5158d8876a",
+      "credentials": {
+        "telegramApi": {
+          "id": "XZViCHbX2vJdYuGk",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Du bist für die Bewertung von Werbe-E-Mails zuständig. Analysiere die folgende Nachricht, erstelle eine prägnante Zusammenfassung und gib eine Empfehlung zur weiteren Vorgehensweise ab.\n\nHier ist die eingehende Nachricht: {{ $('Gmail Trigger').item.json.text }}\n\nGib die folgenden Parameter separat aus:\n\nsummary: Eine kurze Übersicht über den Inhalt der E-Mail.\nrecommendation: Eine Einschätzung, ob und wie auf die Werbe-E-Mail reagiert werden sollte.",
+              "role": "system"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        840,
+        0
+      ],
+      "id": "64963fa5-95c2-4f2a-8c5d-c3342a49ef23",
+      "name": "OpenAI2",
+      "credentials": {
+        "openAiApi": {
+          "id": "",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "5355046437",
+        "text": "=Hier ist die Zusammenfassung einer Werbe E-Mail die du gerade erhalten hast:\n{{ $json.message.content.summary }}\n\nIch würde folgendes empfehlen:\n{{ $json.message.content.recommendation }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1160,
+        0
+      ],
+      "id": "55a01f77-a4f4-4766-b5c5-10d1457f5924",
+      "name": "Telegram2",
+      "webhookId": "de4150a1-e5fe-457c-a706-3737c260ee3f",
+      "credentials": {
+        "telegramApi": {
+          "id": "XZViCHbX2vJdYuGk",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Du bist für die Analyse von E-Mails zuständig, die sich auf die KI-Community, Automatisierung und verwandte Plattformen beziehen. Erfasse die wichtigsten Informationen aus der Nachricht und erstelle eine kurze Zusammenfassung.\n\nHier ist die eingehende Nachricht: {{ $('Gmail Trigger').item.json.text }}\n\nGib die folgende Information aus:\n\nsummary: Eine kurze Zusammenfassung in maximal zwei Sätzen über den Inhalt der E-Mail (z. B. neue Kommentare, Interaktionen, Diskussionsbeiträge oder relevante Updates zu KI-Agenten und Automatisierung).",
+              "role": "system"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        840,
+        360
+      ],
+      "id": "77287679-d409-4383-9c42-fa2542bf5870",
+      "name": "OpenAI3",
+      "credentials": {
+        "openAiApi": {
+          "id": "",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "5355046437",
+        "text": "=Du hast eine neue KI-Community E-Mail:\n{{ $json.message.content.summary }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1160,
+        360
+      ],
+      "id": "d18da764-fbcc-4558-a14e-13ebd6a752e3",
+      "name": "Telegram3",
+      "webhookId": "1147a161-e89b-4e33-b047-25c740dd4a7d",
+      "credentials": {
+        "telegramApi": {
+          "id": "HaexUOtFZ6JFTawO",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "unit": "minutes"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1160,
+        180
+      ],
+      "id": "f43bcca1-d7d2-4eb3-9443-ac3f97908042",
+      "name": "Wait",
+      "webhookId": "9c726da4-448f-4614-923b-a8046e44036a"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Du bist für die Bewertung von Rechnungen und finanziellen E-Mails zuständig. Analysiere die folgende Nachricht, erstelle eine prägnante Zusammenfassung und gib eine Empfehlung zur weiteren Vorgehensweise ab.\n\nHier ist die eingehende Nachricht: {{ $('Gmail Trigger').item.json.text }}\n\nGib die folgenden Parameter separat aus:\n\nsummary: Eine kurze Übersicht über den Inhalt der E-Mail (z. B. Rechnungsbetrag, Fälligkeit, Absender, relevante Finanzinformationen).\nrecommendation: Eine Einschätzung, ob die Rechnung geprüft, bezahlt oder reklamiert werden sollte, sowie weitere empfohlene Schritte (z. B. Weiterleitung an die Buchhaltung, Speicherung für Steuerzwecke).",
+              "role": "system"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        840,
+        -180
+      ],
+      "id": "789c6cba-dcbd-4eee-a09f-9a49cb736750",
+      "name": "OpenAI4",
+      "credentials": {
+        "openAiApi": {
+          "id": "",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "5355046437",
+        "text": "=Hier ist die Zusammenfassung einer Finanz-Email die du gerade erhalten hast:\n{{ $json.message.content.summary }}\n\nIch würde folgendes empfehlen:\n{{ $json.message.content.recommendation }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1160,
+        -180
+      ],
+      "id": "08057777-5215-4641-a69e-3f94f98d9f32",
+      "name": "Telegram4",
+      "webhookId": "f20ef9c8-ce61-4151-9bf9-043b262edb39",
+      "credentials": {
+        "telegramApi": {
+          "id": "HaexUOtFZ6JFTawO",
+          "name": "Telegram account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text Classifier": {
+      "main": [
+        [
+          {
+            "node": "Hohe Priorität",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Rechnungen & Finanzen",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Werbung",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "3D-Druck Kundensupport",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "KI-Community",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hohe Priorität": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "3D-Druck Kundensupport": {
+      "main": [
+        [
+          {
+            "node": "OpenAI1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI1": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail1": {
+      "main": [
+        [
+          {
+            "node": "Telegram1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Werbung": {
+      "main": [
+        [
+          {
+            "node": "OpenAI2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI2": {
+      "main": [
+        [
+          {
+            "node": "Telegram2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "KI-Community": {
+      "main": [
+        [
+          {
+            "node": "OpenAI3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI3": {
+      "main": [
+        [
+          {
+            "node": "Telegram3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Gmail1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rechnungen & Finanzen": {
+      "main": [
+        [
+          {
+            "node": "OpenAI4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI4": {
+      "main": [
+        [
+          {
+            "node": "Telegram4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "621f419a-0cce-4021-b4aa-be18f41ebc4c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9c06bc23b1a23160e3960ed6f733e332af8ebbf2e7eb3507d43983032cffc4ae"
+  },
+  "id": "IXbSqGiay0zJeJJw",
+  "tags": []
+}

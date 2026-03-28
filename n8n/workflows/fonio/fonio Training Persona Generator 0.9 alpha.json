@@ -1,0 +1,498 @@
+{
+  "name": "fonio Training Persona Generator",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "fonio-training-trigger",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "819e706c-9507-440c-bcf9-b3f0209aefd0",
+      "name": "Fonio Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        368,
+        880
+      ],
+      "webhookId": "ca536c70-f01b-464d-ad81-1ca7e40696f2"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "1KCGCBwtzQ82m8xQB47K7vGR6BXaZY21TNSiqAOh_ROk",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "E-Commerce",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1KCGCBwtzQ82m8xQB47K7vGR6BXaZY21TNSiqAOh_ROk/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "8be0a4d1-563e-4a1c-99c7-0b694afe6b2a",
+      "name": "Google Sheets Lesen",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        592,
+        880
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "QfuLctHhI3o7mKAL",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Intelligente Response-Formatierung basierend auf Aktion\nconst routerOutput = $('Auswahl verarbeiten').first().json;\nconst action = routerOutput.action;\n\n// Timestamp für alle Responses\nconst timestamp = new Date().toISOString();\n\nswitch (action) {\n  \n  case 'list':\n  // Liste der Trainingsbereiche - als Text für fonio\n  const bereichsListe = routerOutput.trainingsbereiche.join(', ');\n  return [{\n    json: {\n      success: true,\n      action: 'list',\n      message: `Verfügbare Trainingsbereiche: ${bereichsListe}`,\n      trainingsbereiche: routerOutput.trainingsbereiche,\n      totalCount: routerOutput.totalCount,\n      timestamp: timestamp\n    }\n  }];\n    \n  case 'check':\n    // Bereich-Existenz-Prüfung\n    return [{\n      json: {\n        success: true,\n        action: 'check',\n        bereich: routerOutput.bereich,\n        exists: routerOutput.exists,\n        message: routerOutput.message,\n        timestamp: timestamp\n      }\n    }];\n    \n  case 'error':\n    // Fehler bei unbekanntem Bereich\n    return [{\n      json: {\n        success: false,\n        action: 'error',\n        message: routerOutput.message,\n        availableBereich: routerOutput.availableBereich,\n        timestamp: timestamp\n      }\n    }];\n    \n  case 'generate':\n  case 'random':\n    // Persona wurde generiert - Claude-Output holen\n    const claudeOutput = $('Message a model').first().json;\n    return [{\n      json: {\n        success: true,\n        action: action,\n        trainingsbereich: routerOutput.trainingsbereich,\n        persona: claudeOutput.response,\n        timestamp: timestamp\n      }\n    }];\n    \n  default:\n    return [{\n      json: {\n        success: false,\n        error: \"Unbekannte Aktion\",\n        timestamp: timestamp\n      }\n    }];\n}"
+      },
+      "id": "f40da13f-9ce0-48dd-b61e-91f6117a7d2a",
+      "name": "Response formatieren",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1840,
+        976
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "359dbf06-aeaf-4f82-99b6-ce3ccb91382e",
+      "name": "Antwort an Fonio",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        2064,
+        976
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Error Handling - Formatiere Fehlermeldung für fonio\nconst error = $input.item(0).json;\n\nreturn [{\n  json: {\n    success: false,\n    error: \"Fehler beim Generieren der Trainingspersona\",\n    details: error.message || \"Unbekannter Fehler\",\n    timestamp: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "80f1ae75-4f6d-4ebb-84f9-887ae0e64879",
+      "name": "Fehlerbehandlung",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        368,
+        1296
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "dc1f8b41-a1ab-4e28-8867-309275c3b620",
+      "name": "Fehler-Antwort",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        592,
+        1296
+      ]
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "claude-sonnet-4-20250514",
+          "mode": "list",
+          "cachedResultName": "claude-sonnet-4-20250514"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "==Erstelle eine Trainingspersona für den Bereich \"{{ $json.trainingsbereich }}\".\n\nSituationsbeschreibung:\n{{ $json.beschreibung }}\n\nEntwickle eine vollständige Persona, die repräsentativ für Kunden in diesem Trainingsbereich ist."
+            }
+          ]
+        },
+        "options": {
+          "system": "Du bist ein Experte für Kundenservice-Training und spezialisiert auf die Entwicklung realistischer Trainingspersonas. Deine Aufgabe ist es, detaillierte, glaubwürdige Kundencharaktere zu erstellen, die Mitarbeiter in spezifischen Situationen trainieren können.\n\nErstelle immer Personas mit: Name, Alter, Beruf, Persönlichkeitstyp, Kommunikationsstil, emotionalem Zustand, spezifischen Bedürfnissen und typischen Problemen. Die Personas sollen für Rollenspiele geeignet und psychologisch stimmig sein."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.anthropic",
+      "typeVersion": 1,
+      "position": [
+        1488,
+        880
+      ],
+      "id": "769c1c24-b995-4b8c-9133-e8a28b70d19c",
+      "name": "Message a model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "6RlfJdXsmselCNpN",
+          "name": "Anthropic account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Auswahl verarbeiten').item.json.action }}",
+                    "rightValue": "=check",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "0e4eaed1-ab8c-4181-8dac-1728b2237925"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Modus Check"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "f33fa37a-fe46-4435-bc81-e7aee75ffebc",
+                    "leftValue": "={{ $('Auswahl verarbeiten').item.json.action }}",
+                    "rightValue": "random",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Modus Random"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "1a1a1574-4d2b-44ce-b5ea-c50773cec633",
+                    "leftValue": "={{ $('Auswahl verarbeiten').item.json.action }}",
+                    "rightValue": "list",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Modus List"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        1040,
+        864
+      ],
+      "id": "6c0eceaa-fee0-4449-95b6-b0d290f24b4e",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Function-Node für default: // random\n\n// Die Trainingsbereiche sind als weitere Input-Items verfügbar. Wir filtern die Daten.\nconst dataRows = $input.all().filter(item => item.json.Trainingsbereich); \n\nif (dataRows.length === 0) {\n    return [{ json: { action: 'error', message: 'Keine Daten für Random verfügbar' }}];\n}\n\nconst randomIndex = Math.floor(Math.random() * dataRows.length);\nconst selectedRow = dataRows[randomIndex];\n\nreturn [{ \n    json: { \n        action: 'random', \n        trainingsbereich: selectedRow.json.Trainingsbereich, \n        beschreibung: selectedRow.json.Beschreibung \n    } \n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1264,
+        880
+      ],
+      "id": "e13053f0-263b-4cdc-86a3-ea93e77c42b1",
+      "name": "Situation 'random'"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Function-Node für case 'check'\n\nconst inputItem = $input.first().json; \nconst checkBereich = inputItem.bereich;\n\n// 1. Hole die gesamte Liste: Setze auf leeres Array, falls undefined\nlet dataRows = inputItem.trainingsDaten || []; \n\n// 2. ABSOLUT KRITISCH: Wenn 'trainingsDaten' nicht funktioniert, probiere den Namen des Google Sheet Nodes!\n// Wenn dein vorheriger Code 'trainingsDaten' nicht korrekt erstellt,\n// liegt der Fehler in 'Auswahl verarbeiten'.\n\n// --- Finaler Abgleich mit dem Error-Handling, das du entfernt hast ---\nif (dataRows.length === 0) {\n    // Da du die Abbruchbedingungen entfernt hast, ist dies jetzt der Debug-Punkt.\n    // Wenn hier keine Daten sind, MUSS der Fehler in 'Auswahl verarbeiten' liegen.\n    // Füge diesen Code temporär ein, um den genauen Fehler zu sehen:\n    \n    // return [{ json: { \n    //     action: 'error', \n    //     message: 'Kritischer Fehler: trainingsDaten ist leer oder undefined.',\n    //     debug_input_item: inputItem \n    // }}];\n}\n// --------------------------------------------------------------------\n\n\n// 3. Der eigentliche Vergleich: Jetzt sicher, da dataRows ein Array ist.\nconst exists = dataRows.some(row => \n    typeof row.Trainingsbereich === 'string' && \n    row.Trainingsbereich.toLowerCase() === checkBereich.toLowerCase()\n);\n\nreturn [{ \n    json: { \n        action: 'check', \n        checkPassed: exists, \n        bereich: checkBereich, \n        message: exists ? 'Trainingsbereich gefunden.' : 'Trainingsbereich nicht verfügbar.' \n    } \n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1264,
+        688
+      ],
+      "id": "167edf0c-d5e6-4c8f-8f5a-850b98d89f50",
+      "name": "Situation 'check'"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Function-Node für case 'list'\n\n// Die Trainingsbereiche sind als weitere Input-Items verfügbar. Wir filtern die Daten.\nconst dataRows = $input.all().filter(item => item.json.Trainingsbereich); \n\nconst bereiche = dataRows.map(row => row.json.Trainingsbereich);\n\nreturn [{ \n    json: { \n        action: 'list', \n        trainingsbereiche: bereiche, \n        totalCount: bereiche.length \n    } \n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1552,
+        1072
+      ],
+      "id": "57ad9863-66bf-406a-8163-c6708e5d3886",
+      "name": "Situation 'list'"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "1KCGCBwtzQ82m8xQB47K7vGR6BXaZY21TNSiqAOh_ROk",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1224791603,
+          "mode": "list",
+          "cachedResultName": "Anruferdaten",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1KCGCBwtzQ82m8xQB47K7vGR6BXaZY21TNSiqAOh_ROk/edit#gid=1224791603"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        368,
+        464
+      ],
+      "id": "0842be46-4139-4522-bda5-e4a25893b805",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleApi": {
+          "id": "QfuLctHhI3o7mKAL",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Function: Webhook-Body korrekt extrahieren (NUR 1 Item im Input)\n\n// 1. Hole den Body des Webhook-Requests, wo 'action' und 'bereich' liegen.\nconst webhookBody = $input.first().json.body; \n\n// 2. Sicherheits-Check, ob die Action definiert ist\n// Wir prüfen jetzt webhookBody.action, NICHT input.action\nif (!webhookBody || !webhookBody.action) {\n    return [{ json: { action: 'random', message: 'Action fehlt im Webhook Body.' } }];\n}\n\n// 3. Output erstellen\nreturn [{\n    json: {\n        // Jetzt greifen wir auf die korrekten Felder im webhookBody zu\n        action: webhookBody.action, \n        bereich: webhookBody.bereich || '', \n        rufnummer: webhookBody.rufnummer || ''\n    }\n}];"
+      },
+      "id": "f319e59d-3582-4eab-a172-216ca150a1e7",
+      "name": "Auswahl verarbeiten",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        816,
+        880
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "3eab51b1-ddfc-430f-bc1c-cfccc9602310",
+              "leftValue": "=$json.checkPassed",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1552,
+        688
+      ],
+      "id": "422e0200-574b-476b-b789-147c389294ce",
+      "name": "If"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Fonio Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets Lesen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets Lesen": {
+      "main": [
+        [
+          {
+            "node": "Auswahl verarbeiten",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Response formatieren": {
+      "main": [
+        [
+          {
+            "node": "Antwort an Fonio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fehlerbehandlung": {
+      "main": [
+        [
+          {
+            "node": "Fehler-Antwort",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Response formatieren",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Situation 'check'",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Situation 'random'",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Situation 'list'",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [],
+        []
+      ]
+    },
+    "Situation 'check'": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Situation 'list'": {
+      "main": [
+        [
+          {
+            "node": "Response formatieren",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Situation 'random'": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        []
+      ]
+    },
+    "Auswahl verarbeiten": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1e27cd48-dcd2-4280-bf38-3e5f3a0e1443",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ca9048c6f81bd21d01e3b762fe2fa38de922e62200ce1e767f7a2dfd45624f9b"
+  },
+  "id": "wtVL3a6B2x2Xintd",
+  "tags": []
+}

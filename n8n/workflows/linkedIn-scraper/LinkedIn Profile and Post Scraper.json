@@ -1,0 +1,422 @@
+{
+  "workflow_metadata": {
+    "name": "LinkedIn Quote Processing & Multi-Email Sender",
+    "typ": "Multi-Branch Automation Workflow",
+    "hauptzweck": "Automatisierte Verarbeitung von LinkedIn-Profilen, Quotes und paralleler Versand über Threema an mehrere Empfänger",
+    "komplexitaet": "Hoch - Parallele Verarbeitung mit 3+ Hauptzweigen"
+  },
+  
+  "trigger_nodes": [
+    {
+      "node_id": "schedule_trigger",
+      "typ": "Schedule Trigger / Manual Trigger",
+      "beschreibung": "Startet den Workflow zeitbasiert oder manuell",
+      "position": "Workflow-Start oben links"
+    }
+  ],
+
+  "data_input_nodes": [
+    {
+      "node_id": "get_quote",
+      "typ": "Google Sheets / Database Query",
+      "funktion": "Lädt Quote-Daten aus einer Datenquelle",
+      "ausgabe": "Quote-Datensätze zur Verarbeitung"
+    },
+    {
+      "node_id": "linkedin_profile_scraper",
+      "typ": "HTTP Request / Scraper",
+      "funktion": "Scrapet LinkedIn-Profile (URL wird vermutlich aus vorherigen Daten gezogen)",
+      "integration": "LinkedIn Profile URL Scraper",
+      "position": "Oberer Workflow-Bereich"
+    }
+  ],
+
+  "processing_nodes": [
+    {
+      "node_id": "pick_random",
+      "typ": "Function / Random Selector",
+      "funktion": "Wählt zufällig einen Datensatz aus (vermutlich für A/B-Testing oder Variation)",
+      "zweck": "Diversifizierung der Nachrichteninhalte"
+    },
+    {
+      "node_id": "merge",
+      "typ": "Merge Node",
+      "funktion": "Kombiniert Daten aus verschiedenen Quellen (LinkedIn-Daten + Quote-Daten)",
+      "eingaenge": ["Pick Random Output", "LinkedIn Profile Data"]
+    },
+    {
+      "node_id": "code1",
+      "typ": "Code Node (JavaScript/Python)",
+      "funktion": "Custom Logic für Datenverarbeitung",
+      "vermutlich": "Formatierung, Validierung oder Transformation der Daten"
+    },
+    {
+      "node_id": "code2",
+      "typ": "Code Node (JavaScript/Python)",
+      "funktion": "Weitere Custom Logic",
+      "position": "Nach Merge, vor IF-Verzweigung"
+    },
+    {
+      "node_id": "if2",
+      "typ": "IF Conditional Node",
+      "funktion": "Bedingte Verzweigung basierend auf Daten-Eigenschaften",
+      "verzweigung": "Entscheidet über weiteren Verarbeitungspfad"
+    },
+    {
+      "node_id": "replace_m1",
+      "typ": "Set/Replace Node",
+      "funktion": "Ersetzt oder setzt spezifische Variablen (vermutlich Message-Template M1)"
+    },
+    {
+      "node_id": "switch",
+      "typ": "Switch Node",
+      "funktion": "Mehrfach-Verzweigung zu parallelen Verarbeitungszweigen",
+      "ausgaenge": "Mindestens 3 parallele Pfade"
+    },
+    {
+      "node_id": "edit_fields",
+      "typ": "Edit Fields / Set Node",
+      "funktion": "Bearbeitet oder formatiert Datenfelder",
+      "position": "LinkedIn-Zweig"
+    },
+    {
+      "node_id": "message_parser",
+      "typ": "Parser Node",
+      "funktion": "Parst und strukturiert Nachrichteninhalte",
+      "wiederholungen": "Erscheint in mehreren Zweigen"
+    }
+  ],
+
+  "ai_nodes": [
+    {
+      "node_id": "openai_chat_model",
+      "typ": "OpenAI / LLM Integration",
+      "funktion": "KI-basierte Textgenerierung oder -verarbeitung",
+      "verwendung": "Vermutlich für personalisierte Nachrichtenerstellung oder Content-Enhancement",
+      "position": "LinkedIn-Verarbeitungszweig"
+    },
+    {
+      "node_id": "ai_agent",
+      "typ": "AI Agent Node",
+      "funktion": "Komplexere KI-gesteuerte Aufgaben",
+      "position": "Multi-Email-Zweig"
+    }
+  ],
+
+  "output_nodes": [
+    {
+      "node_id": "send_message1",
+      "typ": "Threema Send Message",
+      "funktion": "Sendet formatierte Nachricht via Threema an Empfänger 1",
+      "zweig": "Haupt-Zweig 1"
+    },
+    {
+      "node_id": "send_message2",
+      "typ": "Threema Send Message",
+      "funktion": "Sendet formatierte Nachricht via Threema an Empfänger 2",
+      "zweig": "Haupt-Zweig 2"
+    },
+    {
+      "node_id": "send_message3",
+      "typ": "Threema Send Message",
+      "funktion": "Sendet formatierte Nachricht via Threema an Empfänger 3",
+      "zweig": "Haupt-Zweig 3"
+    }
+  ],
+
+  "status_update_nodes": [
+    {
+      "node_id": "status_update1",
+      "typ": "Database Update / Google Sheets Update",
+      "funktion": "Aktualisiert Status nach erfolgreichem Versand",
+      "zweig": "Zweig 1",
+      "zweck": "Tracking und Logging"
+    },
+    {
+      "node_id": "status_update2",
+      "typ": "Database Update / Google Sheets Update",
+      "funktion": "Status-Update für Zweig 2",
+      "zweig": "Zweig 2"
+    },
+    {
+      "node_id": "status_update3",
+      "typ": "Database Update / Google Sheets Update",
+      "funktion": "Status-Update für Zweig 3",
+      "zweig": "Zweig 3"
+    },
+    {
+      "node_id": "quota_update1",
+      "typ": "Counter / Quota Update",
+      "funktion": "Aktualisiert Versandquoten oder Zähler",
+      "zweig": "Zweig 1"
+    },
+    {
+      "node_id": "quota_update2",
+      "typ": "Counter / Quota Update",
+      "funktion": "Quota-Update für Zweig 2",
+      "zweig": "Zweig 2"
+    },
+    {
+      "node_id": "quota_update3",
+      "typ": "Counter / Quota Update",
+      "funktion": "Quota-Update für Zweig 3",
+      "zweig": "Zweig 3"
+    }
+  ],
+
+  "wait_nodes": [
+    {
+      "node_id": "wait1",
+      "typ": "Wait Node",
+      "funktion": "Zeitverzögerung vor Abschluss (Rate-Limiting, natürliches Verhalten)",
+      "zweig": "Zweig 1",
+      "zweck": "Vermeidung von API-Limits oder Spam-Detection"
+    },
+    {
+      "node_id": "wait2",
+      "typ": "Wait Node",
+      "funktion": "Zeitverzögerung für Zweig 2",
+      "zweig": "Zweig 2"
+    },
+    {
+      "node_id": "wait3",
+      "typ": "Wait Node",
+      "funktion": "Zeitverzögerung für Zweig 3",
+      "zweig": "Zweig 3"
+    }
+  ],
+
+  "final_nodes": [
+    {
+      "node_id": "replace_m2",
+      "typ": "Replace/Set Node",
+      "funktion": "Finale Datenbereinigung oder Variablen-Reset (M2)",
+      "position": "Workflow-Ende Zweig 1"
+    },
+    {
+      "node_id": "replace_m3",
+      "typ": "Replace/Set Node",
+      "funktion": "Finale Verarbeitung für Zweig 2 (M3)",
+      "position": "Workflow-Ende Zweig 2"
+    },
+    {
+      "node_id": "replace_m4",
+      "typ": "Replace/Set Node",
+      "funktion": "Finale Verarbeitung für Zweig 3 (M4)",
+      "position": "Workflow-Ende Zweig 3"
+    }
+  ],
+
+  "linkedin_branch": {
+    "beschreibung": "Separater Workflow-Zweig für LinkedIn-Profil-Verarbeitung",
+    "nodes": [
+      {
+        "name": "When clicking 'execute'",
+        "typ": "Manual Trigger",
+        "funktion": "Manueller Start des LinkedIn-Zweigs"
+      },
+      {
+        "name": "Get range in sheet",
+        "typ": "Google Sheets Read",
+        "funktion": "Liest LinkedIn-URLs oder Profile aus Sheet"
+      },
+      {
+        "name": "Loop",
+        "typ": "Loop Node",
+        "funktion": "Iteriert über LinkedIn-Profile"
+      },
+      {
+        "name": "Edit Fields",
+        "typ": "Data Transformation",
+        "funktion": "Bereitet Daten für Scraping vor"
+      },
+      {
+        "name": "Code",
+        "typ": "Custom Logic",
+        "funktion": "Verarbeitung der LinkedIn-Daten"
+      },
+      {
+        "name": "Append or update row",
+        "typ": "Google Sheets Write",
+        "funktion": "Speichert verarbeitete LinkedIn-Daten zurück",
+        "wiederholungen": "Mehrfach im Loop"
+      }
+    ],
+    "zweck": "Automatisches Scraping und Aktualisierung von LinkedIn-Profildaten"
+  },
+
+  "multi_email_branch": {
+    "beschreibung": "Email-Clean-Up und Multi-Email-Verarbeitung",
+    "nodes": [
+      {
+        "name": "Multi Email Splitter",
+        "typ": "Split Node",
+        "funktion": "Splittet mehrere Email-Adressen"
+      },
+      {
+        "name": "De-Duplicate Labels",
+        "typ": "Deduplizierung",
+        "funktion": "Entfernt doppelte Einträge"
+      },
+      {
+        "name": "Email Clean-Up",
+        "typ": "Data Cleaning",
+        "funktion": "Bereinigt und validiert Email-Adressen"
+      },
+      {
+        "name": "LinkedIn Post Summary",
+        "typ": "Aggregation/Summary",
+        "funktion": "Erstellt Zusammenfassung von LinkedIn-Posts"
+      },
+      {
+        "name": "AI Agent",
+        "typ": "AI Processing",
+        "funktion": "KI-gestützte Verarbeitung für Email-Content"
+      }
+    ]
+  },
+
+  "workflow_paths": [
+    {
+      "pfad_id": "main_path_1",
+      "schritte": [
+        "Get Quote",
+        "Pick Random",
+        "Merge",
+        "Code2",
+        "IF2",
+        "Replace M1",
+        "Switch",
+        "Send Message1",
+        "Status Update1",
+        "Quota Update1",
+        "Wait1",
+        "Replace M2"
+      ],
+      "beschreibung": "Hauptpfad 1: Quote-Verarbeitung zu Empfänger 1"
+    },
+    {
+      "pfad_id": "main_path_2",
+      "schritte": [
+        "Switch",
+        "Send Message2",
+        "Status Update2",
+        "Quota Update2",
+        "Wait2",
+        "Replace M3"
+      ],
+      "beschreibung": "Paralleler Pfad 2: Quote zu Empfänger 2"
+    },
+    {
+      "pfad_id": "main_path_3",
+      "schritte": [
+        "Switch",
+        "Send Message3",
+        "Status Update3",
+        "Quota Update3",
+        "Wait3",
+        "Replace M4"
+      ],
+      "beschreibung": "Paralleler Pfad 3: Quote zu Empfänger 3"
+    },
+    {
+      "pfad_id": "linkedin_scraping_path",
+      "schritte": [
+        "Manual Trigger",
+        "LinkedIn Profile URL Scraper",
+        "Get range in sheet",
+        "Loop",
+        "Edit Fields",
+        "Code",
+        "OpenAI Chat Model",
+        "Append or update row"
+      ],
+      "beschreibung": "LinkedIn-Profil Scraping und Datenaktualisierung"
+    }
+  ],
+
+  "datenfluss": {
+    "input_quellen": [
+      "Google Sheets (Quotes)",
+      "Google Sheets (LinkedIn URLs)",
+      "LinkedIn Profile Scraper"
+    ],
+    "verarbeitung": [
+      "Random Selection",
+      "Data Merging",
+      "Custom Code Processing",
+      "AI Enhancement (OpenAI)",
+      "Conditional Branching",
+      "Template Replacement"
+    ],
+    "output_ziele": [
+      "Threema Messages (3 Empfänger)",
+      "Google Sheets Status Updates",
+      "Quota Counter Updates"
+    ]
+  },
+
+  "besonderheiten": [
+    {
+      "feature": "Parallele Verarbeitung",
+      "beschreibung": "3 identische Zweige für gleichzeitigen Versand an mehrere Empfänger"
+    },
+    {
+      "feature": "Rate Limiting",
+      "beschreibung": "Wait-Nodes zwischen Versand-Schritten zur Vermeidung von API-Limits"
+    },
+    {
+      "feature": "Status Tracking",
+      "beschreibung": "Umfassendes Logging durch Status- und Quota-Updates"
+    },
+    {
+      "feature": "AI Integration",
+      "beschreibung": "OpenAI/LLM für Content-Enhancement oder Personalisierung"
+    },
+    {
+      "feature": "Loop Processing",
+      "beschreibung": "Iterative Verarbeitung von LinkedIn-Profilen im separaten Zweig"
+    },
+    {
+      "feature": "Conditional Logic",
+      "beschreibung": "IF-Nodes für bedingte Verarbeitung basierend auf Daten-Eigenschaften"
+    },
+    {
+      "feature": "Data Deduplication",
+      "beschreibung": "Deduplizierung von Labels/Email-Adressen im Multi-Email-Zweig"
+    }
+  ],
+
+  "use_cases": [
+    "Automatisierter Newsletter-Versand mit personalisierten Quotes",
+    "LinkedIn-basierte Lead-Generierung mit automatischem Follow-Up",
+    "Multi-Recipient Quote-Distribution über Threema",
+    "Content-Curation und -Distribution mit AI-Enhancement",
+    "Automatisches CRM-Update nach Nachrichtenversand"
+  ],
+
+  "technologie_stack": {
+    "automation_platform": "n8n",
+    "messaging": "Threema Gateway",
+    "data_storage": "Google Sheets",
+    "ai_provider": "OpenAI (ChatGPT/GPT-4)",
+    "scraping": "LinkedIn Profile Scraper",
+    "programming": "JavaScript/Python (Code Nodes)"
+  },
+
+  "optimierungsvorschlaege": [
+    "Error Handling: Keine sichtbaren Error-Handler oder Fallback-Pfade",
+    "Logging: Könnte zentralisiertes Logging für besseres Debugging hinzugefügt werden",
+    "Modularität: Wiederholte Strukturen (3x identische Zweige) könnten durch Loop-Logic reduziert werden",
+    "Notification: Success/Failure-Benachrichtigungen am Workflow-Ende wären hilfreich",
+    "Rate Limiting: Wait-Times könnten dynamisch basierend auf API-Response angepasst werden"
+  ],
+
+  "sicherheitsaspekte": [
+    "API-Keys sollten in n8n Credentials gespeichert sein (nicht im Workflow sichtbar)",
+    "LinkedIn Scraping: Compliance mit LinkedIn ToS beachten",
+    "GDPR: Verarbeitung personenbezogener Daten aus LinkedIn-Profilen",
+    "Rate Limiting: Wichtig zur Vermeidung von Account-Sperren",
+    "Data Storage: Sensible Daten in Google Sheets sollten mit Zugriffsbeschränkungen gesichert sein"
+  ]
+}

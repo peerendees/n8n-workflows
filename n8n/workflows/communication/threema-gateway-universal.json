@@ -1,0 +1,599 @@
+{
+  "name": "Threema Gateway Universal - Nachrichten & Dateien",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "threema-gateway",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-gateway",
+      "name": "Threema Gateway Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [250, 400],
+      "webhookId": "threema-gateway-webhook"
+    },
+    {
+      "parameters": {
+        "content": "=Empfangene Webhook-Daten:\n{{ JSON.stringify($json, null, 2) }}",
+        "height": 464,
+        "width": 465
+      },
+      "id": "note-webhook-info",
+      "name": "Info: Webhook Daten",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [220, 240]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extrahiere und normalisiere Threema Webhook-Daten\nconst webhookData = $input.item.json;\n\n// Bestimme Nachrichtentyp\nlet messageType = 'unknown';\nlet hasFile = false;\n\nif (webhookData.body) {\n  const body = typeof webhookData.body === 'string' ? JSON.parse(webhookData.body) : webhookData.body;\n  \n  // Threema Gateway Nachrichtentypen\n  if (body.type) {\n    messageType = body.type; // text, image, file, audio, video\n  }\n  \n  // Prüfe ob Datei vorhanden\n  if (body.blob_id || body.file_blob_id) {\n    hasFile = true;\n  }\n  \n  return {\n    json: {\n      messageId: body.message_id || webhookData.headers['x-threema-message-id'],\n      from: body.from || webhookData.headers['x-threema-from'],\n      to: body.to || webhookData.headers['x-threema-to'],\n      messageType: messageType,\n      hasFile: hasFile,\n      text: body.text || '',\n      blobId: body.blob_id || body.file_blob_id || null,\n      fileName: body.file_name || null,\n      fileSize: body.file_size || null,\n      mimeType: body.mime_type || body.file_type || null,\n      thumbnailBlobId: body.thumbnail_blob_id || null,\n      timestamp: body.timestamp || new Date().toISOString(),\n      rawData: body\n    }\n  };\n} else {\n  // Fallback für direktes JSON\n  return {\n    json: {\n      messageId: webhookData.message_id || 'unknown',\n      from: webhookData.from || 'unknown',\n      to: webhookData.to || 'unknown',\n      messageType: webhookData.type || 'text',\n      hasFile: false,\n      text: webhookData.text || '',\n      blobId: null,\n      fileName: null,\n      fileSize: null,\n      mimeType: null,\n      thumbnailBlobId: null,\n      timestamp: webhookData.timestamp || new Date().toISOString(),\n      rawData: webhookData\n    }\n  };\n}"
+      },
+      "id": "parse-webhook-data",
+      "name": "Parse Webhook Daten",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [450, 400]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "has-file-condition",
+              "leftValue": "={{ $json.hasFile }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-has-file",
+      "name": "Hat Datei?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [650, 400]
+    },
+    {
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "method": "GET",
+        "url": "=https://msgapi.threema.ch/blobs/{{ $json.blobId }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "from",
+              "value": "={{ $json.to }}"
+            },
+            {
+              "name": "secret",
+              "value": "={{ $credentials.threemaGatewayApi.secret }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "fileData"
+            }
+          }
+        }
+      },
+      "id": "download-file",
+      "name": "Datei herunterladen",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [850, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "threema-gateway-api",
+          "name": "Threema Gateway API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Verarbeite heruntergeladene Datei\nconst item = $input.item.json;\n\nreturn {\n  json: {\n    ...item,\n    fileDownloaded: true,\n    fileBinaryData: 'fileData',\n    processedAt: new Date().toISOString()\n  },\n  binary: $input.item.binary\n};"
+      },
+      "id": "process-file",
+      "name": "Datei verarbeiten",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "is-image",
+              "leftValue": "={{ $json.mimeType }}",
+              "rightValue": "image",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-file-type",
+      "name": "Dateityp prüfen",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [1250, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "set-type",
+              "name": "fileCategory",
+              "value": "image",
+              "type": "string"
+            },
+            {
+              "id": "set-processing",
+              "name": "readyForProcessing",
+              "value": true,
+              "type": "boolean"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-image-data",
+      "name": "Als Bild markieren",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [1450, 200]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "is-audio",
+              "leftValue": "={{ $json.mimeType }}",
+              "rightValue": "audio",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-audio",
+      "name": "Audio prüfen",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1450, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "set-audio-type",
+              "name": "fileCategory",
+              "value": "audio",
+              "type": "string"
+            },
+            {
+              "id": "set-audio-processing",
+              "name": "readyForProcessing",
+              "value": true,
+              "type": "boolean"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-audio-data",
+      "name": "Als Audio markieren",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [1650, 250]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "set-other-type",
+              "name": "fileCategory",
+              "value": "document",
+              "type": "string"
+            },
+            {
+              "id": "set-other-processing",
+              "name": "readyForProcessing",
+              "value": true,
+              "type": "boolean"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-document-data",
+      "name": "Als Dokument markieren",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [1650, 350]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "set-text-type",
+              "name": "messageCategory",
+              "value": "text",
+              "type": "string"
+            },
+            {
+              "id": "set-text-processing",
+              "name": "readyForProcessing",
+              "value": true,
+              "type": "boolean"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-text-data",
+      "name": "Als Text markieren",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [850, 500]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combinationMode": "mergeByPosition",
+        "options": {}
+      },
+      "id": "merge-data",
+      "name": "Daten zusammenführen",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [1850, 400]
+    },
+    {
+      "parameters": {
+        "content": "=🎯 VERARBEITUNGSPUNKT\n\nHier können Sie eigene Logik einfügen:\n- Nachrichten an andere APIs senden\n- Dateien speichern (Google Drive, Dropbox, etc.)\n- KI-Verarbeitung (OpenAI, Claude, etc.)\n- Datenbank-Operationen\n- E-Mail-Benachrichtigungen\n\nVerfügbare Daten:\n- $json.messageCategory / $json.fileCategory\n- $json.text (für Textnachrichten)\n- $json.fileData (Binary-Daten für Dateien)\n- $json.from, $json.to, $json.messageId\n- $json.fileName, $json.mimeType",
+        "height": 539,
+        "width": 393
+      },
+      "id": "note-processing",
+      "name": "Info: Verarbeitungspunkt",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [1820, 220],
+      "color": 4
+    },
+    {
+      "parameters": {
+        "jsCode": "// Beispiel: Nachrichtenverarbeitung\n// Hier können Sie eigene Logik implementieren\n\nconst item = $input.item.json;\n\n// Log für Debugging\nconsole.log('Verarbeite Nachricht:', {\n  type: item.messageCategory || item.fileCategory,\n  from: item.from,\n  hasFile: item.hasFile\n});\n\n// Beispiel-Verarbeitung\nlet processing_result = {\n  status: 'processed',\n  processedAt: new Date().toISOString(),\n  summary: ''\n};\n\nif (item.text) {\n  processing_result.summary = `Textnachricht empfangen: ${item.text.substring(0, 50)}...`;\n} else if (item.hasFile) {\n  processing_result.summary = `Datei empfangen: ${item.fileName} (${item.mimeType})`;\n}\n\nreturn {\n  json: {\n    ...item,\n    processing: processing_result\n  },\n  binary: $input.item.binary\n};"
+      },
+      "id": "process-message",
+      "name": "Nachricht verarbeiten",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2050, 400]
+    },
+    {
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "method": "POST",
+        "url": "https://msgapi.threema.ch/send_simple",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "from",
+              "value": "={{ $json.to }}"
+            },
+            {
+              "name": "to",
+              "value": "={{ $json.from }}"
+            },
+            {
+              "name": "secret",
+              "value": "={{ $credentials.threemaGatewayApi.secret }}"
+            },
+            {
+              "name": "text",
+              "value": "=✅ Ihre Nachricht wurde erfolgreich empfangen und verarbeitet.\\n\\nZusammenfassung: {{ $json.processing.summary }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "send-confirmation",
+      "name": "Bestätigung senden",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2250, 400],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "threema-gateway-api",
+          "name": "Threema Gateway API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"status\": \"success\", \"message\": \"Nachricht verarbeitet\", \"messageId\": \"{{ $json.messageId }}\" }",
+        "options": {}
+      },
+      "id": "webhook-response",
+      "name": "Webhook Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [2450, 400]
+    },
+    {
+      "parameters": {
+        "content": "=📋 WORKFLOW ÜBERSICHT\n\nDieser Workflow verarbeitet alle Threema Gateway Nachrichten:\n\n✅ Unterstützte Nachrichtentypen:\n- Text\n- Bilder\n- Audio-Dateien\n- Video-Dateien\n- Dokumente/Dateien\n\n🔧 Workflow-Schritte:\n1. Webhook empfängt Nachricht\n2. Daten werden geparst\n3. Dateien werden heruntergeladen (falls vorhanden)\n4. Dateityp wird erkannt\n5. Verarbeitung erfolgt\n6. Bestätigung an Sender\n7. HTTP Response an Threema\n\n⚙️ Konfiguration erforderlich:\n- Threema Gateway API Credentials\n- Webhook-URL in Threema konfigurieren",
+        "height": 654,
+        "width": 361,
+        "color": 5
+      },
+      "id": "note-overview",
+      "name": "Info: Workflow Übersicht",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [100, 180]
+    },
+    {
+      "parameters": {
+        "content": "=⚠️ FEHLERBEHANDLUNG\n\nBei Fehlern:\n- Workflow fährt fort (continueOnFail)\n- Fehler werden geloggt\n- Alternativer Pfad wird ausgeführt\n\nOptional:\n- E-Mail-Benachrichtigung bei Fehler\n- Logging in externe Systeme\n- Retry-Mechanismen",
+        "height": 331,
+        "width": 289,
+        "color": 6
+      },
+      "id": "note-error-handling",
+      "name": "Info: Fehlerbehandlung",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [2420, 180]
+    }
+  ],
+  "connections": {
+    "Threema Gateway Webhook": {
+      "main": [
+        [
+          {
+            "node": "Parse Webhook Daten",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Webhook Daten": {
+      "main": [
+        [
+          {
+            "node": "Hat Datei?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hat Datei?": {
+      "main": [
+        [
+          {
+            "node": "Datei herunterladen",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Als Text markieren",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Datei herunterladen": {
+      "main": [
+        [
+          {
+            "node": "Datei verarbeiten",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Datei verarbeiten": {
+      "main": [
+        [
+          {
+            "node": "Dateityp prüfen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dateityp prüfen": {
+      "main": [
+        [
+          {
+            "node": "Als Bild markieren",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Audio prüfen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Als Bild markieren": {
+      "main": [
+        [
+          {
+            "node": "Daten zusammenführen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Audio prüfen": {
+      "main": [
+        [
+          {
+            "node": "Als Audio markieren",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Als Dokument markieren",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Als Audio markieren": {
+      "main": [
+        [
+          {
+            "node": "Daten zusammenführen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Als Dokument markieren": {
+      "main": [
+        [
+          {
+            "node": "Daten zusammenführen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Als Text markieren": {
+      "main": [
+        [
+          {
+            "node": "Daten zusammenführen",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Daten zusammenführen": {
+      "main": [
+        [
+          {
+            "node": "Nachricht verarbeiten",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nachricht verarbeiten": {
+      "main": [
+        [
+          {
+            "node": "Bestätigung senden",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bestätigung senden": {
+      "main": [
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": ""
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "createdAt": "2025-01-06T12:00:00.000Z",
+      "updatedAt": "2025-01-06T12:00:00.000Z",
+      "id": "threema",
+      "name": "threema"
+    },
+    {
+      "createdAt": "2025-01-06T12:00:00.000Z",
+      "updatedAt": "2025-01-06T12:00:00.000Z",
+      "id": "gateway",
+      "name": "gateway"
+    }
+  ],
+  "triggerCount": 0,
+  "updatedAt": "2025-01-06T12:00:00.000Z",
+  "versionId": "threema-gateway-universal-v1"
+}

@@ -1,0 +1,10 @@
+{
+  "event": "session.ended",
+  "data": {
+    "id": "test_session_123",
+    "title": "Test YouTube Video",
+    "transcript": "Dies ist ein Test-Transkript. Das Video wurde erfolgreich transkribiert."
+  },
+  "timestamp": "2024-12-23T18:00:00Z"
+}
+
