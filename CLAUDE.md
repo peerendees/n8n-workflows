@@ -57,6 +57,31 @@ Die folgenden Workflow-Kategorien sind im Einsatz:
 - **Content & Daten:** YouTube-Transkripte nach Notion, LinkedIn-Scraping, Blogbeitrag-Erstellung
 - **Infrastruktur:** Bidirektionaler GitHub-Sync (Backup + Restore), Workflow-Migration, Credential-Validierung
 
+## Wichtig: n8n-Sync und Feature-Branches
+
+> **KRITISCH**: Wenn Dateien im `n8n/`-Verzeichnis auf einem Feature-Branch (z.B. `claude/...`) gepusht werden, synct der Sync-Workflow diese NICHT nach n8n — er holt nur von `main`. Gleichzeitig ueberschreibt der Backup-Workflow alle 15 Minuten den GitHub-Stand mit dem aktuellen n8n-Stand.
+
+**Nach jedem Push auf einen Feature-Branch, der `n8n/`-Dateien enthaelt, MUSS Claude dem Nutzer folgende Warnung ausgeben:**
+
+```
+⚠️  MERGE ERFORDERLICH — n8n-Workflow-Aenderungen auf Feature-Branch!
+
+Deine Aenderungen an n8n/-Dateien liegen auf dem Branch [Branch-Name].
+Der Sync-Workflow holt nur von `main`. Der Backup-Workflow ueberschreibt
+GitHub alle 15 Min mit dem alten n8n-Stand.
+
+→ Jetzt PR mergen oder manuell in n8n uebernehmen!
+→ Optional: Backup-Workflow in n8n kurz deaktivieren bis zum Merge.
+```
+
+**Ablauf bei Aenderungen an n8n-Workflows:**
+1. Aenderung entwickeln und auf Feature-Branch pushen
+2. Sofort Merge-Warnung ausgeben (siehe oben)
+3. Nutzer muss PR mergen ODER Aenderung manuell in n8n anwenden
+4. Erst nach Sync den Backup-Workflow wieder aktivieren (falls deaktiviert)
+
+Siehe auch: `BEST_PRACTICES.md` fuer Details zur Race-Condition-Vermeidung.
+
 ## Connectoren/APIs
 
 | Connector | Verwendung | Haeufigkeit |
