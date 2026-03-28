@@ -1,4 +1,5 @@
 # n8n ↔ GitHub: Best Practices für Synchronisation & Backup
+<!-- Letzte Pruefung: 2026-03-28 -->
 
 Dieses Dokument beschreibt das Architektur-Konzept und die "Best Practices" für das Zusammenspiel zwischen n8n und GitHub, um Konflikte (Race Conditions) zu vermeiden.
 
