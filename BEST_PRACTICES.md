@@ -37,3 +37,19 @@ Wenn Änderungen am Backup-Workflow oder anderen kritischen Files vorgenommen we
 
 ## 4. Webhook Trigger vs. Cron
 - Der Sync-Workflow sollte bevorzugt per **GitHub Webhook** getriggert werden. Dies minimiert das Zeitfenster für Konflikte, da n8n fast unmittelbar nach einem Push aktualisiert wird.
+
+## 5. Ökosystem: Checkliste für KI-Tools, Feature-Branches und Merge
+
+Damit GitHub, n8n und automatische Jobs nicht gegeneinander arbeiten:
+
+1. **Workflow-Logik gehört nach `main` (oder du akzeptierst, dass n8n nicht nachzieht):** Der Sync-Workflow liest Dateien von **`main`**. Änderungen nur auf einem Feature-Branch sind in n8n unsichtbar, bis sie gemerged sind.
+2. **Vor Merge von `n8n/…`-JSON:** Backup-Workflow in n8n **kurz deaktivieren**, PR nach `main` mergen, warten bis **GitHub → n8n Synchronisation** erfolgreich gelaufen ist (Webhook-Execution prüfen), im Editor verifizieren, dann Backup **wieder aktivieren**.
+3. **Nach Merge:** Kurz prüfen, ob der Sync-Lauf **grün** ist. Wenn der Backup-Lauf vor dem Sync noch einmal nach `main` schreibt, kann der alte n8n-Stand die frische Merge-Version überschreiben (siehe Abschnitt „Race Condition“).
+4. **Konvention für Auto-Commits:** Backup-Commits enthalten `Auto-Backup` in der Message; der Sync ignoriert solche Pushes bewusst, damit keine Schleifen entstehen.
+5. **Sticky Note / Versions-Tags** in kritischen Workflows beibehalten, damit du im Editor siehst, ob n8n wirklich den Stand von GitHub hat.
+
+## 6. Technische Anmerkungen zum Sync (Repo-Stand)
+
+- Bei **großen Pushes** kann GitHub eine **leere `commits`-Liste** liefern; der Workflow fällt auf **`head_commit`** zurück.
+- Bei **mehreren geänderten JSON-Dateien** pro Push müssen Parse-Daten **pro Item** (`$('Parse Workflow').item`) angebunden sein, nicht nur der letzte `$node`-Stand.
+- Detaillierte Analyse, Evidenz-Vorlage und Symptom-Matrix: [n8n/docs/debugging/SYNC-ANALYSE-UND-EVIDENZ.md](n8n/docs/debugging/SYNC-ANALYSE-UND-EVIDENZ.md).
