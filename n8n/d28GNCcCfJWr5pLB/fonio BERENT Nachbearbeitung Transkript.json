@@ -105,7 +105,7 @@
             {
               "name": "anrufername",
               "type": "string",
-              "value": "={{ ($json.body.extractionData?.vorname ?? '') + ($json.body.extractionData?.name ? ' ' + $json.body.extractionData.name : '') }}"
+              "value": "={{ (($json.body.extractionData?.vorname ?? '') + ($json.body.extractionData?.name ? ' ' + $json.body.extractionData.name : '')).trim() || 'N. N.' }}"
             },
             {
               "name": "telefonnummer",
