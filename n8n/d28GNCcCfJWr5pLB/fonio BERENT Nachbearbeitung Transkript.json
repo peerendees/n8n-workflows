@@ -246,7 +246,7 @@
       "name": "Sticky Note2",
       "parameters": {
         "color": 5,
-        "content": "## Ausgabe\nThreema Work erhält eine Push mit dem aufbereiteten Skript.",
+        "content": "## Ausgabe\nThreema Work erhält eine Push mit dem aufbereiteten Transkript.\nBER-32: Code-Node parst AI-Output als JSON.",
         "height": 256,
         "width": 500
       },
