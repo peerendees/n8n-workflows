@@ -15,8 +15,361 @@
           ]
         }
       }
+    },
+    {
+      "id": "nd-001",
+      "name": "Letzten Digest Zeitpunkt holen",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [220, 0],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.notion.com/v1/databases/83f99ad870f64c68806806030907765f/query",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Notion-Version", "value": "2022-06-28" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "jsonBody": {
+          "sorts": [{ "property": "Datum", "direction": "descending" }],
+          "page_size": 1
+        }
+      },
+      "credentials": { "httpHeaderAuth": { "name": "Notion API" } }
+    },
+    {
+      "id": "cd-001",
+      "name": "Oldest Timestamp berechnen",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, 0],
+      "parameters": {
+        "jsCode": "const results = $input.first().json.results;\nlet oldest;\nif (results && results.length > 0) {\n  const lastDate = results[0].properties?.Datum?.date?.start;\n  oldest = lastDate ? String(new Date(lastDate).getTime() / 1000) : String(Math.floor(Date.now()/1000) - 86400);\n} else {\n  oldest = String(Math.floor(Date.now()/1000) - 86400);\n}\nreturn [{ json: { oldest } }];"
+      }
+    },
+    {
+      "id": "sl-001",
+      "name": "Slack hedy-trainer-community",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [660, -600],
+      "parameters": {
+        "method": "GET",
+        "url": "https://slack.com/api/conversations.history",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "channel", "value": "C0AA0DCBHP1" },
+            { "name": "oldest", "value": "={{ $('Oldest Timestamp berechnen').item.json.oldest }}" },
+            { "name": "limit", "value": "100" }
+          ]
+        }
+      },
+      "credentials": { "httpHeaderAuth": { "name": "Slack API" } }
+    },
+    {
+      "id": "sl-002",
+      "name": "Slack help",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [660, -400],
+      "parameters": {
+        "method": "GET",
+        "url": "https://slack.com/api/conversations.history",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "channel", "value": "C07CG9BKNBE" },
+            { "name": "oldest", "value": "={{ $('Oldest Timestamp berechnen').item.json.oldest }}" },
+            { "name": "limit", "value": "100" }
+          ]
+        }
+      },
+      "credentials": { "httpHeaderAuth": { "name": "Slack API" } }
+    },
+    {
+      "id": "sl-003",
+      "name": "Slack general",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [660, -200],
+      "parameters": {
+        "method": "GET",
+        "url": "https://slack.com/api/conversations.history",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "channel", "value": "C07D2J226DN" },
+            { "name": "oldest", "value": "={{ $('Oldest Timestamp berechnen').item.json.oldest }}" },
+            { "name": "limit", "value": "100" }
+          ]
+        }
+      },
+      "credentials": { "httpHeaderAuth": { "name": "Slack API" } }
+    },
+    {
+      "id": "sl-004",
+      "name": "Slack announcements",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [660, 0],
+      "parameters": {
+        "method": "GET",
+        "url": "https://slack.com/api/conversations.history",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "channel", "value": "C07CAUQ1GR3" },
+            { "name": "oldest", "value": "={{ $('Oldest Timestamp berechnen').item.json.oldest }}" },
+            { "name": "limit", "value": "100" }
+          ]
+        }
+      },
+      "credentials": { "httpHeaderAuth": { "name": "Slack API" } }
+    },
+    {
+      "id": "sl-005",
+      "name": "Slack feature-requests",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [660, 200],
+      "parameters": {
+        "method": "GET",
+        "url": "https://slack.com/api/conversations.history",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "channel", "value": "C07CSELCDNV" },
+            { "name": "oldest", "value": "={{ $('Oldest Timestamp berechnen').item.json.oldest }}" },
+            { "name": "limit", "value": "100" }
+          ]
+        }
+      },
+      "credentials": { "httpHeaderAuth": { "name": "Slack API" } }
+    },
+    {
+      "id": "sl-006",
+      "name": "Slack share-experiences",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [660, 400],
+      "parameters": {
+        "method": "GET",
+        "url": "https://slack.com/api/conversations.history",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "channel", "value": "C07C75Y8NJJ" },
+            { "name": "oldest", "value": "={{ $('Oldest Timestamp berechnen').item.json.oldest }}" },
+            { "name": "limit", "value": "100" }
+          ]
+        }
+      },
+      "credentials": { "httpHeaderAuth": { "name": "Slack API" } }
+    },
+    {
+      "id": "sl-007",
+      "name": "Slack language-requests",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [660, 600],
+      "parameters": {
+        "method": "GET",
+        "url": "https://slack.com/api/conversations.history",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "channel", "value": "C083UNSH8NL" },
+            { "name": "oldest", "value": "={{ $('Oldest Timestamp berechnen').item.json.oldest }}" },
+            { "name": "limit", "value": "100" }
+          ]
+        }
+      },
+      "credentials": { "httpHeaderAuth": { "name": "Slack API" } }
+    },
+    {
+      "id": "cd-002",
+      "name": "Slack Daten zusammenfuehren",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [880, 0],
+      "parameters": {
+        "jsCode": "const channels = [\n  { name: '#hedy-trainer-community', data: $('Slack hedy-trainer-community').item.json },\n  { name: '#help', data: $('Slack help').item.json },\n  { name: '#general', data: $('Slack general').item.json },\n  { name: '#announcements', data: $('Slack announcements').item.json },\n  { name: '#feature-requests', data: $('Slack feature-requests').item.json },\n  { name: '#share-experiences', data: $('Slack share-experiences').item.json },\n  { name: '#language-requests', data: $('Slack language-requests').item.json }\n];\n\nlet slackText = '';\nlet activeCount = 0;\nconst inactiveChannels = [];\n\nfor (const ch of channels) {\n  const messages = (ch.data.messages || []).filter(m => !m.subtype || m.subtype === 'bot_message');\n  const relevant = messages.filter(m => m.text && !m.text.includes('has joined'));\n  if (relevant.length > 0) {\n    activeCount++;\n    slackText += `\\n\\n**${ch.name}** (${relevant.length} neue Nachrichten):\\n`;\n    relevant.slice(0, 10).forEach(m => {\n      const text = m.text.substring(0, 200);\n      slackText += `- ${m.username || m.user || 'Unbekannt'}: ${text}\\n`;\n    });\n  } else {\n    inactiveChannels.push(ch.name);\n  }\n}\n\nif (inactiveChannels.length > 0) {\n  slackText += `\\n\\nKeine Aktivitaet: ${inactiveChannels.join(', ')}`;\n}\n\nreturn [{ json: { slackText, activeCount, totalChannels: 7 } }];"
+      }
+    },
+    {
+      "id": "cl-001",
+      "name": "Claude API Digest",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [1100, 0],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "anthropic-version", "value": "2023-06-01" },
+            { "name": "content-type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "jsonBody": {
+          "model": "claude-sonnet-4-20250514",
+          "max_tokens": 1024,
+          "system": "Du bist ein Slack-Digest-Assistent fuer den Hedy AI Community Slack Workspace (hedyaicommunity.slack.com). Erstelle eine kompakte deutsche Zusammenfassung der wichtigsten neuen Beitraege. Prioritaet: #hedy-trainer-community > #help > #general > #announcements > #feature-requests. Aktivste Kanaele zuerst, inaktive nur in Fusszeile. Keine woertlichen Zitate. Format: **Hedy Digest TT.MM.JJJJ HH:MM** | X von 7 Kanaelen aktiv. Maximale Laenge: 1500 Zeichen.",
+          "messages": [
+            {
+              "role": "user",
+              "content": "={{ 'Hier sind die neuen Slack-Nachrichten seit dem letzten Digest:\\n\\n' + $json.slackText }}"
+            }
+          ]
+        }
+      },
+      "credentials": { "httpHeaderAuth": { "name": "Anthropic API" } }
+    },
+    {
+      "id": "cd-003",
+      "name": "Digest Text extrahieren",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1320, 0],
+      "parameters": {
+        "jsCode": "const response = $input.first().json;\nconst digestText = response.content?.[0]?.text ?? 'Kein Digest verfuegbar.';\nconst lower = digestText.toLowerCase();\nconst hasContent = !lower.includes('keine neuen') && !lower.includes('keine aktivitaet');\nconst activeCount = $('Slack Daten zusammenfuehren').item.json.activeCount;\nreturn [{ json: { digestText, hasContent, activeCount } }];"
+      }
+    },
+    {
+      "id": "if-001",
+      "name": "Hat Inhalt",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1540, 0],
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [{ "leftValue": "={{ $json.hasContent }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true" } }],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "cd-004",
+      "name": "Notion Payload Digest",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1760, -100],
+      "parameters": {
+        "jsCode": "const dt = $('Digest Text extrahieren').item.json;\nconst title = 'Slack-Digest – ' + $now.toFormat('dd.MM.yyyy HH:mm');\nconst notionBody = {\n  parent: { database_id: '9a3f08ea-d77e-40b1-9997-a9d5762a7517' },\n  properties: {\n    Titel: { title: [{ text: { content: title } }] },\n    Datum: { date: { start: $now.toISO() } },\n    'Aktive Kanaele': { number: dt.activeCount },\n    Gesamtkanale: { number: 7 },\n    Status: { select: { name: 'Erstellt' } }\n  },\n  children: [\n    {\n      object: 'block',\n      type: 'paragraph',\n      paragraph: {\n        rich_text: [\n          {\n            type: 'text',\n            text: { content: (dt.digestText || '').slice(0, 2000) }\n          }\n        ]\n      }\n    }\n  ]\n};\nreturn [{ json: { notionBody } }];"
+      }
+    },
+    {
+      "id": "nd-002",
+      "name": "Notion Digest anlegen",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [1980, -100],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.notion.com/v1/pages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Notion-Version", "value": "2022-06-28" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "jsonBody": "={{ $json.notionBody }}"
+      },
+      "credentials": { "httpHeaderAuth": { "name": "Notion API" } }
+    },
+    {
+      "id": "th-001",
+      "name": "Threema Senden",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [2200, -100],
+      "parameters": {
+        "method": "POST",
+        "url": "https://msgapi.threema.ch/send_simple",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "specifyBody": "keypair",
+        "bodyParameters": {
+          "parameters": [
+            { "name": "from", "value": "*BERENT1" },
+            { "name": "to", "value": "BUMFMZ39" },
+            { "name": "text", "value": "={{ $('Digest Text extrahieren').item.json.digestText }}" }
+          ]
+        }
+      },
+      "credentials": { "httpQueryAuth": { "name": "Threema Gateway" } }
     }
   ],
-  "connections": {},
+  "connections": {
+    "Schedule Trigger": { "main": [[{ "node": "Letzten Digest Zeitpunkt holen", "type": "main", "index": 0 }]] },
+    "Letzten Digest Zeitpunkt holen": { "main": [[{ "node": "Oldest Timestamp berechnen", "type": "main", "index": 0 }]] },
+    "Oldest Timestamp berechnen": {
+      "main": [
+        [
+          { "node": "Slack hedy-trainer-community", "type": "main", "index": 0 },
+          { "node": "Slack help", "type": "main", "index": 0 },
+          { "node": "Slack general", "type": "main", "index": 0 },
+          { "node": "Slack announcements", "type": "main", "index": 0 },
+          { "node": "Slack feature-requests", "type": "main", "index": 0 },
+          { "node": "Slack share-experiences", "type": "main", "index": 0 },
+          { "node": "Slack language-requests", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Slack hedy-trainer-community": { "main": [[{ "node": "Slack Daten zusammenfuehren", "type": "main", "index": 0 }]] },
+    "Slack help": { "main": [[{ "node": "Slack Daten zusammenfuehren", "type": "main", "index": 0 }]] },
+    "Slack general": { "main": [[{ "node": "Slack Daten zusammenfuehren", "type": "main", "index": 0 }]] },
+    "Slack announcements": { "main": [[{ "node": "Slack Daten zusammenfuehren", "type": "main", "index": 0 }]] },
+    "Slack feature-requests": { "main": [[{ "node": "Slack Daten zusammenfuehren", "type": "main", "index": 0 }]] },
+    "Slack share-experiences": { "main": [[{ "node": "Slack Daten zusammenfuehren", "type": "main", "index": 0 }]] },
+    "Slack language-requests": { "main": [[{ "node": "Slack Daten zusammenfuehren", "type": "main", "index": 0 }]] },
+    "Slack Daten zusammenfuehren": { "main": [[{ "node": "Claude API Digest", "type": "main", "index": 0 }]] },
+    "Claude API Digest": { "main": [[{ "node": "Digest Text extrahieren", "type": "main", "index": 0 }]] },
+    "Digest Text extrahieren": { "main": [[{ "node": "Hat Inhalt", "type": "main", "index": 0 }]] },
+    "Hat Inhalt": {
+      "main": [
+        [
+          { "node": "Notion Payload Digest", "type": "main", "index": 0 }
+        ],
+        []
+      ]
+    },
+    "Notion Payload Digest": { "main": [[{ "node": "Notion Digest anlegen", "type": "main", "index": 0 }]] },
+    "Notion Digest anlegen": { "main": [[{ "node": "Threema Senden", "type": "main", "index": 0 }]] }
+  },
   "settings": { "executionOrder": "v1" }
 }
